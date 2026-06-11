@@ -16,7 +16,7 @@ const investorNav = [
   { label: 'Trading Desk',    icon: TrendingUp,      to: '/investor/trading',    phase: 2 },
   { label: 'Tax Documents',   icon: FileText,        to: '/investor/taxes',      phase: 2 },
   { label: 'Voting',          icon: Vote,            to: '/investor/voting',     phase: 3 },
-  { label: 'AI Doc Reader',   icon: Bot,             to: '/investor/ai-reader',  phase: 3 },
+  { label: 'Deal Room',        icon: Bot,             to: '/investor/ai-reader',  phase: 3 },
 ]
 
 const landlordNav = [

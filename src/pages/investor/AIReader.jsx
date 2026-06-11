@@ -71,13 +71,13 @@ export function InvestorAIReader() {
 
   return (
     <Layout>
-      <Header title="AI Document Reader" subtitle="Phase 3 — Smart Q&A for property documents" />
+      <Header title="Deal Room" subtitle="Phase 3 — Ask questions across all property documents" />
       <div className="p-6 flex gap-6" style={{ height: 'calc(100vh - 80px)' }}>
         {/* Left: property selector + docs */}
         <div className="w-72 flex-shrink-0 space-y-4">
           <div className="ds-alert-warning flex items-center gap-2">
             <Badge className="bg-amber-600 text-white text-xs">Phase 3</Badge>
-            <p className="text-xs">AI-powered doc analysis</p>
+            <p className="text-xs">AI-powered document Q&amp;A</p>
           </div>
 
           <Card>
