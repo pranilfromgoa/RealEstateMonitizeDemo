@@ -106,6 +106,7 @@ export function DataProvider({ children }) {
 
   const createListing = (propertyId, qty, askPrice, investorId = 'investor-001') => {
     const today = new Date().toISOString().split('T')[0]
+    const txHash = '0x' + Math.random().toString(16).slice(2, 42)
     setStore(prev => ({
       ...prev,
       marketListings: [{
@@ -114,6 +115,13 @@ export function DataProvider({ children }) {
         bricks: qty, askPrice,
         listedDate: today, status: 'active',
       }, ...prev.marketListings],
+      transactions: [{
+        id: `tx-${Date.now()}`,
+        type: 'list', investorId,
+        propertyId, bricks: qty,
+        amount: qty * askPrice,
+        date: today, txHash,
+      }, ...prev.transactions],
     }))
   }
 
@@ -154,7 +162,7 @@ export function DataProvider({ children }) {
         portfolioHoldings: newHoldings,
         transactions: [{
           id: `tx-${Date.now()}`,
-          type: 'buy', investorId: buyerInvestorId,
+          type: 'market_buy', investorId: buyerInvestorId,
           propertyId: listing.propertyId,
           bricks: qty, amount: qty * listing.askPrice * 1.01,
           date: today, txHash,

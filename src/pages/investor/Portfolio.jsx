@@ -4,7 +4,7 @@ import { StatCard } from '@/components/ui/stat-card'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { useData } from '@/context/DataContext'
-import { DollarSign, Briefcase, TrendingUp, Percent, ArrowUpRight, ArrowDownRight, Calendar } from 'lucide-react'
+import { DollarSign, Briefcase, TrendingUp, Percent, Calendar } from 'lucide-react'
 
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
 const fmtSmall = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(n)
@@ -22,7 +22,7 @@ export function InvestorPortfolio() {
       }, 0) / myHoldings.length
     : 0
 
-  const allTx = transactions.filter(t => t.investorId === 'investor-001')
+  const allTx = transactions.filter(t => t.investorId === 'investor-001' && t.type === 'rent')
 
   return (
     <Layout>
@@ -97,50 +97,45 @@ export function InvestorPortfolio() {
           </CardContent>
         </Card>
 
-        {/* Transaction history */}
+        {/* Rent history */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Transaction History</CardTitle>
+              <CardTitle>Rent Income History</CardTitle>
               <button className="text-xs text-gray-500 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 flex items-center gap-1">
                 <Calendar size={12} /> Export CSV
               </button>
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-100">
-                  {['Date', 'Type', 'Property', 'Bricks', 'Amount', 'Tx Hash'].map(h => (
-                    <th key={h} className="text-left text-xs text-gray-500 font-medium px-6 py-3">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {allTx.map(tx => {
-                  const prop = properties.find(p => p.id === tx.propertyId)
-                  const typeConfig = {
-                    buy: { label: 'Buy', variant: 'default', icon: ArrowUpRight },
-                    sell: { label: 'Sell', variant: 'success', icon: ArrowDownRight },
-                    rent: { label: 'Rent', variant: 'success', icon: DollarSign },
-                  }[tx.type]
-                  return (
-                    <tr key={tx.id} className="border-b border-gray-50 hover:bg-gray-50">
-                      <td className="px-6 py-3 text-gray-600">{tx.date}</td>
-                      <td className="px-6 py-3"><Badge variant={typeConfig.variant}>{typeConfig.label}</Badge></td>
-                      <td className="px-6 py-3 text-gray-700">{prop?.name}</td>
-                      <td className="px-6 py-3 text-gray-600">{tx.bricks}</td>
-                      <td className={`px-6 py-3 font-medium ${tx.type !== 'buy' ? 'text-green-600' : 'text-gray-900'}`}>
-                        {tx.type !== 'buy' ? '+' : '-'}{fmt(tx.amount)}
-                      </td>
-                      <td className="px-6 py-3">
-                        <a href="#" className="text-xs text-blue-500 font-mono hover:underline">{tx.txHash.slice(0,10)}…</a>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+            {allTx.length === 0 ? (
+              <p className="text-sm text-gray-400 text-center py-10">No rent payouts received yet. Rent distributions will appear here once processed by the platform.</p>
+            ) : (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    {['Date', 'Property', 'Amount', 'Tx Hash'].map(h => (
+                      <th key={h} className="text-left text-xs text-gray-500 font-medium px-6 py-3">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {allTx.map(tx => {
+                    const prop = properties.find(p => p.id === tx.propertyId)
+                    return (
+                      <tr key={tx.id} className="border-b border-gray-50 hover:bg-gray-50">
+                        <td className="px-6 py-3 text-gray-600">{tx.date}</td>
+                        <td className="px-6 py-3 text-gray-700">{prop?.name}</td>
+                        <td className="px-6 py-3 font-medium text-green-600">+{fmt(tx.amount)}</td>
+                        <td className="px-6 py-3">
+                          <a href="#" className="text-xs text-blue-500 font-mono hover:underline">{tx.txHash.slice(0, 10)}…</a>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            )}
           </CardContent>
         </Card>
       </div>

@@ -7,21 +7,28 @@ import { Button } from '@/components/ui/button'
 import { Modal } from '@/components/ui/modal'
 import { StatCard } from '@/components/ui/stat-card'
 import { useData } from '@/context/DataContext'
-import { TrendingUp, TrendingDown, ArrowLeftRight, DollarSign, Plus, CheckCircle2, Tag } from 'lucide-react'
+import { TrendingUp, ArrowLeftRight, DollarSign, Plus, CheckCircle2, Tag, ChevronDown, ChevronUp, ShoppingCart, Briefcase } from 'lucide-react'
 
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(n)
 
 const INVESTOR_ID = 'investor-001'
 
+const TX_CONFIG = {
+  buy:        { label: 'Bought',       bg: 'bg-blue-100',  text: 'text-blue-700',  icon: ShoppingCart, amountColor: 'text-red-500',   sign: '-' },
+  market_buy: { label: 'Market Buy',   bg: 'bg-blue-100',  text: 'text-blue-700',  icon: ShoppingCart, amountColor: 'text-red-500',   sign: '-' },
+  list:       { label: 'Listed',       bg: 'bg-amber-100', text: 'text-amber-700', icon: Tag,          amountColor: 'text-green-600', sign: '+' },
+}
+
 export function InvestorTradingDesk() {
-  const { properties, portfolioHoldings, marketListings, createListing, buyFromMarket } = useData()
-  const [tab, setTab] = useState('buy')
+  const { properties, portfolioHoldings, marketListings, transactions, createListing, buyFromMarket } = useData()
+  const [tab, setTab] = useState('my_holdings')
   const [buyModal, setBuyModal] = useState(null)
   const [sellModal, setSellModal] = useState(null)
   const [qty, setQty] = useState(10)
   const [sellQty, setSellQty] = useState(10)
   const [sellPrice, setSellPrice] = useState(102)
   const [done, setDone] = useState(false)
+  const [expandedProp, setExpandedProp] = useState(null)
 
   const myHoldings = portfolioHoldings.filter(h => h.investorId === INVESTOR_ID)
   const myListings = marketListings.filter(l => l.sellerId === INVESTOR_ID && l.status === 'active')
@@ -49,97 +56,183 @@ export function InvestorTradingDesk() {
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard label="Active Listings" value={otherListings.length} icon={ArrowLeftRight} color="blue" />
+          <StatCard label="Available to Buy" value={otherListings.length} icon={ArrowLeftRight} color="blue" sub={otherListings.length === 1 ? 'Property' : 'Properties'} />
           <StatCard label="My Holdings" value={myHoldings.reduce((s, h) => s + h.bricks, 0).toLocaleString()} icon={TrendingUp} color="green" sub="total Bricks" />
-          <StatCard label="My Listed Bricks" value={myListings.reduce((s, l) => s + l.bricks, 0).toLocaleString()} icon={Tag} color="amber" />
-          <StatCard label="My Listings" value={myListings.length} icon={DollarSign} color="purple" />
+          <StatCard label="My Listed Bricks" value={myListings.reduce((s, l) => s + l.bricks, 0).toLocaleString()} icon={Tag} color="amber" sub="total Bricks" />
+          <StatCard label="Listed for Sale" value={new Set(myListings.map(l => l.propertyId)).size} icon={DollarSign} color="purple" sub={new Set(myListings.map(l => l.propertyId)).size === 1 ? 'Property' : 'Properties'} />
         </div>
 
         {/* Tabs */}
         <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
-          {['buy', 'sell'].map(t => (
-            <button key={t} onClick={() => setTab(t)}
-              className={`px-5 py-2 rounded-lg text-sm font-medium transition-colors capitalize ${tab === t ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
-              {t === 'buy' ? 'Buy Bricks' : 'List Bricks for Sale'}
+          {[
+            { key: 'my_holdings', label: 'My Holdings' },
+            { key: 'buy', label: 'Buy Bricks' },
+            { key: 'sell', label: 'List for Sale' },
+          ].map(t => (
+            <button key={t.key} onClick={() => setTab(t.key)}
+              className={`px-5 py-2 rounded-lg text-sm font-medium transition-colors ${tab === t.key ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+              {t.label}
             </button>
           ))}
         </div>
 
-        {tab === 'buy' && (
-          <Card>
-            <CardHeader><CardTitle>Available on Secondary Market</CardTitle></CardHeader>
-            <CardContent className="p-0">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-gray-100">
-                    {['Property', 'Bricks', 'Ask Price', 'vs. Floor', 'Seller', 'Listed', ''].map(h => (
-                      <th key={h} className="text-left text-xs text-gray-500 font-medium px-5 py-3">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {otherListings.map(listing => {
-                    const prop = properties.find(p => p.id === listing.propertyId)
-                    if (!prop) return null
-                    const premium = ((listing.askPrice - prop.pricePerBrick) / prop.pricePerBrick * 100).toFixed(1)
-                    return (
-                      <tr key={listing.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                        <td className="px-5 py-3">
-                          <div className="flex items-center gap-3">
-                            <img src={prop.image} alt="" className="w-10 h-8 rounded-lg object-cover" />
-                            <div>
-                              <p className="font-medium text-gray-900 text-sm">{prop.name}</p>
-                              <p className="text-xs text-gray-400">{prop.city}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-5 py-3 font-medium text-gray-900">{listing.bricks}</td>
-                        <td className="px-5 py-3 font-semibold text-gray-900">${listing.askPrice}</td>
-                        <td className="px-5 py-3">
-                          <span className={`text-xs font-medium px-2 py-1 rounded-full ${parseFloat(premium) > 0 ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'}`}>
-                            {parseFloat(premium) > 0 ? '+' : ''}{premium}%
-                          </span>
-                        </td>
-                        <td className="px-5 py-3 text-gray-500 text-xs">Anonymous</td>
-                        <td className="px-5 py-3 text-gray-400 text-xs">{listing.listedDate}</td>
-                        <td className="px-5 py-3">
-                          <Button size="sm" onClick={() => { setBuyModal(listing); setQty(listing.bricks); setDone(false) }}>
-                            Buy
-                          </Button>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </CardContent>
-          </Card>
-        )}
-
-        {tab === 'sell' && (
+        {/* My Holdings Tab */}
+        {tab === 'my_holdings' && (
           <div className="space-y-4">
-            {myListings.length > 0 && (
+            {myHoldings.length === 0 ? (
               <Card>
-                <CardHeader><CardTitle className="flex items-center gap-2"><Tag size={15} className="text-amber-500" /> My Active Listings</CardTitle></CardHeader>
+                <CardContent className="py-12 text-center text-gray-400">
+                  <Briefcase size={32} className="mx-auto mb-3 opacity-30" />
+                  <p className="text-sm">You don't hold any Bricks yet. Go to <button className="text-blue-500 underline" onClick={() => setTab('buy')}>Buy Bricks</button> to get started.</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardHeader><CardTitle className="flex items-center gap-2"><Briefcase size={15} className="text-blue-500" /> My Holdings</CardTitle></CardHeader>
                 <CardContent className="p-0">
-                  {myListings.map(listing => {
-                    const prop = properties.find(p => p.id === listing.propertyId)
+                  {myHoldings.map(h => {
+                    const prop = properties.find(p => p.id === h.propertyId)
                     if (!prop) return null
+                    const listed = myListings.filter(l => l.propertyId === h.propertyId).reduce((s, l) => s + l.bricks, 0)
+                    const available = h.bricks - listed
+                    const currentValue = h.bricks * prop.pricePerBrick
+                    const propTx = transactions.filter(t =>
+                      t.investorId === INVESTOR_ID &&
+                      t.propertyId === h.propertyId &&
+                      (t.type === 'buy' || t.type === 'market_buy' || t.type === 'list')
+                    )
+                    const isExpanded = expandedProp === h.propertyId
                     return (
-                      <div key={listing.id} className="flex items-center gap-4 px-5 py-3 border-b border-gray-100 last:border-0">
-                        <img src={prop.image} alt="" className="w-12 h-9 rounded-lg object-cover" />
-                        <div className="flex-1">
-                          <p className="font-medium text-gray-900">{prop.name}</p>
-                          <p className="text-xs text-gray-400">{listing.bricks} Bricks · ${listing.askPrice}/brick · Listed {listing.listedDate}</p>
-                        </div>
-                        <Badge variant="warning">Listed</Badge>
-                        <p className="text-sm font-semibold text-green-600">{fmt(listing.bricks * listing.askPrice)}</p>
+                      <div key={h.propertyId} className="border-b border-gray-100 last:border-0">
+                        <button
+                          onClick={() => setExpandedProp(isExpanded ? null : h.propertyId)}
+                          className="w-full flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition-colors text-left">
+                          <img src={prop.image} alt="" className="w-14 h-10 rounded-xl object-cover flex-shrink-0" />
+                          <div className="flex-1">
+                            <p className="font-semibold text-gray-900">{prop.name}</p>
+                            <p className="text-xs text-gray-400 mt-0.5">
+                              <span className="font-medium text-gray-700">{h.bricks} Bricks</span>
+                              {listed > 0 && <> · <span className="text-amber-600 font-medium">{listed} listed</span></>}
+                              {' '}· <span className="text-green-700 font-medium">{available} available</span>
+                            </p>
+                          </div>
+                          <div className="text-right flex-shrink-0">
+                            <p className="text-sm font-bold text-gray-900">{fmt(currentValue)}</p>
+                            <p className="text-xs text-gray-400">current value</p>
+                          </div>
+                          <div className="ml-2 flex-shrink-0">
+                            {isExpanded ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
+                          </div>
+                        </button>
+
+                        {isExpanded && (
+                          <div className="bg-gray-50 border-t border-gray-100">
+                            {propTx.length === 0 ? (
+                              <p className="text-xs text-gray-400 text-center py-4">No transactions recorded for this property.</p>
+                            ) : (
+                              <table className="w-full text-sm">
+                                <thead>
+                                  <tr className="border-b border-gray-200">
+                                    {['Date', 'Type', 'Bricks', 'Amount', 'Tx Hash'].map(h => (
+                                      <th key={h} className="text-left text-xs text-gray-400 font-medium px-5 py-2">{h}</th>
+                                    ))}
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {propTx.map(tx => {
+                                    const cfg = TX_CONFIG[tx.type]
+                                    if (!cfg) return null
+                                    return (
+                                      <tr key={tx.id} className="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
+                                        <td className="px-5 py-2.5 text-gray-500 text-xs">{tx.date}</td>
+                                        <td className="px-5 py-2.5">
+                                          <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${cfg.bg} ${cfg.text}`}>
+                                            <cfg.icon size={10} /> {cfg.label}
+                                          </span>
+                                        </td>
+                                        <td className="px-5 py-2.5 text-gray-700 font-medium">{tx.bricks}</td>
+                                        <td className={`px-5 py-2.5 font-medium text-xs ${cfg.amountColor}`}>
+                                          {cfg.sign}{fmt(tx.amount)}
+                                        </td>
+                                        <td className="px-5 py-2.5">
+                                          <span className="text-xs text-blue-400 font-mono">{tx.txHash.slice(0, 10)}…</span>
+                                        </td>
+                                      </tr>
+                                    )
+                                  })}
+                                </tbody>
+                              </table>
+                            )}
+                          </div>
+                        )}
                       </div>
                     )
                   })}
                 </CardContent>
               </Card>
             )}
+          </div>
+        )}
+
+        {/* Buy Bricks Tab */}
+        {tab === 'buy' && (
+          <Card>
+            <CardHeader><CardTitle>Available on Secondary Market</CardTitle></CardHeader>
+            <CardContent className="p-0">
+              {otherListings.length === 0 ? (
+                <p className="text-sm text-gray-400 text-center py-10">No listings available on the secondary market right now.</p>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-100">
+                      {['Property', 'Bricks', 'Ask Price', 'vs. Floor', 'Seller', 'Listed', ''].map(h => (
+                        <th key={h} className="text-left text-xs text-gray-500 font-medium px-5 py-3">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {otherListings.map(listing => {
+                      const prop = properties.find(p => p.id === listing.propertyId)
+                      if (!prop) return null
+                      const premium = ((listing.askPrice - prop.pricePerBrick) / prop.pricePerBrick * 100).toFixed(1)
+                      return (
+                        <tr key={listing.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                          <td className="px-5 py-3">
+                            <div className="flex items-center gap-3">
+                              <img src={prop.image} alt="" className="w-10 h-8 rounded-lg object-cover" />
+                              <div>
+                                <p className="font-medium text-gray-900 text-sm">{prop.name}</p>
+                                <p className="text-xs text-gray-400">{prop.city}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-5 py-3 font-medium text-gray-900">{listing.bricks}</td>
+                          <td className="px-5 py-3 font-semibold text-gray-900">${listing.askPrice}</td>
+                          <td className="px-5 py-3">
+                            <span className={`text-xs font-medium px-2 py-1 rounded-full ${parseFloat(premium) > 0 ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'}`}>
+                              {parseFloat(premium) > 0 ? '+' : ''}{premium}%
+                            </span>
+                          </td>
+                          <td className="px-5 py-3 text-gray-500 text-xs">Anonymous</td>
+                          <td className="px-5 py-3 text-gray-400 text-xs">{listing.listedDate}</td>
+                          <td className="px-5 py-3">
+                            <Button size="sm" onClick={() => { setBuyModal(listing); setQty(listing.bricks); setDone(false) }}>
+                              Buy
+                            </Button>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* List for Sale Tab */}
+        {tab === 'sell' && (
+          <div className="space-y-4">
             <Card>
               <CardHeader><CardTitle>List Bricks from My Portfolio</CardTitle></CardHeader>
               <CardContent>
