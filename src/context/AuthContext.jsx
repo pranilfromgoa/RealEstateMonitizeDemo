@@ -19,10 +19,10 @@ const userProfiles = {
   },
   admin: {
     id: 'admin-001',
-    name: 'Jordan Lee',
-    email: 'jordan.lee@brickbloc.com',
+    name: 'Daniel',
+    email: 'daniel@brickbloc.com',
     role: 'admin',
-    avatar: 'JL',
+    avatar: 'D',
   },
 }
 
