@@ -60,7 +60,7 @@ const roles = [
     iconBg: 'bg-violet-100',
     iconColor: 'text-violet-600',
     buttonBg: 'bg-violet-600 hover:bg-violet-700',
-    demo: { name: 'Jordan Lee', id: 'admin-001' },
+    demo: { name: 'Daniel', id: 'admin-001' },
   },
 ]
 
