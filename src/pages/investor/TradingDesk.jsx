@@ -6,12 +6,15 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Modal } from '@/components/ui/modal'
 import { StatCard } from '@/components/ui/stat-card'
-import { marketListings, properties, portfolioHoldings } from '@/data/mockData'
-import { TrendingUp, TrendingDown, ArrowLeftRight, DollarSign, Plus, CheckCircle2 } from 'lucide-react'
+import { useData } from '@/context/DataContext'
+import { TrendingUp, TrendingDown, ArrowLeftRight, DollarSign, Plus, CheckCircle2, Tag } from 'lucide-react'
 
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(n)
 
+const INVESTOR_ID = 'investor-001'
+
 export function InvestorTradingDesk() {
+  const { properties, portfolioHoldings, marketListings, createListing, buyFromMarket } = useData()
   const [tab, setTab] = useState('buy')
   const [buyModal, setBuyModal] = useState(null)
   const [sellModal, setSellModal] = useState(null)
@@ -19,11 +22,21 @@ export function InvestorTradingDesk() {
   const [sellQty, setSellQty] = useState(10)
   const [sellPrice, setSellPrice] = useState(102)
   const [done, setDone] = useState(false)
-  const myHoldings = portfolioHoldings.filter(h => h.investorId === 'investor-001')
 
-  const handleConfirm = () => {
+  const myHoldings = portfolioHoldings.filter(h => h.investorId === INVESTOR_ID)
+  const myListings = marketListings.filter(l => l.sellerId === INVESTOR_ID && l.status === 'active')
+  const otherListings = marketListings.filter(l => l.sellerId !== INVESTOR_ID && l.status === 'active')
+
+  const handleConfirmBuy = () => {
+    buyFromMarket(buyModal.id, qty, INVESTOR_ID)
     setDone(true)
-    setTimeout(() => { setDone(false); setBuyModal(null); setSellModal(null) }, 2500)
+    setTimeout(() => { setDone(false); setBuyModal(null) }, 2500)
+  }
+
+  const handleConfirmSell = () => {
+    createListing(sellModal.propertyId, sellQty, sellPrice, INVESTOR_ID)
+    setDone(true)
+    setTimeout(() => { setDone(false); setSellModal(null) }, 2500)
   }
 
   return (
@@ -36,10 +49,10 @@ export function InvestorTradingDesk() {
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard label="Active Listings" value="5" icon={ArrowLeftRight} color="blue" />
-          <StatCard label="24h Volume" value="$8,450" icon={TrendingUp} color="green" />
-          <StatCard label="Avg. Premium" value="+2.8%" icon={TrendingUp} color="purple" />
-          <StatCard label="My Listings" value="2" icon={DollarSign} color="amber" />
+          <StatCard label="Active Listings" value={otherListings.length} icon={ArrowLeftRight} color="blue" />
+          <StatCard label="My Holdings" value={myHoldings.reduce((s, h) => s + h.bricks, 0).toLocaleString()} icon={TrendingUp} color="green" sub="total Bricks" />
+          <StatCard label="My Listed Bricks" value={myListings.reduce((s, l) => s + l.bricks, 0).toLocaleString()} icon={Tag} color="amber" />
+          <StatCard label="My Listings" value={myListings.length} icon={DollarSign} color="purple" />
         </div>
 
         {/* Tabs */}
@@ -65,7 +78,7 @@ export function InvestorTradingDesk() {
                   </tr>
                 </thead>
                 <tbody>
-                  {marketListings.map(listing => {
+                  {otherListings.map(listing => {
                     const prop = properties.find(p => p.id === listing.propertyId)
                     if (!prop) return null
                     const premium = ((listing.askPrice - prop.pricePerBrick) / prop.pricePerBrick * 100).toFixed(1)
@@ -105,6 +118,28 @@ export function InvestorTradingDesk() {
 
         {tab === 'sell' && (
           <div className="space-y-4">
+            {myListings.length > 0 && (
+              <Card>
+                <CardHeader><CardTitle className="flex items-center gap-2"><Tag size={15} className="text-amber-500" /> My Active Listings</CardTitle></CardHeader>
+                <CardContent className="p-0">
+                  {myListings.map(listing => {
+                    const prop = properties.find(p => p.id === listing.propertyId)
+                    if (!prop) return null
+                    return (
+                      <div key={listing.id} className="flex items-center gap-4 px-5 py-3 border-b border-gray-100 last:border-0">
+                        <img src={prop.image} alt="" className="w-12 h-9 rounded-lg object-cover" />
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-900">{prop.name}</p>
+                          <p className="text-xs text-gray-400">{listing.bricks} Bricks · ${listing.askPrice}/brick · Listed {listing.listedDate}</p>
+                        </div>
+                        <Badge variant="warning">Listed</Badge>
+                        <p className="text-sm font-semibold text-green-600">{fmt(listing.bricks * listing.askPrice)}</p>
+                      </div>
+                    )
+                  })}
+                </CardContent>
+              </Card>
+            )}
             <Card>
               <CardHeader><CardTitle>List Bricks from My Portfolio</CardTitle></CardHeader>
               <CardContent>
@@ -112,14 +147,21 @@ export function InvestorTradingDesk() {
                   {myHoldings.map(h => {
                     const prop = properties.find(p => p.id === h.propertyId)
                     if (!prop) return null
+                    const listed = myListings.filter(l => l.propertyId === h.propertyId).reduce((s, l) => s + l.bricks, 0)
+                    const available = h.bricks - listed
                     return (
                       <div key={h.propertyId} className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
                         <img src={prop.image} alt="" className="w-14 h-10 rounded-xl object-cover" />
                         <div className="flex-1">
                           <p className="font-semibold text-gray-900">{prop.name}</p>
-                          <p className="text-sm text-gray-400">You own: <span className="font-medium text-gray-700">{h.bricks} Bricks</span> · Floor: $100/brick</p>
+                          <p className="text-sm text-gray-400">
+                            Owned: <span className="font-medium text-gray-700">{h.bricks}</span>
+                            {listed > 0 && <> · Listed: <span className="font-medium text-amber-600">{listed}</span></>}
+                            {' '}· Available to list: <span className="font-medium text-green-700">{available}</span>
+                          </p>
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => { setSellModal(h); setSellQty(10); setSellPrice(102); setDone(false) }}>
+                        <Button variant="outline" size="sm" disabled={available <= 0}
+                          onClick={() => { setSellModal({ ...h, availableToList: available }); setSellQty(Math.min(10, available)); setSellPrice(prop.pricePerBrick); setDone(false) }}>
                           <Plus size={14} /> List for Sale
                         </Button>
                       </div>
@@ -165,7 +207,7 @@ export function InvestorTradingDesk() {
               </div>
               <div className="flex gap-3">
                 <Button variant="outline" className="flex-1" onClick={() => setBuyModal(null)}>Cancel</Button>
-                <Button className="flex-1" onClick={handleConfirm}>Confirm Purchase</Button>
+                <Button className="flex-1" onClick={handleConfirmBuy}>Confirm Purchase</Button>
               </div>
             </div>
           )
@@ -176,6 +218,7 @@ export function InvestorTradingDesk() {
       <Modal open={!!sellModal} onClose={() => setSellModal(null)} title="List Bricks for Sale">
         {sellModal && (() => {
           const prop = properties.find(p => p.id === sellModal.propertyId)
+          const maxSell = sellModal.availableToList || sellModal.bricks
           return done ? (
             <div className="text-center py-8">
               <CheckCircle2 size={48} className="text-green-500 mx-auto mb-3" />
@@ -188,20 +231,20 @@ export function InvestorTradingDesk() {
                 <img src={prop?.image} alt="" className="w-16 h-12 rounded-lg object-cover" />
                 <div>
                   <p className="font-semibold">{prop?.name}</p>
-                  <p className="text-sm text-muted-foreground">You own: {sellModal.bricks} Bricks · Floor: $100</p>
+                  <p className="text-sm text-muted-foreground">Available to list: <span className="font-medium text-gray-800">{maxSell} Bricks</span> · Floor: ${prop?.pricePerBrick}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="ds-label mb-2">Quantity to sell</label>
-                  <input type="number" value={sellQty} min={1} max={sellModal.bricks}
-                    onChange={e => setSellQty(Math.min(sellModal.bricks, Math.max(1, parseInt(e.target.value) || 1)))}
+                  <label className="ds-label mb-2">Quantity to list (max {maxSell})</label>
+                  <input type="number" value={sellQty} min={1} max={maxSell}
+                    onChange={e => setSellQty(Math.min(maxSell, Math.max(1, parseInt(e.target.value) || 1)))}
                     className="ds-input" />
                 </div>
                 <div>
                   <label className="ds-label mb-2">Ask price per Brick ($)</label>
-                  <input type="number" value={sellPrice} min={90} max={200}
-                    onChange={e => setSellPrice(Math.max(90, parseFloat(e.target.value) || 90))}
+                  <input type="number" value={sellPrice} min={1}
+                    onChange={e => setSellPrice(Math.max(1, parseFloat(e.target.value) || 1))}
                     className="ds-input" />
                 </div>
               </div>
@@ -212,7 +255,7 @@ export function InvestorTradingDesk() {
               </div>
               <div className="flex gap-3">
                 <Button variant="outline" className="flex-1" onClick={() => setSellModal(null)}>Cancel</Button>
-                <Button variant="success" className="flex-1" onClick={handleConfirm}>Create Listing</Button>
+                <Button variant="success" className="flex-1" onClick={handleConfirmSell}>Create Listing</Button>
               </div>
             </div>
           )

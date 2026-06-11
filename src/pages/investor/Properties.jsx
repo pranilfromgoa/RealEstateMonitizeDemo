@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Modal } from '@/components/ui/modal'
 import { Card, CardContent } from '@/components/ui/card'
-import { properties } from '@/data/mockData'
+import { useData } from '@/context/DataContext'
 import { Building2, MapPin, TrendingUp, Layers, Search, SlidersHorizontal, CheckCircle2, FileText, X } from 'lucide-react'
 
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
@@ -21,6 +21,7 @@ const typeColors = {
 }
 
 export function InvestorProperties() {
+  const { properties, buyBricks } = useData()
   const [search, setSearch] = useState('')
   const [filterType, setFilterType] = useState('all')
   const [detail, setDetail] = useState(null)
@@ -40,6 +41,7 @@ export function InvestorProperties() {
   const soldPct = (p) => ((p.totalBricks - p.availableBricks) / p.totalBricks * 100).toFixed(0)
 
   const handleBuy = () => {
+    buyBricks(buyModal.id, buyQty, buyModal.pricePerBrick)
     setBought(true)
     setTimeout(() => { setBought(false); setBuyModal(null) }, 2500)
   }
@@ -98,7 +100,7 @@ export function InvestorProperties() {
                   <span>{prop.city}</span>
                 </div>
 
-                <div className="mt-3 grid grid-cols-2 gap-3">
+                <div className="mt-3 grid grid-cols-3 gap-2">
                   <div className="bg-gray-50 rounded-lg p-2">
                     <p className="text-xs text-gray-400">Price / Brick</p>
                     <p className="font-bold text-gray-900">{fmt(prop.pricePerBrick)}</p>
@@ -106,6 +108,10 @@ export function InvestorProperties() {
                   <div className="bg-gray-50 rounded-lg p-2">
                     <p className="text-xs text-gray-400">Total Value</p>
                     <p className="font-bold text-gray-900">{fmt(prop.totalValue)}</p>
+                  </div>
+                  <div className="bg-green-50 rounded-lg p-2">
+                    <p className="text-xs text-gray-400">Expected Rent</p>
+                    <p className="font-bold text-green-700">{prop.monthlyRent ? fmt(prop.monthlyRent) + '/mo' : '—'}</p>
                   </div>
                 </div>
 
@@ -153,7 +159,7 @@ export function InvestorProperties() {
                 { label: 'Total Value', value: fmt(detail.totalValue) },
                 { label: 'Price / Brick', value: fmt(detail.pricePerBrick) },
                 { label: 'Annual Yield', value: `${detail.annualYield}%` },
-                { label: 'Monthly Rent', value: fmt(detail.monthlyRent) },
+                { label: 'Expected Rent/mo', value: fmt(detail.monthlyRent) },
                 { label: 'Total Bricks', value: detail.totalBricks.toLocaleString() },
                 { label: 'Available', value: detail.availableBricks.toLocaleString() },
               ].map(stat => (
@@ -255,7 +261,7 @@ export function InvestorProperties() {
                     <span className="text-blue-600">{fmt(buyQty * buyModal.pricePerBrick * 1.005)}</span>
                   </div>
                   <div className="flex justify-between text-xs text-green-600 bg-green-50 rounded-lg px-3 py-2 mt-2">
-                    <span>Estimated monthly income</span>
+                    <span>Expected monthly income</span>
                     <span className="font-semibold">{fmt(buyModal.monthlyRent * buyQty / buyModal.totalBricks)}/mo</span>
                   </div>
                 </div>

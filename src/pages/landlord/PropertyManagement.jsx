@@ -6,8 +6,9 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Modal } from '@/components/ui/modal'
 import { Progress } from '@/components/ui/progress'
-import { properties, landlords, rentHistory } from '@/data/mockData'
-import { Building2, Wrench, Users, FileText, Plus, CheckCircle2, MapPin, TrendingUp } from 'lucide-react'
+import { landlords } from '@/data/mockData'
+import { useData } from '@/context/DataContext'
+import { Building2, Wrench, Users, FileText, Plus, CheckCircle2, MapPin, TrendingUp, Clock, XCircle } from 'lucide-react'
 
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
 
@@ -18,7 +19,11 @@ const maintenanceLogs = [
   { id: 'm4', propertyId: 'prop-001', issue: 'Parking lot — pothole repair', status: 'pending', date: '2025-06-01', cost: 0 },
 ]
 
+const statusVariant = { pending: 'warning', under_review: 'default', approved: 'success', rejected: 'destructive' }
+
 export function LandlordPropertyManagement() {
+  const { properties, rentHistory, pendingSubmissions } = useData()
+  const mySubmissions = pendingSubmissions.filter(s => s.landlordId === 'landlord-001')
   const [selectedProp, setSelectedProp] = useState('prop-001')
   const [addMaintModal, setAddMaintModal] = useState(false)
   const [addTenantModal, setAddTenantModal] = useState(false)
@@ -40,6 +45,40 @@ export function LandlordPropertyManagement() {
           <Badge className="bg-purple-600 text-white">Phase 2</Badge>
           <p className="text-sm text-purple-700">Self-serve property management dashboard — update tenants, log repairs, and view monthly reports.</p>
         </div>
+
+        {/* Submissions awaiting tokenization */}
+        {mySubmissions.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock size={16} className="text-amber-500" /> Pending Submissions
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {mySubmissions.map(sub => (
+                <div key={sub.id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                    sub.status === 'approved' ? 'bg-green-100' : sub.status === 'rejected' ? 'bg-red-100' : 'bg-amber-100'
+                  }`}>
+                    {sub.status === 'approved' ? <CheckCircle2 size={16} className="text-green-600" />
+                      : sub.status === 'rejected' ? <XCircle size={16} className="text-red-600" />
+                      : <Clock size={16} className="text-amber-600" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <p className="font-semibold text-gray-900">{sub.propertyName}</p>
+                      <Badge variant={statusVariant[sub.status] || 'warning'}>{sub.status.replace('_', ' ')}</Badge>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-0.5">{sub.address} · Submitted {sub.submittedDate}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {sub.documents.filter(d => d.uploaded).length}/{sub.documents.length} docs · Est. {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(sub.estimatedValue)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Property tabs */}
         <div className="flex gap-2 overflow-x-auto">
@@ -65,8 +104,8 @@ export function LandlordPropertyManagement() {
                   </div>
                   <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
                     <div className="bg-gray-50 rounded-lg p-2">
-                      <p className="text-xs text-gray-400">Monthly Rent</p>
-                      <p className="font-bold text-gray-900">{fmt(prop.monthlyRent)}</p>
+                      <p className="text-xs text-gray-400">Expected Rent</p>
+                      <p className="font-bold text-green-700">{fmt(prop.monthlyRent)}/mo</p>
                     </div>
                     <div className="bg-gray-50 rounded-lg p-2">
                       <p className="text-xs text-gray-400">Yield</p>

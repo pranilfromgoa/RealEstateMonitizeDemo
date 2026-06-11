@@ -4,7 +4,7 @@ import { Header } from '@/components/layout/Header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { properties } from '@/data/mockData'
+import { useData } from '@/context/DataContext'
 import { Bot, Send, FileText, ChevronDown, Sparkles, User } from 'lucide-react'
 
 const mockAnswers = {
@@ -40,9 +40,11 @@ const suggestions = [
 ]
 
 export function InvestorAIReader() {
-  const [selectedProp, setSelectedProp] = useState(properties[0])
+  const { properties } = useData()
+  const [selectedProp, setSelectedProp] = useState(null)
+  const firstProp = selectedProp || properties[0]
   const [messages, setMessages] = useState([
-    { role: 'assistant', text: `Hi! I've analyzed all documents for **${properties[0].name}**. Ask me anything about the property deed, LLC structure, lease agreements, financials, or any other document. I can answer questions from the full document set in seconds.` }
+    { role: 'assistant', text: `Hi! I've analyzed all documents for **${properties[0]?.name ?? 'this property'}**. Ask me anything about the property deed, LLC structure, lease agreements, financials, or any other document. I can answer questions from the full document set in seconds.` }
   ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -85,7 +87,7 @@ export function InvestorAIReader() {
                 <button
                   key={p.id}
                   onClick={() => handlePropChange(p)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors text-sm ${selectedProp.id === p.id ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50 text-gray-700'}`}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors text-sm ${firstProp?.id === p.id ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50 text-gray-700'}`}
                 >
                   <img src={p.image} alt="" className="w-10 h-8 rounded-lg object-cover flex-shrink-0" />
                   <span className="leading-tight">{p.name}</span>
@@ -97,7 +99,7 @@ export function InvestorAIReader() {
           <Card>
             <CardHeader className="py-3"><CardTitle className="text-sm">Documents Loaded</CardTitle></CardHeader>
             <CardContent className="p-3 space-y-2">
-              {selectedProp.documents.map(doc => (
+              {firstProp?.documents.map(doc => (
                 <div key={doc.name} className="flex items-center gap-2">
                   <FileText size={13} className="text-green-600" />
                   <span className="text-xs text-gray-600">{doc.name}</span>
@@ -116,7 +118,7 @@ export function InvestorAIReader() {
             </div>
             <div>
               <p className="font-semibold text-gray-900 text-sm">BrickBloc AI Assistant</p>
-              <p className="text-xs text-muted-foreground">Analyzing: {selectedProp.name} — {selectedProp.documents.length} documents loaded</p>
+              <p className="text-xs text-muted-foreground">Analyzing: {firstProp?.name} — {firstProp?.documents.length} documents loaded</p>
             </div>
           </div>
 

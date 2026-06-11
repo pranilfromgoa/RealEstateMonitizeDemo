@@ -6,7 +6,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Modal } from '@/components/ui/modal'
 import { StatCard } from '@/components/ui/stat-card'
-import { rentHistory, properties, platformStats } from '@/data/mockData'
+import { platformStats } from '@/data/mockData'
+import { useData } from '@/context/DataContext'
 import { Banknote, DollarSign, CheckCircle2, Clock, Calculator, Send } from 'lucide-react'
 
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(n)
@@ -14,7 +15,7 @@ const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency:
 const FEE_RATE = 0.05
 
 export function AdminPayouts() {
-  const [rents, setRents] = useState(rentHistory)
+  const { rentHistory: rents, properties, processRentPayout } = useData()
   const [payModal, setPayModal] = useState(null)
   const [rentAmount, setRentAmount] = useState('')
   const [processing, setProcessing] = useState(false)
@@ -29,12 +30,7 @@ export function AdminPayouts() {
   const handleProcess = () => {
     setProcessing(true)
     setTimeout(() => {
-      const fee = parseFloat(rentAmount) * FEE_RATE
-      const net = parseFloat(rentAmount) - fee
-      setRents(r => r.map(item => item.id === payModal.id
-        ? { ...item, status: 'distributed', amount: parseFloat(rentAmount), fee, netAmount: net, txHash: '0x' + Math.random().toString(16).slice(2, 42) }
-        : item
-      ))
+      processRentPayout(payModal.id, parseFloat(rentAmount))
       setProcessing(false)
       setDone(true)
     }, 1800)

@@ -5,14 +5,19 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { properties, rentHistory, landlords } from '@/data/mockData'
-import { Building2, DollarSign, TrendingUp, Users, ArrowUpRight, CheckCircle2 } from 'lucide-react'
+import { landlords } from '@/data/mockData'
+import { useData } from '@/context/DataContext'
+import { Building2, DollarSign, TrendingUp, Users, ArrowUpRight, CheckCircle2, Clock, XCircle } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
 
+const statusVariant = { pending: 'warning', under_review: 'default', approved: 'success', rejected: 'destructive' }
+
 export function LandlordDashboard() {
+  const { properties, rentHistory, pendingSubmissions } = useData()
   const landlord = landlords.find(l => l.id === 'landlord-001')
+  const mySubmissions = pendingSubmissions.filter(s => s.landlordId === 'landlord-001')
   const myProps = properties.filter(p => p.landlordId === 'landlord-001')
   const totalValue = myProps.reduce((s, p) => s + p.totalValue, 0)
   const totalMonthlyRent = myProps.reduce((s, p) => s + p.monthlyRent, 0)
@@ -65,7 +70,7 @@ export function LandlordDashboard() {
                         <div className="mt-2">
                           <div className="flex justify-between text-xs text-gray-500 mb-1">
                             <span>{soldPct.toFixed(0)}% of Bricks sold</span>
-                            <span>{fmt(prop.monthlyRent)}/mo rent</span>
+                            <span>{fmt(prop.monthlyRent)}/mo expected rent</span>
                           </div>
                           <Progress value={soldPct} color="green" />
                         </div>
@@ -76,6 +81,43 @@ export function LandlordDashboard() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Submissions in review */}
+          {mySubmissions.length > 0 && (
+            <div className="lg:col-span-2">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Submissions in Review</CardTitle>
+                    <Link to="/landlord/upload">
+                      <Button variant="outline" size="sm">+ Submit New</Button>
+                    </Link>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {mySubmissions.map(sub => (
+                    <div key={sub.id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                        sub.status === 'approved' ? 'bg-green-100' : sub.status === 'rejected' ? 'bg-red-100' : 'bg-amber-100'
+                      }`}>
+                        {sub.status === 'approved' ? <CheckCircle2 size={16} className="text-green-600" />
+                          : sub.status === 'rejected' ? <XCircle size={16} className="text-red-600" />
+                          : <Clock size={16} className="text-amber-600" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <p className="font-semibold text-gray-900 truncate">{sub.propertyName}</p>
+                          <Badge variant={statusVariant[sub.status] || 'warning'}>{sub.status.replace('_', ' ')}</Badge>
+                        </div>
+                        <p className="text-xs text-gray-400 mt-0.5">{sub.address} · Submitted {sub.submittedDate}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">Est. value: {fmt(sub.estimatedValue)} · {sub.proposal?.suggestedBrickCount?.toLocaleString() || '—'} Bricks proposed</p>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
           {/* Rent history */}
           <div>

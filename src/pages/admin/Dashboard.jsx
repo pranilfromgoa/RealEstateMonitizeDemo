@@ -4,27 +4,40 @@ import { StatCard } from '@/components/ui/stat-card'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { platformStats, properties, rentHistory, pendingSubmissions, kycRequests } from '@/data/mockData'
-import { Building2, DollarSign, Users, TrendingUp, Clock, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react'
+import { platformStats } from '@/data/mockData'
+import { useData } from '@/context/DataContext'
+import { Building2, DollarSign, Users, TrendingUp, Clock, CheckCircle2, AlertCircle, ArrowRight, RotateCcw } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
 
 export function AdminDashboard() {
+  const { properties, pendingSubmissions, rentHistory, resetData } = useData()
   const pendingPayouts = rentHistory.filter(r => r.status === 'pending')
   const recentRent = rentHistory.filter(r => r.status === 'distributed').slice(0, 5)
+  const pendingApprovals = pendingSubmissions.filter(s => s.status === 'pending' || s.status === 'under_review').length
 
   return (
     <Layout>
       <Header title="Admin Dashboard" subtitle="Platform overview and operations" />
       <div className="ds-page">
+        {/* Reset demo button */}
+        <div className="flex justify-end">
+          <button
+            onClick={() => { if (window.confirm('Reset all demo data to defaults?')) resetData() }}
+            className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-red-500 border border-gray-200 hover:border-red-300 px-3 py-1.5 rounded-lg transition-colors"
+          >
+            <RotateCcw size={12} /> Reset Demo Data
+          </button>
+        </div>
+
         {/* Alerts */}
-        {(platformStats.pendingApprovals > 0 || pendingPayouts.length > 0) && (
+        {(pendingApprovals > 0 || pendingPayouts.length > 0) && (
           <div className="space-y-2">
-            {platformStats.pendingApprovals > 0 && (
+            {pendingApprovals > 0 && (
               <div className="ds-alert-warning border border-amber-200 rounded-xl px-4 py-3 flex items-center gap-3">
                 <AlertCircle size={16} className="text-amber-600" />
-                <p className="text-sm">{platformStats.pendingApprovals} property submissions pending review</p>
+                <p className="text-sm">{pendingApprovals} property submissions pending review</p>
                 <Link to="/admin/approvals"><Button size="sm" variant="outline" className="ml-auto border-amber-300 text-amber-700 hover:bg-amber-100">Review <ArrowRight size={13} /></Button></Link>
               </div>
             )}
@@ -57,7 +70,7 @@ export function AdminDashboard() {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>All Properties</CardTitle>
+                <CardTitle>Live / Tokenized Properties</CardTitle>
                 <Link to="/admin/tokenization"><Button variant="outline" size="sm">+ Tokenize New</Button></Link>
               </div>
             </CardHeader>
@@ -68,6 +81,7 @@ export function AdminDashboard() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 truncate">{prop.name}</p>
                     <p className="text-xs text-gray-400">{prop.city} · {fmt(prop.totalValue)}</p>
+                    <p className="text-xs text-green-600 font-medium">{prop.monthlyRent ? fmt(prop.monthlyRent) + '/mo expected' : '—'}</p>
                   </div>
                   <div className="text-right flex-shrink-0">
                     <p className="text-xs text-gray-500">{((prop.totalBricks - prop.availableBricks) / prop.totalBricks * 100).toFixed(0)}% sold</p>

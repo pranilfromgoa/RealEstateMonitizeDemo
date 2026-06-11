@@ -5,14 +5,14 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Modal } from '@/components/ui/modal'
-import { pendingSubmissions, kycRequests } from '@/data/mockData'
-import { ClipboardList, CheckCircle2, XCircle, Clock, FileText, User, Building2, AlertCircle } from 'lucide-react'
+import { useData } from '@/context/DataContext'
+import { ClipboardList, CheckCircle2, XCircle, Clock, FileText, User, Building2, AlertCircle, ArrowRight, Cpu } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
 
 export function AdminApprovals() {
-  const [submissions, setSubmissions] = useState(pendingSubmissions)
-  const [kyc, setKyc] = useState(kycRequests)
+  const { pendingSubmissions: submissions, kycRequests: kyc, updateSubmission, updateKyc } = useData()
   const [detail, setDetail] = useState(null)
   const [tab, setTab] = useState('properties')
   const [actionDone, setActionDone] = useState({})
@@ -20,20 +20,35 @@ export function AdminApprovals() {
   const handleAction = (id, action, type = 'sub') => {
     setActionDone(a => ({ ...a, [id]: action }))
     if (type === 'sub') {
-      setSubmissions(s => s.map(item => item.id === id ? { ...item, status: action === 'approve' ? 'approved' : 'rejected' } : item))
+      updateSubmission(id, { status: action === 'approve' ? 'approved' : 'rejected' })
     } else {
-      setKyc(k => k.map(item => item.id === id ? { ...item, status: action === 'approve' ? 'approved' : 'rejected' } : item))
+      updateKyc(id, { status: action === 'approve' ? 'approved' : 'rejected' })
     }
     setDetail(null)
   }
 
   const pendingCount = submissions.filter(s => s.status === 'pending' || s.status === 'under_review').length
   const kycPendingCount = kyc.filter(k => k.status === 'pending' || k.status === 'under_review').length
+  const approvedCount = submissions.filter(s => s.status === 'approved').length
 
   return (
     <Layout>
       <Header title="Approvals" subtitle="Review and approve property submissions and identity verifications" />
       <div className="ds-page">
+        {approvedCount > 0 && (
+          <div className="ds-alert-success border border-green-200 rounded-xl px-4 py-3 flex items-center gap-3">
+            <Cpu size={16} className="text-green-600 flex-shrink-0" />
+            <p className="text-sm flex-1">
+              <span className="font-semibold">{approvedCount} {approvedCount === 1 ? 'property' : 'properties'} approved</span> and ready to tokenize — next step is the Brick Maker.
+            </p>
+            <Link to="/admin/tokenization">
+              <Button size="sm" className="flex-shrink-0 bg-green-600 hover:bg-green-700 text-white">
+                Go to Brick Maker <ArrowRight size={13} />
+              </Button>
+            </Link>
+          </div>
+        )}
+
         <div className="grid grid-cols-3 gap-4">
           <div className="bg-white rounded-xl border border-gray-200 p-4">
             <p className="text-2xl font-bold text-amber-600">{pendingCount}</p>
@@ -92,7 +107,10 @@ export function AdminApprovals() {
                     {sub.notes && <p className="text-xs text-amber-600 mt-1">📋 {sub.notes}</p>}
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => setDetail(sub)}>
+                    <Button variant="outline" size="sm" onClick={() => {
+                      if (sub.status === 'pending') updateSubmission(sub.id, { status: 'under_review' })
+                      setDetail(sub)
+                    }}>
                       <FileText size={13} /> Review
                     </Button>
                     {(sub.status === 'pending' || sub.status === 'under_review') && (
@@ -176,10 +194,17 @@ export function AdminApprovals() {
               ))}
             </div>
             {detail.notes && <div className="ds-alert-warning rounded-xl p-3 text-xs">{detail.notes}</div>}
-            <div className="flex gap-3 pt-2">
-              <Button variant="destructive" className="flex-1" onClick={() => handleAction(detail.id, 'reject')}>Reject</Button>
-              <Button variant="success" className="flex-1" onClick={() => handleAction(detail.id, 'approve')}>Approve & Proceed</Button>
-            </div>
+            {(detail.status === 'pending' || detail.status === 'under_review') ? (
+              <div className="flex gap-3 pt-2">
+                <Button variant="destructive" className="flex-1" onClick={() => handleAction(detail.id, 'reject')}>Reject</Button>
+                <Button variant="success" className="flex-1" onClick={() => handleAction(detail.id, 'approve')}>Approve & Proceed</Button>
+              </div>
+            ) : (
+              <div className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium ${detail.status === 'approved' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                {detail.status === 'approved' ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
+                This submission has been <span className="font-bold ml-1">{detail.status}</span>.
+              </div>
+            )}
           </div>
         )}
       </Modal>

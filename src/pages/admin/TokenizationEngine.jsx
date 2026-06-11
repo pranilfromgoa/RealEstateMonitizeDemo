@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { properties, pendingSubmissions } from '@/data/mockData'
+import { useData } from '@/context/DataContext'
 import { Cpu, CheckCircle2, Hash, Zap, Layers, ArrowRight, AlertTriangle, User, MessageSquare } from 'lucide-react'
 
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
@@ -26,11 +26,12 @@ const defaultForm = {
   appraisalValue: '',
   brickCount: '',
   pricePerBrick: '',
+  monthlyRent: '',
 }
 
-const approvedQueue = pendingSubmissions.filter(s => s.status === 'approved')
-
 export function AdminTokenizationEngine() {
+  const { pendingSubmissions, properties, addProperty, updateSubmission } = useData()
+  const approvedQueue = pendingSubmissions.filter(s => s.status === 'approved')
   const [selectedSub, setSelectedSub] = useState(null)
   const [form, setForm] = useState(defaultForm)
   const [running, setRunning] = useState(false)
@@ -50,6 +51,7 @@ export function AdminTokenizationEngine() {
       appraisalValue: String(sub.estimatedValue || ''),
       brickCount: String(sub.proposal.suggestedBrickCount),
       pricePerBrick: String(sub.proposal.suggestedPricePerBrick),
+      monthlyRent: String(sub.proposal.monthlyRent || ''),
     })
   }
 
@@ -65,13 +67,43 @@ export function AdminTokenizationEngine() {
     setRunning(true)
     setRunStep(0)
     let s = 0
+    const hash = '0x' + Math.random().toString(16).slice(2, 42)
     const interval = setInterval(() => {
       s++
       setRunStep(s)
       if (s >= steps.length) {
         clearInterval(interval)
+        const brickCount = parseInt(form.brickCount) || 0
+        const pricePerBrick = parseInt(form.pricePerBrick) || 0
+        const addrParts = form.address.split(',')
+        addProperty({
+          id: `prop-${Date.now()}`,
+          name: form.propertyName,
+          address: form.address,
+          city: addrParts[1]?.trim() || addrParts[0]?.trim() || '',
+          type: selectedSub?.type || 'Commercial',
+          description: '',
+          totalValue: parseFloat(form.appraisalValue) || 0,
+          pricePerBrick,
+          totalBricks: brickCount,
+          availableBricks: brickCount,
+          monthlyRent: parseFloat(form.monthlyRent) || 0,
+          annualYield: 0,
+          landlordId: selectedSub?.landlordId || 'landlord-001',
+          llcName: form.llcName,
+          status: 'live',
+          image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&auto=format&fit=crop&q=60',
+          highlights: [],
+          documents: [],
+          financials: { occupancy: 100 },
+          tokenizationDate: new Date().toISOString().split('T')[0],
+          contractAddress: hash,
+        })
+        if (selectedSub) {
+          updateSubmission(selectedSub.id, { status: 'tokenized', contractAddress: hash })
+        }
+        setTxHash(hash)
         setDone(true)
-        setTxHash('0x' + Math.random().toString(16).slice(2, 42))
       }
     }, 700)
   }
@@ -213,12 +245,13 @@ export function AdminTokenizationEngine() {
                         <AlertTriangle size={14} className="text-amber-600" />
                         <p className="text-xs font-semibold text-amber-800">Landlord's Proposal — Review &amp; Adjust Below</p>
                       </div>
-                      <div className="grid grid-cols-4 gap-2 text-xs">
+                      <div className="grid grid-cols-5 gap-2 text-xs">
                         {[
                           { l: 'Equity', proposed: `${selectedSub.proposal.tokenizePercent}%`, final: `${selectedSub.proposal.tokenizePercent}%` },
                           { l: 'Brick Count', proposed: selectedSub.proposal.suggestedBrickCount.toLocaleString(), final: (parseInt(form.brickCount) || 0).toLocaleString() },
                           { l: 'Price/Brick', proposed: `$${selectedSub.proposal.suggestedPricePerBrick}`, final: `$${form.pricePerBrick || '—'}` },
                           { l: 'Total Raise', proposed: fmt(selectedSub.proposal.desiredRaise), final: fmt(platformRaise) },
+                          { l: 'Expected Rent', proposed: fmt(selectedSub.proposal.monthlyRent || 0), final: form.monthlyRent ? fmt(parseFloat(form.monthlyRent)) : '—' },
                         ].map(row => {
                           const changed = row.proposed !== row.final
                           return (
@@ -264,12 +297,20 @@ export function AdminTokenizationEngine() {
                         className="ds-input"
                         placeholder="Harbor Walk Properties LLC" />
                     </div>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-2 gap-2">
                       <div>
                         <label className="ds-label">Appraised Value ($)</label>
                         <input type="number" value={form.appraisalValue} onChange={e => setForm(f => ({ ...f, appraisalValue: e.target.value }))}
                           className="ds-input" />
                       </div>
+                      <div>
+                        <label className="ds-label">Expected Monthly Rent ($)</label>
+                        <input type="number" value={form.monthlyRent} onChange={e => setForm(f => ({ ...f, monthlyRent: e.target.value }))}
+                          className={`ds-input ${selectedSub && form.monthlyRent !== String(selectedSub.proposal.monthlyRent || '') ? 'border-violet-400 bg-violet-50' : ''}`}
+                          placeholder="e.g. 8500" />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
                       <div>
                         <label className="ds-label">Brick Count</label>
                         <input type="number" value={form.brickCount} onChange={e => setForm(f => ({ ...f, brickCount: e.target.value }))}
@@ -285,6 +326,7 @@ export function AdminTokenizationEngine() {
 
                   <div className="bg-gray-50 rounded-xl p-3 text-xs text-gray-500 space-y-1">
                     <div className="flex justify-between"><span>Total raise</span><span className="font-medium">{fmt(platformRaise)}</span></div>
+                    <div className="flex justify-between"><span>Expected rent/mo</span><span className="font-medium">{form.monthlyRent ? fmt(parseFloat(form.monthlyRent)) : '—'}</span></div>
                     <div className="flex justify-between"><span>Token standard</span><span className="font-medium">ERC-1155</span></div>
                     <div className="flex justify-between"><span>Network</span><span className="font-medium">Ethereum L2 (Polygon)</span></div>
                   </div>
@@ -315,6 +357,7 @@ export function AdminTokenizationEngine() {
                       <p className="text-xs text-blue-500 font-mono">0x{prop.id.replace('prop-', '')}...a4f</p>
                     </div>
                     <p className="text-xs text-gray-400">{prop.totalBricks.toLocaleString()} Bricks · {fmt(prop.pricePerBrick)}/brick</p>
+                    <p className="text-xs text-green-600 font-medium">{prop.monthlyRent ? fmt(prop.monthlyRent) + '/mo expected' : '—'}</p>
                   </div>
                   <div className="text-right flex-shrink-0">
                     <Badge variant="success" className="text-xs">Live</Badge>

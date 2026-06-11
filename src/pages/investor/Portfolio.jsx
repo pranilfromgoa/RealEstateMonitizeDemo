@@ -3,21 +3,24 @@ import { Header } from '@/components/layout/Header'
 import { StatCard } from '@/components/ui/stat-card'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { portfolioHoldings, properties, rentHistory, transactions } from '@/data/mockData'
+import { useData } from '@/context/DataContext'
 import { DollarSign, Briefcase, TrendingUp, Percent, ArrowUpRight, ArrowDownRight, Calendar } from 'lucide-react'
 
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
 const fmtSmall = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(n)
 
 export function InvestorPortfolio() {
+  const { portfolioHoldings, properties, transactions } = useData()
   const myHoldings = portfolioHoldings.filter(h => h.investorId === 'investor-001')
   const totalBricks = myHoldings.reduce((s, h) => s + h.bricks, 0)
   const totalInvested = myHoldings.reduce((s, h) => s + h.bricks * h.purchasePrice, 0)
   const totalEarned = myHoldings.reduce((s, h) => s + h.earnedRent, 0)
-  const avgYield = myHoldings.reduce((s, h) => {
-    const prop = properties.find(p => p.id === h.propertyId)
-    return s + (prop?.annualYield || 0)
-  }, 0) / myHoldings.length
+  const avgYield = myHoldings.length > 0
+    ? myHoldings.reduce((s, h) => {
+        const prop = properties.find(p => p.id === h.propertyId)
+        return s + (prop?.annualYield || 0)
+      }, 0) / myHoldings.length
+    : 0
 
   const allTx = transactions.filter(t => t.investorId === 'investor-001')
 
@@ -57,7 +60,7 @@ export function InvestorPortfolio() {
                         </div>
                         <Badge variant="success">{prop.annualYield}% yield</Badge>
                       </div>
-                      <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      <div className="mt-3 grid grid-cols-2 sm:grid-cols-5 gap-3">
                         <div>
                           <p className="text-xs text-gray-400">Bricks Owned</p>
                           <p className="font-bold text-gray-900 text-lg">{h.bricks}</p>
@@ -71,7 +74,11 @@ export function InvestorPortfolio() {
                           <p className="font-bold text-green-600">{fmt(h.earnedRent)}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-400">Monthly Income</p>
+                          <p className="text-xs text-gray-400">Expected Rent/mo</p>
+                          <p className="font-bold text-green-600">{fmt(prop.monthlyRent)}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-400">My Share/mo</p>
                           <p className="font-bold text-blue-600">{fmtSmall(monthlyIncome)}</p>
                         </div>
                       </div>

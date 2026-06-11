@@ -5,13 +5,14 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Briefcase, TrendingUp, DollarSign, Building2, ArrowUpRight, Clock } from 'lucide-react'
-import { portfolioHoldings, properties, transactions, rentHistory } from '@/data/mockData'
+import { useData } from '@/context/DataContext'
 import { Link } from 'react-router-dom'
 
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
 const fmtSmall = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(n)
 
 export function InvestorDashboard() {
+  const { portfolioHoldings, properties, transactions } = useData()
   const myHoldings = portfolioHoldings.filter(h => h.investorId === 'investor-001')
   const totalBricks = myHoldings.reduce((s, h) => s + h.bricks, 0)
   const totalInvested = myHoldings.reduce((s, h) => s + h.bricks * h.purchasePrice, 0)

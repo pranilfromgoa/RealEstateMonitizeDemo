@@ -5,6 +5,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Upload, CheckCircle2, FileText, AlertCircle, Building2, Info, Layers } from 'lucide-react'
+import { useData } from '@/context/DataContext'
+import { useAuth } from '@/context/AuthContext'
 
 const docRequirements = [
   { id: 'deed', label: 'Property Deed', required: true, desc: 'Official ownership document' },
@@ -23,10 +25,13 @@ const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency:
 const emptyForm = {
   name: '', address: '', city: '', state: '',
   type: 'Multi-Family', estimatedValue: '', description: '',
+  monthlyRent: '',
   tokenizePercent: '100', pricePerBrick: '100', landlordNotes: '',
 }
 
 export function LandlordPropertyUpload() {
+  const { addSubmission } = useData()
+  const { user } = useAuth()
   const [step, setStep] = useState(1)
   const [form, setForm] = useState(emptyForm)
   const [uploaded, setUploaded] = useState({})
@@ -46,7 +51,32 @@ export function LandlordPropertyUpload() {
   const estimatedBricks = ppb > 0 ? Math.round(tokenizableValue / ppb) : 0
   const desiredRaise = estimatedBricks * ppb
 
-  const handleSubmit = () => setSubmitted(true)
+  const handleSubmit = () => {
+    addSubmission({
+      id: `sub-${Date.now()}`,
+      propertyName: form.name,
+      address: `${form.address}, ${form.city}, ${form.state}`,
+      city: form.city,
+      type: form.type,
+      estimatedValue: parseFloat(form.estimatedValue) || 0,
+      landlordId: user?.id || 'landlord-001',
+      landlordName: user?.name || 'Landlord',
+      submittedDate: new Date().toISOString().split('T')[0],
+      status: 'pending',
+      documents: docRequirements.map(d => ({ name: d.label, uploaded: !!uploaded[d.id] })),
+      proposal: {
+        tokenizePercent: parseInt(form.tokenizePercent),
+        suggestedPricePerBrick: parseInt(form.pricePerBrick),
+        suggestedBrickCount: estimatedBricks,
+        desiredRaise: desiredRaise,
+        monthlyRent: parseFloat(form.monthlyRent) || 0,
+        notes: form.landlordNotes,
+      },
+      notes: form.landlordNotes,
+      llcName: '',
+    })
+    setSubmitted(true)
+  }
 
   if (submitted) {
     return (
@@ -65,6 +95,7 @@ export function LandlordPropertyUpload() {
               <div className="flex justify-between"><span className="text-gray-500">Property:</span><span className="font-medium">{form.name}</span></div>
               <div className="flex justify-between"><span className="text-gray-500">Equity to Tokenize:</span><span className="font-medium">{form.tokenizePercent}%</span></div>
               <div className="flex justify-between"><span className="text-gray-500">Proposed Price/Brick:</span><span className="font-medium">${form.pricePerBrick}</span></div>
+              <div className="flex justify-between"><span className="text-gray-500">Expected Rent:</span><span className="font-medium">{form.monthlyRent ? `$${parseInt(form.monthlyRent).toLocaleString()}/mo` : '—'}</span></div>
               <div className="flex justify-between"><span className="text-gray-500">Est. Bricks:</span><span className="font-medium">{estimatedBricks.toLocaleString()}</span></div>
               <div className="flex justify-between"><span className="text-gray-500">Documents:</span><span className="font-medium">{Object.keys(uploaded).length} uploaded</span></div>
               <div className="flex justify-between"><span className="text-gray-500">Status:</span><Badge variant="warning">Pending Review</Badge></div>
@@ -139,6 +170,13 @@ export function LandlordPropertyUpload() {
                   <input type="number" value={form.estimatedValue} onChange={e => setForm(f => ({ ...f, estimatedValue: e.target.value }))}
                     className="ds-input"
                     placeholder="1,500,000" />
+                </div>
+                <div>
+                  <label className="ds-label">Expected Monthly Rent ($) *</label>
+                  <input type="number" value={form.monthlyRent} onChange={e => setForm(f => ({ ...f, monthlyRent: e.target.value }))}
+                    className="ds-input"
+                    placeholder="8,500" />
+                  <p className="text-xs text-gray-400 mt-1">Total rent collected from all tenants per month</p>
                 </div>
                 <div className="sm:col-span-2">
                   <label className="ds-label">Property Description</label>
@@ -232,7 +270,7 @@ export function LandlordPropertyUpload() {
                 <p>Our team reviews every submission and will contact you to finalize the tokenization terms, pricing, and timeline. No fees until your property goes live.</p>
               </div>
 
-              <Button className="w-full" disabled={!form.name || !form.address || !form.city || !form.estimatedValue}
+              <Button className="w-full" disabled={!form.name || !form.address || !form.city || !form.estimatedValue || !form.monthlyRent}
                 onClick={() => setStep(2)}>
                 Continue to Documents
               </Button>
@@ -299,6 +337,7 @@ export function LandlordPropertyUpload() {
                   { l: 'Address', v: `${form.address}, ${form.city}, ${form.state}` },
                   { l: 'Type', v: form.type },
                   { l: 'Estimated Value', v: form.estimatedValue ? `$${parseInt(form.estimatedValue).toLocaleString()}` : '—' },
+                  { l: 'Expected Rent', v: form.monthlyRent ? `$${parseInt(form.monthlyRent).toLocaleString()}/mo` : '—' },
                 ].map(row => (
                   <div key={row.l} className="flex justify-between">
                     <span className="text-gray-500">{row.l}</span>

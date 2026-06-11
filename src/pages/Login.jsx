@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
-import { Building2, TrendingUp, ShieldCheck, Layers, ArrowRight, CheckCircle2 } from 'lucide-react'
+import { Building2, TrendingUp, ShieldCheck, Layers, ArrowRight, CheckCircle2, RotateCcw } from 'lucide-react'
 import { cn } from '@/lib/utils'
+
+const STORAGE_KEY = 'brickbloc_demo_v1'
 
 const roles = [
   {
@@ -66,8 +68,15 @@ const roles = [
 
 export function Login() {
   const [selected, setSelected] = useState(null)
+  const [cleared, setCleared] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
+
+  const handleClear = () => {
+    localStorage.removeItem(STORAGE_KEY)
+    setCleared(true)
+    setTimeout(() => setCleared(false), 2000)
+  }
 
   const handleLogin = () => {
     if (!selected) return
@@ -210,9 +219,16 @@ export function Login() {
             {selected && <ArrowRight size={18} />}
           </button>
 
-          <p className="text-center text-gray-600 text-xs mt-4">
-            Prototype version — all data is simulated for demonstration purposes
-          </p>
+          <div className="flex items-center justify-center mt-4 gap-3">
+            <p className="text-gray-600 text-xs">Prototype — all data is simulated</p>
+            <button
+              onClick={handleClear}
+              className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-red-400 transition-colors"
+            >
+              <RotateCcw size={11} />
+              {cleared ? 'Cleared!' : 'Reset demo data'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
