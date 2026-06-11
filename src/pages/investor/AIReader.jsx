@@ -71,7 +71,7 @@ export function InvestorAIReader() {
 
   return (
     <Layout>
-      <Header title="Deal Room" subtitle="Phase 3 — Ask questions across all property documents" />
+      <Header title="Property Intelligence" subtitle="Phase 3 — AI-powered document Q&A and property analysis" />
       <div className="p-6 flex gap-6" style={{ height: 'calc(100vh - 80px)' }}>
         {/* Left: property selector + docs */}
         <div className="w-72 flex-shrink-0 space-y-4">

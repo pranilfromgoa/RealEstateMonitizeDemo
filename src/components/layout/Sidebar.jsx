@@ -15,8 +15,8 @@ const investorNav = [
   { label: 'KYC Verification',icon: ShieldCheck,     to: '/investor/kyc',        phase: 1 },
   { label: 'Trading Desk',    icon: TrendingUp,      to: '/investor/trading',    phase: 2 },
   { label: 'Tax Documents',   icon: FileText,        to: '/investor/taxes',      phase: 2 },
-  { label: 'Voting',          icon: Vote,            to: '/investor/voting',     phase: 3 },
-  { label: 'Deal Room',        icon: Bot,             to: '/investor/ai-reader',  phase: 3 },
+  { label: "Brick Owners' Circle", icon: Vote,       to: '/investor/voting',     phase: 3 },
+  { label: 'Property Intelligence', icon: Bot,        to: '/investor/ai-reader',  phase: 3 },
 ]
 
 const landlordNav = [

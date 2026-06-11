@@ -13,7 +13,7 @@ const roles = [
     icon: TrendingUp,
     tagline: 'Buy Bricks, Earn Rent',
     description: 'Browse tokenized properties, purchase Bricks, track your portfolio, and earn passive rental income.',
-    features: ['Browse property listings', 'Buy & sell Bricks', 'Track portfolio & earnings', 'Tax documents & voting'],
+    features: ['Browse property listings', 'Buy & sell Bricks', 'Track portfolio & earnings', "Tax documents & Property Intelligence"],
     color: 'blue',
     gradient: 'from-blue-500 to-blue-600',
     border: 'border-blue-200',

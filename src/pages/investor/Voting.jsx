@@ -22,11 +22,11 @@ export function InvestorVoting() {
 
   return (
     <Layout>
-      <Header title="Voting" subtitle="Phase 3 — Participate in governance decisions" />
+      <Header title="Brick Owners' Circle" subtitle="Phase 3 — Collective decisions by Brick holders" />
       <div className="ds-page">
         <div className="ds-alert-warning flex items-center gap-3">
           <Badge className="bg-amber-600 text-white">Phase 3</Badge>
-          <p className="text-sm">Brick holders can vote on major property decisions. Your voting weight is proportional to the number of Bricks you own in each property.</p>
+          <p className="text-sm">As a Brick owner you have a say in major property decisions. Your vote weight is proportional to the Bricks you hold in each property.</p>
         </div>
 
         <div className="grid grid-cols-3 gap-4">
