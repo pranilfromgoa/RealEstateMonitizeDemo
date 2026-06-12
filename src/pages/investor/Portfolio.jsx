@@ -74,12 +74,12 @@ export function InvestorPortfolio() {
                           <p className="font-bold text-green-600">{fmt(h.earnedRent)}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-400">Expected Rent/mo</p>
-                          <p className="font-bold text-green-600">{fmt(prop.monthlyRent)}</p>
+                          <p className="text-xs text-gray-400">Expected Property Rent/mo</p>
+                          <p className="font-bold text-gray-700">{fmt(prop.monthlyRent)}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-400">My Share/mo</p>
-                          <p className="font-bold text-blue-600">{fmtSmall(monthlyIncome)}</p>
+                          <p className="text-xs text-gray-400">Expected Rent Share/mo</p>
+                          <p className="font-bold text-green-600">{fmtSmall(monthlyIncome)}</p>
                         </div>
                       </div>
                       <div className="mt-3 flex flex-wrap gap-3 text-xs text-gray-500">
