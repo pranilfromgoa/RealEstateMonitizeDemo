@@ -10,17 +10,10 @@ const userProfiles = {
     role: 'investor',
     avatar: 'AR',
   },
-  landlord: {
-    id: 'landlord-001',
-    name: 'Sarah Chen',
-    email: 'sarah.chen@properties.com',
-    role: 'landlord',
-    avatar: 'SC',
-  },
   admin: {
     id: 'admin-001',
     name: 'Daniel',
-    email: 'daniel@brickbloc.com',
+    email: 'daniel@brickchain.com',
     role: 'admin',
     avatar: 'D',
   },

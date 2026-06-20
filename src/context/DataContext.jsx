@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import {
-  properties as defaultProperties,
+  spvs as defaultSpvs,
+  investors as defaultInvestors,
   pendingSubmissions as defaultSubmissions,
   rentHistory as defaultRentHistory,
   kycRequests as defaultKycRequests,
@@ -10,11 +11,12 @@ import {
 } from '@/data/mockData'
 
 const DataContext = createContext(null)
-const STORAGE_KEY = 'brickbloc_demo_v1'
+const STORAGE_KEY = 'brickchain_demo_v3'
 
 function getDefaults() {
   return {
-    properties: defaultProperties,
+    spvs: defaultSpvs,
+    investors: defaultInvestors,
     pendingSubmissions: defaultSubmissions,
     rentHistory: defaultRentHistory,
     kycRequests: defaultKycRequests,
@@ -28,7 +30,16 @@ export function DataProvider({ children }) {
   const [store, setStore] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
-      if (saved) return JSON.parse(saved)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        // Backfill coverImage for any SPV that was saved before the field existed
+        const defaultImageMap = Object.fromEntries(defaultSpvs.map(s => [s.id, s.coverImage]))
+        parsed.spvs = (parsed.spvs || defaultSpvs).map(s => ({
+          ...s,
+          coverImage: s.coverImage || defaultImageMap[s.id] || '',
+        }))
+        return parsed
+      }
     } catch {}
     return getDefaults()
   })
@@ -55,8 +66,18 @@ export function DataProvider({ children }) {
       prev.map(k => k.id === id ? { ...k, ...changes } : k)
     )
 
-  const addProperty = (prop) =>
-    update('properties', prev => [...prev, prop])
+  const updateInvestor = (id, changes) =>
+    update('investors', prev =>
+      prev.map(inv => inv.id === id ? { ...inv, ...changes } : inv)
+    )
+
+  const updateSpv = (id, changes) =>
+    update('spvs', prev =>
+      prev.map(s => s.id === id ? { ...s, ...changes } : s)
+    )
+
+  const addSpv = (spv) =>
+    update('spvs', prev => [...prev, spv])
 
   const processRentPayout = (id, amount) => {
     const fee = amount * 0.05
@@ -69,34 +90,34 @@ export function DataProvider({ children }) {
     )
   }
 
-  const buyBricks = (propertyId, qty, pricePerBrick, investorId = 'investor-001') => {
+  const buyBricks = (spvId, qty, pricePerBrick, investorId = 'investor-001') => {
     const today = new Date().toISOString().split('T')[0]
     const txHash = '0x' + Math.random().toString(16).slice(2, 42)
     setStore(prev => {
       const existing = prev.portfolioHoldings.find(
-        h => h.investorId === investorId && h.propertyId === propertyId
+        h => h.investorId === investorId && h.spvId === spvId
       )
       const newHoldings = existing
         ? prev.portfolioHoldings.map(h =>
-            h.investorId === investorId && h.propertyId === propertyId
+            h.investorId === investorId && h.spvId === spvId
               ? { ...h, bricks: h.bricks + qty }
               : h
           )
         : [...prev.portfolioHoldings, {
-            investorId, propertyId, bricks: qty,
+            investorId, spvId, bricks: qty,
             purchasePrice: pricePerBrick, purchaseDate: today, earnedRent: 0,
           }]
       return {
         ...prev,
         portfolioHoldings: newHoldings,
-        properties: prev.properties.map(p =>
-          p.id === propertyId
-            ? { ...p, availableBricks: Math.max(0, p.availableBricks - qty) }
-            : p
+        spvs: prev.spvs.map(s =>
+          s.id === spvId
+            ? { ...s, availableBricks: Math.max(0, s.availableBricks - qty) }
+            : s
         ),
         transactions: [{
           id: `tx-${Date.now()}`,
-          type: 'buy', investorId, propertyId,
+          type: 'buy', investorId, spvId,
           bricks: qty, amount: qty * pricePerBrick * 1.005,
           date: today, txHash,
         }, ...prev.transactions],
@@ -104,21 +125,21 @@ export function DataProvider({ children }) {
     })
   }
 
-  const createListing = (propertyId, qty, askPrice, investorId = 'investor-001') => {
+  const createListing = (spvId, qty, askPrice, investorId = 'investor-001') => {
     const today = new Date().toISOString().split('T')[0]
     const txHash = '0x' + Math.random().toString(16).slice(2, 42)
     setStore(prev => ({
       ...prev,
       marketListings: [{
         id: `mkt-${Date.now()}`,
-        propertyId, sellerId: investorId,
+        spvId, sellerId: investorId,
         bricks: qty, askPrice,
         listedDate: today, status: 'active',
       }, ...prev.marketListings],
       transactions: [{
         id: `tx-${Date.now()}`,
         type: 'list', investorId,
-        propertyId, bricks: qty,
+        spvId, bricks: qty,
         amount: qty * askPrice,
         date: today, txHash,
       }, ...prev.transactions],
@@ -136,22 +157,22 @@ export function DataProvider({ children }) {
         ? prev.marketListings.filter(l => l.id !== listingId)
         : prev.marketListings.map(l => l.id === listingId ? { ...l, bricks: remaining } : l)
       const buyerExisting = prev.portfolioHoldings.find(
-        h => h.investorId === buyerInvestorId && h.propertyId === listing.propertyId
+        h => h.investorId === buyerInvestorId && h.spvId === listing.spvId
       )
       const holdingsAfterBuy = buyerExisting
         ? prev.portfolioHoldings.map(h =>
-            h.investorId === buyerInvestorId && h.propertyId === listing.propertyId
+            h.investorId === buyerInvestorId && h.spvId === listing.spvId
               ? { ...h, bricks: h.bricks + qty }
               : h
           )
         : [...prev.portfolioHoldings, {
-            investorId: buyerInvestorId, propertyId: listing.propertyId,
+            investorId: buyerInvestorId, spvId: listing.spvId,
             bricks: qty, purchasePrice: listing.askPrice,
             purchaseDate: today, earnedRent: 0,
           }]
       const newHoldings = holdingsAfterBuy
         .map(h =>
-          h.investorId === listing.sellerId && h.propertyId === listing.propertyId
+          h.investorId === listing.sellerId && h.spvId === listing.spvId
             ? { ...h, bricks: h.bricks - qty }
             : h
         )
@@ -163,7 +184,7 @@ export function DataProvider({ children }) {
         transactions: [{
           id: `tx-${Date.now()}`,
           type: 'market_buy', investorId: buyerInvestorId,
-          propertyId: listing.propertyId,
+          spvId: listing.spvId,
           bricks: qty, amount: qty * listing.askPrice * 1.01,
           date: today, txHash,
         }, ...prev.transactions],
@@ -182,7 +203,9 @@ export function DataProvider({ children }) {
       addSubmission,
       updateSubmission,
       updateKyc,
-      addProperty,
+      updateInvestor,
+      updateSpv,
+      addSpv,
       buyBricks,
       createListing,
       buyFromMarket,

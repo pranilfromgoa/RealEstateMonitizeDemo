@@ -4,14 +4,12 @@ import { useNavigate } from 'react-router-dom'
 import { useState, useRef, useEffect } from 'react'
 
 const roleColors = {
-  investor: 'from-blue-500 to-blue-600',
-  landlord: 'from-emerald-500 to-emerald-600',
+  investor: 'from-sky-500 to-sky-600',
   admin:    'from-violet-500 to-violet-600',
 }
 
 const roleRingColors = {
-  investor: 'ring-blue-500/30',
-  landlord: 'ring-emerald-500/30',
+  investor: 'ring-sky-500/30',
   admin:    'ring-violet-500/30',
 }
 
@@ -44,13 +42,12 @@ export function Header({ title, subtitle }) {
   ]
 
   const roleBadgeColors = {
-    investor: 'bg-blue-100 text-blue-700',
-    landlord: 'bg-emerald-100 text-emerald-700',
+    investor: 'bg-sky-100 text-sky-700',
     admin:    'bg-violet-100 text-violet-700',
   }
 
   return (
-    <header className="bg-card border-b border-border px-6 py-4">
+    <header className="bg-white border-b border-border px-6 py-4">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-foreground">{title}</h1>
@@ -82,13 +79,13 @@ export function Header({ title, subtitle }) {
                   <p className="font-semibold text-foreground text-sm">Notifications</p>
                 </div>
                 {notifications.map(n => (
-                  <div key={n.id} className={`px-4 py-3 border-b border-border/50 hover:bg-accent cursor-pointer ${n.unread ? 'bg-blue-50/50' : ''}`}>
+                  <div key={n.id} className={`px-4 py-3 border-b border-border/50 hover:bg-accent cursor-pointer ${n.unread ? 'bg-sky-50/50' : ''}`}>
                     <p className="text-sm text-foreground">{n.text}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">{n.time}</p>
                   </div>
                 ))}
                 <div className="px-4 py-2 text-center">
-                  <button className="text-xs text-blue-600 hover:text-blue-800 font-medium">View all</button>
+                  <button className="text-xs text-sky-600 hover:text-sky-800 font-medium">View all</button>
                 </div>
               </div>
             )}

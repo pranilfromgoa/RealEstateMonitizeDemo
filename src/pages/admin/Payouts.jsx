@@ -15,7 +15,7 @@ const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency:
 const FEE_RATE = 0.05
 
 export function AdminPayouts() {
-  const { rentHistory: rents, properties, processRentPayout } = useData()
+  const { rentHistory: rents, spvs, processRentPayout } = useData()
   const [payModal, setPayModal] = useState(null)
   const [rentAmount, setRentAmount] = useState('')
   const [processing, setProcessing] = useState(false)
@@ -57,16 +57,16 @@ export function AdminPayouts() {
             </CardHeader>
             <CardContent className="p-0">
               {pending.map(rent => {
-                const prop = properties.find(p => p.id === rent.propertyId)
+                const spv = spvs.find(s => s.id === rent.spvId)
                 return (
                   <div key={rent.id} className="flex items-center gap-4 px-5 py-4 border-b border-gray-100 last:border-0 bg-amber-50/50">
-                    <img src={prop?.image} alt="" className="w-14 h-10 rounded-xl object-cover flex-shrink-0" />
+                    <img src={spv?.image} alt="" className="w-14 h-10 rounded-xl object-cover flex-shrink-0" />
                     <div className="flex-1">
-                      <p className="font-semibold text-gray-900">{prop?.name}</p>
-                      <p className="text-sm text-gray-400">Expected: {fmt(prop?.monthlyRent || 0)}/mo · Due: {rent.date}</p>
+                      <p className="font-semibold text-gray-900">{spv?.name}</p>
+                      <p className="text-sm text-gray-400">Expected: {fmt(spv?.monthlyRent || 0)}/mo · Due: {rent.date}</p>
                     </div>
                     <Badge variant="warning">Pending</Badge>
-                    <Button onClick={() => { setPayModal(rent); setRentAmount(prop?.monthlyRent?.toString() || ''); setDone(false) }}>
+                    <Button onClick={() => { setPayModal(rent); setRentAmount(spv?.monthlyRent?.toString() || ''); setDone(false) }}>
                       <Send size={14} /> Process Payout
                     </Button>
                   </div>
@@ -83,20 +83,20 @@ export function AdminPayouts() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100">
-                  {['Property', 'Gross Rent', 'Platform Fee (5%)', 'Net Distributed', 'Date', 'Status', 'Tx Hash'].map(h => (
+                  {['SPV', 'Gross Rent', 'Platform Fee (5%)', 'Net Distributed', 'Date', 'Status', 'Tx Hash'].map(h => (
                     <th key={h} className="text-left text-xs text-gray-500 font-medium px-5 py-3">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {rents.filter(r => r.status === 'distributed').map(rent => {
-                  const prop = properties.find(p => p.id === rent.propertyId)
+                  const spv = spvs.find(s => s.id === rent.spvId)
                   return (
                     <tr key={rent.id} className="border-b border-gray-50 hover:bg-gray-50">
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-2">
-                          <img src={prop?.image} alt="" className="w-8 h-6 rounded object-cover" />
-                          <span className="text-gray-800 text-xs">{prop?.name}</span>
+                          <img src={spv?.image} alt="" className="w-8 h-6 rounded object-cover" />
+                          <span className="text-gray-800 text-xs">{spv?.name}</span>
                         </div>
                       </td>
                       <td className="px-5 py-3 font-medium text-gray-900">{fmt(rent.amount)}</td>
@@ -129,7 +129,7 @@ export function AdminPayouts() {
             ) : (
               <>
                 <div className="ds-alert-info rounded-xl p-4">
-                  <p className="font-semibold text-gray-900">{properties.find(p => p.id === payModal.propertyId)?.name}</p>
+                  <p className="font-semibold text-gray-900">{spvs.find(s => s.id === payModal.spvId)?.name}</p>
                   <p className="text-sm text-muted-foreground mt-0.5">Enter the actual rent received this month</p>
                 </div>
                 <div>

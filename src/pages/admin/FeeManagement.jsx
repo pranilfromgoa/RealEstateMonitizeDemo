@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { StatCard } from '@/components/ui/stat-card'
-import { platformStats, rentHistory, properties } from '@/data/mockData'
+import { platformStats, rentHistory, spvs } from '@/data/mockData'
 import { Settings, DollarSign, TrendingUp, Percent, CheckCircle2, AlertCircle } from 'lucide-react'
 
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(n)
@@ -14,8 +14,7 @@ const defaultFees = [
   { id: 'rent_fee', label: 'Rent Distribution Fee', value: 5, type: 'percentage', trigger: 'On each rent distribution', phase: 1 },
   { id: 'buy_fee', label: 'Primary Market Purchase Fee', value: 0.5, type: 'percentage', trigger: 'On each primary Brick purchase', phase: 1 },
   { id: 'sell_fee', label: 'Secondary Market Trading Fee', value: 1.0, type: 'percentage', trigger: 'On each secondary market trade (buyer + seller)', phase: 2 },
-  { id: 'listing_fee', label: 'Landlord Listing Fee', value: 250, type: 'flat', trigger: 'On each approved property listing', phase: 2 },
-  { id: 'kyb_fee', label: 'KYB Verification Fee', value: 99, type: 'flat', trigger: 'On successful business verification', phase: 2 },
+  { id: 'listing_fee', label: 'SPV Listing Fee', value: 250, type: 'flat', trigger: 'On each approved SPV listing', phase: 2 },
 ]
 
 export function AdminFeeManagement() {
@@ -103,27 +102,27 @@ export function AdminFeeManagement() {
 
         {/* Fee revenue by property */}
         <Card>
-          <CardHeader><CardTitle>Fee Revenue by Property</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Fee Revenue by SPV</CardTitle></CardHeader>
           <CardContent className="p-0">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100">
-                  {['Property', 'Total Rent Distributed', 'Fees Collected', 'Fee Rate', 'Distributions'].map(h => (
+                  {['SPV', 'Total Rent Distributed', 'Fees Collected', 'Fee Rate', 'Distributions'].map(h => (
                     <th key={h} className="text-left text-xs text-gray-500 font-medium px-5 py-3">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {properties.map(prop => {
-                  const propRents = rentHistory.filter(r => r.propertyId === prop.id && r.status === 'distributed')
-                  const totalRent = propRents.reduce((s, r) => s + r.amount, 0)
-                  const totalFee = propRents.reduce((s, r) => s + (r.fee || 0), 0)
+                {spvs.map(spv => {
+                  const spvRents = rentHistory.filter(r => r.spvId === spv.id && r.status === 'distributed')
+                  const totalRent = spvRents.reduce((s, r) => s + r.amount, 0)
+                  const totalFee = spvRents.reduce((s, r) => s + (r.fee || 0), 0)
                   return (
-                    <tr key={prop.id} className="border-b border-gray-50 hover:bg-gray-50">
+                    <tr key={spv.id} className="border-b border-gray-50 hover:bg-gray-50">
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-2">
-                          <img src={prop.image} alt="" className="w-8 h-6 rounded object-cover" />
-                          <span className="font-medium text-gray-900 text-xs">{prop.name}</span>
+                          <img src={spv.image} alt="" className="w-8 h-6 rounded object-cover" />
+                          <span className="font-medium text-gray-900 text-xs">{spv.name}</span>
                         </div>
                       </td>
                       <td className="px-5 py-3 text-gray-700">{fmt(totalRent)}</td>
@@ -131,7 +130,7 @@ export function AdminFeeManagement() {
                       <td className="px-5 py-3">
                         {totalRent > 0 ? <span className="text-gray-600">{(totalFee / totalRent * 100).toFixed(1)}%</span> : '—'}
                       </td>
-                      <td className="px-5 py-3 text-gray-500">{propRents.length}</td>
+                      <td className="px-5 py-3 text-gray-500">{spvRents.length}</td>
                     </tr>
                   )
                 })}

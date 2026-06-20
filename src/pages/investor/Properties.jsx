@@ -20,8 +20,8 @@ const typeColors = {
   'Luxury Residential': 'default',
 }
 
-export function InvestorProperties() {
-  const { properties, buyBricks } = useData()
+export function InvestorSpvs() {
+  const { spvs, buyBricks } = useData()
   const [search, setSearch] = useState('')
   const [filterType, setFilterType] = useState('all')
   const [detail, setDetail] = useState(null)
@@ -29,12 +29,13 @@ export function InvestorProperties() {
   const [buyQty, setBuyQty] = useState(10)
   const [bought, setBought] = useState(false)
 
-  const types = ['all', ...new Set(properties.map(p => p.type))]
+  const activeSpvs = spvs.filter(s => s.status === 'active')
+  const types = ['all', ...new Set(activeSpvs.map(s => s.type))]
 
-  const filtered = properties.filter(p => {
-    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.city.toLowerCase().includes(search.toLowerCase())
-    const matchType = filterType === 'all' || p.type === filterType
+  const filtered = activeSpvs.filter(s => {
+    const matchSearch = s.name.toLowerCase().includes(search.toLowerCase()) ||
+      s.city.toLowerCase().includes(search.toLowerCase())
+    const matchType = filterType === 'all' || s.type === filterType
     return matchSearch && matchType
   })
 
@@ -48,7 +49,7 @@ export function InvestorProperties() {
 
   return (
     <Layout>
-      <Header title="Property Listings" subtitle="Browse and invest in tokenized real estate" />
+      <Header title="SPV Marketplace" subtitle="Browse and invest in tokenized SPVs" />
       <div className="ds-page">
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-3">
@@ -76,62 +77,62 @@ export function InvestorProperties() {
           </div>
         </div>
 
-        <p className="text-sm text-muted-foreground">{filtered.length} properties available</p>
+        <p className="text-sm text-muted-foreground">{filtered.length} SPVs available</p>
 
         {/* Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-          {filtered.map(prop => (
-            <div key={prop.id} className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+          {filtered.map(spv => (
+            <div key={spv.id} className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
               <div className="relative h-44 overflow-hidden">
-                <img src={prop.image} alt={prop.name} className="w-full h-full object-cover" />
+                <img src={spv.image} alt={spv.name} className="w-full h-full object-cover" />
                 <div className="absolute top-3 left-3 flex gap-1.5">
-                  <Badge variant={typeColors[prop.type] || 'default'} className="text-xs">{prop.type}</Badge>
+                  <Badge variant={typeColors[spv.type] || 'default'} className="text-xs">{spv.type}</Badge>
                 </div>
                 <div className="absolute top-3 right-3">
                   <span className="bg-white/90 backdrop-blur-sm text-green-700 text-xs font-bold px-2 py-1 rounded-full">
-                    {prop.annualYield}% yield
+                    {spv.annualYield}% yield
                   </span>
                 </div>
               </div>
               <div className="p-4">
-                <h3 className="ds-section-title text-base">{prop.name}</h3>
+                <h3 className="ds-section-title text-base">{spv.name}</h3>
                 <div className="flex items-center gap-1 mt-1 text-gray-400 text-xs">
                   <MapPin size={12} />
-                  <span>{prop.city}</span>
+                  <span>{spv.city}</span>
                 </div>
 
                 <div className="mt-3 grid grid-cols-3 gap-2">
                   <div className="bg-gray-50 rounded-lg p-2">
                     <p className="text-xs text-gray-400">Price / Brick</p>
-                    <p className="font-bold text-gray-900">{fmt(prop.pricePerBrick)}</p>
+                    <p className="font-bold text-gray-900">{fmt(spv.pricePerBrick)}</p>
                   </div>
                   <div className="bg-gray-50 rounded-lg p-2">
                     <p className="text-xs text-gray-400">Total Value</p>
-                    <p className="font-bold text-gray-900">{fmt(prop.totalValue)}</p>
+                    <p className="font-bold text-gray-900">{fmt(spv.totalValue)}</p>
                   </div>
                   <div className="bg-green-50 rounded-lg p-2">
                     <p className="text-xs text-gray-400">Expected Rent</p>
-                    <p className="font-bold text-green-700">{prop.monthlyRent ? fmt(prop.monthlyRent) + '/mo' : '—'}</p>
+                    <p className="font-bold text-green-700">{spv.monthlyRent ? fmt(spv.monthlyRent) + '/mo' : '—'}</p>
                   </div>
                 </div>
 
                 <div className="mt-3">
                   <div className="flex justify-between text-xs text-gray-500 mb-1">
-                    <span>{soldPct(prop)}% sold</span>
-                    <span>{prop.availableBricks.toLocaleString()} Bricks left</span>
+                    <span>{soldPct(spv)}% sold</span>
+                    <span>{spv.availableBricks.toLocaleString()} Bricks left</span>
                   </div>
-                  <Progress value={parseInt(soldPct(prop))} color={parseInt(soldPct(prop)) > 80 ? 'amber' : 'blue'} />
+                  <Progress value={parseInt(soldPct(spv))} color={parseInt(soldPct(spv)) > 80 ? 'amber' : 'blue'} />
                 </div>
 
                 <div className="mt-4 flex gap-2">
                   <button
-                    onClick={() => setDetail(prop)}
+                    onClick={() => setDetail(spv)}
                     className="flex-1 py-2 text-sm border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium"
                   >
                     Details
                   </button>
                   <button
-                    onClick={() => { setBuyModal(prop); setBuyQty(10); setBought(false) }}
+                    onClick={() => { setBuyModal(spv); setBuyQty(10); setBought(false) }}
                     className="flex-1 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
                   >
                     Buy Bricks
@@ -171,7 +172,7 @@ export function InvestorProperties() {
             </div>
 
             <div>
-              <h4 className="ds-section-title mb-2 text-sm">Property Highlights</h4>
+              <h4 className="ds-section-title mb-2 text-sm">SPV Highlights</h4>
               <div className="grid grid-cols-2 gap-2">
                 {detail.highlights.map(h => (
                   <div key={h} className="flex items-center gap-2 text-sm text-muted-foreground">

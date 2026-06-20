@@ -10,14 +10,14 @@ import { Bot, Send, FileText, ChevronDown, Sparkles, User } from 'lucide-react'
 const mockAnswers = {
   default: [
     "Based on the property documents, this is a well-maintained asset with strong fundamentals. The appraisal was conducted by a licensed firm and values the property at market rate.",
-    "The property deed confirms clear title ownership with no encumbrances. The LLC structure provides liability protection for investors.",
+    "The property deed confirms clear title ownership with no encumbrances. The LLC structure provides liability protection for holders.",
     "According to the insurance policy, the property is fully covered for replacement cost value, including liability coverage up to $5 million.",
     "The lease agreements show long-term tenants with renewal options. Rental income has been consistent for the past 3 years with a 3% annual escalation clause.",
   ],
   tenant: "The current tenants have maintained strong payment histories per the rent rolls. Lease terms range from 12-36 months with renewal options. Average tenant tenure is 2.4 years.",
   risk: "Key risks identified in the documents: (1) Market rent is 8% above current lease rates — potential upside on renewal. (2) HVAC system is 12 years old and may require replacement within 5 years. (3) Property taxes increased 4.2% last year — slightly above the 3% annual cap.",
   yield: "The property generates a gross yield of 8.2% based on the current purchase price. After management fees (8%), insurance, and property taxes, the net yield is approximately 6.9%.",
-  llc: "The LLC is a single-purpose entity created specifically for this property. Articles of incorporation were filed in 2021. The operating agreement provides investor protections including pro-rata distribution rights and approval requirements for major decisions.",
+  llc: "The LLC is a single-purpose entity created specifically for this property. Articles of incorporation were filed in 2021. The operating agreement provides holder protections including pro-rata distribution rights and approval requirements for major decisions.",
   zoning: "The property is zoned R-3 (Multi-family residential) with a certificate of occupancy for 12 units. No pending zoning changes or variances were found in the municipal records.",
 }
 
@@ -35,16 +35,16 @@ const suggestions = [
   'What are the main risks in this property?',
   'Who are the current tenants and when do leases expire?',
   'What is the net yield after all expenses?',
-  'Is the LLC structure investor-friendly?',
+  'Is the LLC structure holder-friendly?',
   'Are there any zoning or permit issues?',
 ]
 
 export function InvestorAIReader() {
-  const { properties } = useData()
-  const [selectedProp, setSelectedProp] = useState(null)
-  const firstProp = selectedProp || properties[0]
+  const { spvs } = useData()
+  const [selectedSpv, setSelectedSpv] = useState(null)
+  const firstProp = selectedSpv || spvs[0]
   const [messages, setMessages] = useState([
-    { role: 'assistant', text: `Hi! I've analyzed all documents for **${properties[0]?.name ?? 'this property'}**. Ask me anything about the property deed, LLC structure, lease agreements, financials, or any other document. I can answer questions from the full document set in seconds.` }
+    { role: 'assistant', text: `Hi! I've analyzed all documents for **${spvs[0]?.name ?? 'this property'}**. Ask me anything about the property deed, LLC structure, lease agreements, financials, or any other document. I can answer questions from the full document set in seconds.` }
   ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -64,14 +64,14 @@ export function InvestorAIReader() {
     }, 1200 + Math.random() * 800)
   }
 
-  const handlePropChange = (prop) => {
-    setSelectedProp(prop)
-    setMessages([{ role: 'assistant', text: `Documents for **${prop.name}** loaded. I've read all ${prop.documents.length} documents. What would you like to know?` }])
+  const handleSpvChange = (spv) => {
+    setSelectedSpv(spv)
+    setMessages([{ role: 'assistant', text: `Documents for **${spv.name}** loaded. I've read all ${spv.documents.length} documents. What would you like to know?` }])
   }
 
   return (
     <Layout>
-      <Header title="Property Intelligence" subtitle="Phase 3 — AI-powered document Q&A and property analysis" />
+      <Header title="SPV Intelligence" subtitle="Phase 3 — AI-powered document Q&A and SPV analysis" />
       <div className="p-6 flex gap-6" style={{ height: 'calc(100vh - 80px)' }}>
         {/* Left: property selector + docs */}
         <div className="w-72 flex-shrink-0 space-y-4">
@@ -81,16 +81,16 @@ export function InvestorAIReader() {
           </div>
 
           <Card>
-            <CardHeader className="py-3"><CardTitle className="text-sm">Select Property</CardTitle></CardHeader>
+            <CardHeader className="py-3"><CardTitle className="text-sm">Select SPV</CardTitle></CardHeader>
             <CardContent className="p-2 space-y-1">
-              {properties.map(p => (
+              {spvs.map(s => (
                 <button
-                  key={p.id}
-                  onClick={() => handlePropChange(p)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors text-sm ${firstProp?.id === p.id ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50 text-gray-700'}`}
+                  key={s.id}
+                  onClick={() => handleSpvChange(s)}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors text-sm ${firstProp?.id === s.id ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50 text-gray-700'}`}
                 >
-                  <img src={p.image} alt="" className="w-10 h-8 rounded-lg object-cover flex-shrink-0" />
-                  <span className="leading-tight">{p.name}</span>
+                  <img src={s.image} alt="" className="w-10 h-8 rounded-lg object-cover flex-shrink-0" />
+                  <span className="leading-tight">{s.name}</span>
                 </button>
               ))}
             </CardContent>
@@ -117,7 +117,7 @@ export function InvestorAIReader() {
               <Sparkles size={16} className="text-white" />
             </div>
             <div>
-              <p className="font-semibold text-gray-900 text-sm">BrickBloc AI Assistant</p>
+              <p className="font-semibold text-gray-900 text-sm">BrickChain AI Assistant</p>
               <p className="text-xs text-muted-foreground">Analyzing: {firstProp?.name} — {firstProp?.documents.length} documents loaded</p>
             </div>
           </div>

@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { votingProposals, properties } from '@/data/mockData'
+import { votingProposals, spvs } from '@/data/mockData'
 import { Vote, CheckCircle2, Clock, AlertCircle, ThumbsUp, ThumbsDown } from 'lucide-react'
 
 export function InvestorVoting() {
@@ -44,7 +44,7 @@ export function InvestorVoting() {
 
         <div className="space-y-4">
           {votingProposals.map(proposal => {
-            const prop = properties.find(p => p.id === proposal.propertyId)
+            const spv = spvs.find(s => s.id === proposal.spvId)
             const totalVotes = proposal.votesFor + proposal.votesAgainst
             const forPct = totalVotes > 0 ? (proposal.votesFor / totalVotes * 100).toFixed(0) : 0
             const againstPct = totalVotes > 0 ? (proposal.votesAgainst / totalVotes * 100).toFixed(0) : 0
@@ -62,7 +62,7 @@ export function InvestorVoting() {
                         <Badge variant={isActive ? 'default' : 'secondary'}>
                           {isActive ? 'Active' : 'Closed'}
                         </Badge>
-                        <span className="text-xs text-gray-400">{prop?.name}</span>
+                        <span className="text-xs text-gray-400">{spv?.name}</span>
                       </div>
                       <h3 className="ds-section-title text-base">{proposal.title}</h3>
                       <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{proposal.description}</p>

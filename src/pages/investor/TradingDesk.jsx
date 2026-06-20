@@ -20,7 +20,7 @@ const TX_CONFIG = {
 }
 
 export function InvestorTradingDesk() {
-  const { properties, portfolioHoldings, marketListings, transactions, createListing, buyFromMarket } = useData()
+  const { spvs, portfolioHoldings, marketListings, transactions, createListing, buyFromMarket } = useData()
   const [tab, setTab] = useState('my_holdings')
   const [buyModal, setBuyModal] = useState(null)
   const [sellModal, setSellModal] = useState(null)
@@ -41,7 +41,7 @@ export function InvestorTradingDesk() {
   }
 
   const handleConfirmSell = () => {
-    createListing(sellModal.propertyId, sellQty, sellPrice, INVESTOR_ID)
+    createListing(sellModal.spvId, sellQty, sellPrice, INVESTOR_ID)
     setDone(true)
     setTimeout(() => { setDone(false); setSellModal(null) }, 2500)
   }
@@ -52,14 +52,14 @@ export function InvestorTradingDesk() {
       <div className="ds-page">
         <div className="bg-purple-50 border border-purple-200 rounded-xl px-4 py-3 flex items-center gap-3">
           <Badge variant="default" className="bg-purple-600 text-white">Phase 2</Badge>
-          <p className="text-sm text-purple-700">The secondary market lets verified investors buy and sell Bricks directly with each other.</p>
+          <p className="text-sm text-purple-700">The secondary market lets verified holders buy and sell Bricks directly with each other.</p>
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard label="Available to Buy" value={otherListings.length} icon={ArrowLeftRight} color="blue" sub={otherListings.length === 1 ? 'Property' : 'Properties'} />
+          <StatCard label="Available to Buy" value={otherListings.length} icon={ArrowLeftRight} color="blue" sub={otherListings.length === 1 ? 'SPV' : 'SPVs'} />
           <StatCard label="My Holdings" value={myHoldings.reduce((s, h) => s + h.bricks, 0).toLocaleString()} icon={TrendingUp} color="green" sub="total Bricks" />
           <StatCard label="My Listed Bricks" value={myListings.reduce((s, l) => s + l.bricks, 0).toLocaleString()} icon={Tag} color="amber" sub="total Bricks" />
-          <StatCard label="Listed for Sale" value={new Set(myListings.map(l => l.propertyId)).size} icon={DollarSign} color="purple" sub={new Set(myListings.map(l => l.propertyId)).size === 1 ? 'Property' : 'Properties'} />
+          <StatCard label="Listed for Sale" value={new Set(myListings.map(l => l.spvId)).size} icon={DollarSign} color="purple" sub={new Set(myListings.map(l => l.spvId)).size === 1 ? 'SPV' : 'SPVs'} />
         </div>
 
         {/* Tabs */}
@@ -91,25 +91,25 @@ export function InvestorTradingDesk() {
                 <CardHeader><CardTitle className="flex items-center gap-2"><Briefcase size={15} className="text-blue-500" /> My Holdings</CardTitle></CardHeader>
                 <CardContent className="p-0">
                   {myHoldings.map(h => {
-                    const prop = properties.find(p => p.id === h.propertyId)
-                    if (!prop) return null
-                    const listed = myListings.filter(l => l.propertyId === h.propertyId).reduce((s, l) => s + l.bricks, 0)
+                    const spv = spvs.find(s => s.id === h.spvId)
+                    if (!spv) return null
+                    const listed = myListings.filter(l => l.spvId === h.spvId).reduce((s, l) => s + l.bricks, 0)
                     const available = h.bricks - listed
-                    const currentValue = h.bricks * prop.pricePerBrick
-                    const propTx = transactions.filter(t =>
+                    const currentValue = h.bricks * spv.pricePerBrick
+                    const spvTx = transactions.filter(t =>
                       t.investorId === INVESTOR_ID &&
-                      t.propertyId === h.propertyId &&
+                      t.spvId === h.spvId &&
                       (t.type === 'buy' || t.type === 'market_buy' || t.type === 'list')
                     )
-                    const isExpanded = expandedProp === h.propertyId
+                    const isExpanded = expandedProp === h.spvId
                     return (
-                      <div key={h.propertyId} className="border-b border-gray-100 last:border-0">
+                      <div key={h.spvId} className="border-b border-gray-100 last:border-0">
                         <button
-                          onClick={() => setExpandedProp(isExpanded ? null : h.propertyId)}
+                          onClick={() => setExpandedProp(isExpanded ? null : h.spvId)}
                           className="w-full flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition-colors text-left">
-                          <img src={prop.image} alt="" className="w-14 h-10 rounded-xl object-cover flex-shrink-0" />
+                          <img src={spv.image} alt="" className="w-14 h-10 rounded-xl object-cover flex-shrink-0" />
                           <div className="flex-1">
-                            <p className="font-semibold text-gray-900">{prop.name}</p>
+                            <p className="font-semibold text-gray-900">{spv.name}</p>
                             <p className="text-xs text-gray-400 mt-0.5">
                               <span className="font-medium text-gray-700">{h.bricks} Bricks</span>
                               {listed > 0 && <> · <span className="text-amber-600 font-medium">{listed} listed</span></>}
@@ -127,7 +127,7 @@ export function InvestorTradingDesk() {
 
                         {isExpanded && (
                           <div className="bg-gray-50 border-t border-gray-100">
-                            {propTx.length === 0 ? (
+                            {spvTx.length === 0 ? (
                               <p className="text-xs text-gray-400 text-center py-4">No transactions recorded for this property.</p>
                             ) : (
                               <table className="w-full text-sm">
@@ -139,7 +139,7 @@ export function InvestorTradingDesk() {
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  {propTx.map(tx => {
+                                  {spvTx.map(tx => {
                                     const cfg = TX_CONFIG[tx.type]
                                     if (!cfg) return null
                                     return (
@@ -185,24 +185,24 @@ export function InvestorTradingDesk() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-gray-100">
-                      {['Property', 'Bricks', 'Ask Price', 'vs. Floor', 'Seller', 'Listed', ''].map(h => (
+                      {['SPV', 'Bricks', 'Ask Price', 'vs. Floor', 'Seller', 'Listed', ''].map(h => (
                         <th key={h} className="text-left text-xs text-gray-500 font-medium px-5 py-3">{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {otherListings.map(listing => {
-                      const prop = properties.find(p => p.id === listing.propertyId)
-                      if (!prop) return null
-                      const premium = ((listing.askPrice - prop.pricePerBrick) / prop.pricePerBrick * 100).toFixed(1)
+                      const spv = spvs.find(s => s.id === listing.spvId)
+                      if (!spv) return null
+                      const premium = ((listing.askPrice - spv.pricePerBrick) / spv.pricePerBrick * 100).toFixed(1)
                       return (
                         <tr key={listing.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                           <td className="px-5 py-3">
                             <div className="flex items-center gap-3">
-                              <img src={prop.image} alt="" className="w-10 h-8 rounded-lg object-cover" />
+                              <img src={spv.image} alt="" className="w-10 h-8 rounded-lg object-cover" />
                               <div>
-                                <p className="font-medium text-gray-900 text-sm">{prop.name}</p>
-                                <p className="text-xs text-gray-400">{prop.city}</p>
+                                <p className="font-medium text-gray-900 text-sm">{spv.name}</p>
+                                <p className="text-xs text-gray-400">{spv.city}</p>
                               </div>
                             </div>
                           </td>
@@ -238,15 +238,15 @@ export function InvestorTradingDesk() {
               <CardContent>
                 <div className="space-y-4">
                   {myHoldings.map(h => {
-                    const prop = properties.find(p => p.id === h.propertyId)
-                    if (!prop) return null
-                    const listed = myListings.filter(l => l.propertyId === h.propertyId).reduce((s, l) => s + l.bricks, 0)
+                    const spv = spvs.find(s => s.id === h.spvId)
+                    if (!spv) return null
+                    const listed = myListings.filter(l => l.spvId === h.spvId).reduce((s, l) => s + l.bricks, 0)
                     const available = h.bricks - listed
                     return (
-                      <div key={h.propertyId} className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
-                        <img src={prop.image} alt="" className="w-14 h-10 rounded-xl object-cover" />
+                      <div key={h.spvId} className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+                        <img src={spv.image} alt="" className="w-14 h-10 rounded-xl object-cover" />
                         <div className="flex-1">
-                          <p className="font-semibold text-gray-900">{prop.name}</p>
+                          <p className="font-semibold text-gray-900">{spv.name}</p>
                           <p className="text-sm text-gray-400">
                             Owned: <span className="font-medium text-gray-700">{h.bricks}</span>
                             {listed > 0 && <> · Listed: <span className="font-medium text-amber-600">{listed}</span></>}
@@ -254,7 +254,7 @@ export function InvestorTradingDesk() {
                           </p>
                         </div>
                         <Button variant="outline" size="sm" disabled={available <= 0}
-                          onClick={() => { setSellModal({ ...h, availableToList: available }); setSellQty(Math.min(10, available)); setSellPrice(prop.pricePerBrick); setDone(false) }}>
+                          onClick={() => { setSellModal({ ...h, availableToList: available }); setSellQty(Math.min(10, available)); setSellPrice(spv.pricePerBrick); setDone(false) }}>
                           <Plus size={14} /> List for Sale
                         </Button>
                       </div>
@@ -270,7 +270,7 @@ export function InvestorTradingDesk() {
       {/* Buy Modal */}
       <Modal open={!!buyModal} onClose={() => setBuyModal(null)} title="Buy Bricks (Secondary Market)">
         {buyModal && (() => {
-          const prop = properties.find(p => p.id === buyModal.propertyId)
+          const spv = spvs.find(s => s.id === buyModal.spvId)
           return done ? (
             <div className="text-center py-8">
               <CheckCircle2 size={48} className="text-green-500 mx-auto mb-3" />
@@ -280,9 +280,9 @@ export function InvestorTradingDesk() {
           ) : (
             <div className="space-y-4">
               <div className="ds-alert-info flex items-center gap-4">
-                <img src={prop?.image} alt="" className="w-16 h-12 rounded-lg object-cover" />
+                <img src={spv?.image} alt="" className="w-16 h-12 rounded-lg object-cover" />
                 <div>
-                  <p className="font-semibold">{prop?.name}</p>
+                  <p className="font-semibold">{spv?.name}</p>
                   <p className="text-sm text-muted-foreground">Ask: ${buyModal.askPrice}/brick</p>
                 </div>
               </div>
@@ -310,7 +310,7 @@ export function InvestorTradingDesk() {
       {/* Sell Modal */}
       <Modal open={!!sellModal} onClose={() => setSellModal(null)} title="List Bricks for Sale">
         {sellModal && (() => {
-          const prop = properties.find(p => p.id === sellModal.propertyId)
+          const spv = spvs.find(s => s.id === sellModal.spvId)
           const maxSell = sellModal.availableToList || sellModal.bricks
           return done ? (
             <div className="text-center py-8">
@@ -321,10 +321,10 @@ export function InvestorTradingDesk() {
           ) : (
             <div className="space-y-4">
               <div className="bg-gray-50 rounded-xl p-4 flex items-center gap-4">
-                <img src={prop?.image} alt="" className="w-16 h-12 rounded-lg object-cover" />
+                <img src={spv?.image} alt="" className="w-16 h-12 rounded-lg object-cover" />
                 <div>
-                  <p className="font-semibold">{prop?.name}</p>
-                  <p className="text-sm text-muted-foreground">Available to list: <span className="font-medium text-gray-800">{maxSell} Bricks</span> · Floor: ${prop?.pricePerBrick}</p>
+                  <p className="font-semibold">{spv?.name}</p>
+                  <p className="text-sm text-muted-foreground">Available to list: <span className="font-medium text-gray-800">{maxSell} Bricks</span> · Floor: ${spv?.pricePerBrick}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">

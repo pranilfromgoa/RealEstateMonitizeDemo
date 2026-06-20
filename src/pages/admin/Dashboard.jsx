@@ -6,16 +6,18 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { platformStats } from '@/data/mockData'
 import { useData } from '@/context/DataContext'
-import { Building2, DollarSign, Users, TrendingUp, Clock, CheckCircle2, AlertCircle, ArrowRight, RotateCcw } from 'lucide-react'
+import { Building2, DollarSign, Users, TrendingUp, Clock, CheckCircle2, AlertCircle, ArrowRight, RotateCcw, FileText } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
 
 export function AdminDashboard() {
-  const { properties, pendingSubmissions, rentHistory, resetData } = useData()
+  const { spvs, investors, kycRequests, rentHistory, resetData } = useData()
   const pendingPayouts = rentHistory.filter(r => r.status === 'pending')
   const recentRent = rentHistory.filter(r => r.status === 'distributed').slice(0, 5)
-  const pendingApprovals = pendingSubmissions.filter(s => s.status === 'pending' || s.status === 'under_review').length
+  const liveSpvs = spvs.filter(s => s.status === 'active')
+  const reviewSpvs = spvs.filter(s => s.status === 'pending')
+  const pendingKyc = kycRequests.filter(k => k.status === 'pending').length
 
   return (
     <Layout>
@@ -32,13 +34,26 @@ export function AdminDashboard() {
         </div>
 
         {/* Alerts */}
-        {(pendingApprovals > 0 || pendingPayouts.length > 0) && (
+        {(reviewSpvs.length > 0 || pendingPayouts.length > 0 || pendingKyc > 0) && (
           <div className="space-y-2">
-            {pendingApprovals > 0 && (
+            {pendingKyc > 0 && (
+              <div className="ds-alert-info border border-blue-200 rounded-xl px-4 py-3 flex items-center gap-3">
+                <AlertCircle size={16} className="text-blue-600" />
+                <p className="text-sm">
+                  <span className="font-semibold">{pendingKyc} KYC {pendingKyc === 1 ? 'request' : 'requests'} pending</span>
+                  {' '}— verify investor identities before they can invest
+                </p>
+                <Link to="/admin/approvals"><Button size="sm" variant="outline" className="ml-auto border-blue-300 text-blue-700 hover:bg-blue-100">Review KYC <ArrowRight size={13} /></Button></Link>
+              </div>
+            )}
+            {reviewSpvs.length > 0 && (
               <div className="ds-alert-warning border border-amber-200 rounded-xl px-4 py-3 flex items-center gap-3">
                 <AlertCircle size={16} className="text-amber-600" />
-                <p className="text-sm">{pendingApprovals} property submissions pending review</p>
-                <Link to="/admin/approvals"><Button size="sm" variant="outline" className="ml-auto border-amber-300 text-amber-700 hover:bg-amber-100">Review <ArrowRight size={13} /></Button></Link>
+                <p className="text-sm">
+                  <span className="font-semibold">{reviewSpvs.length} SPVs in the registry</span>
+                  {' '}are not yet live — review and activate them in the SPV Registry
+                </p>
+                <Link to="/admin/spv"><Button size="sm" variant="outline" className="ml-auto border-amber-300 text-amber-700 hover:bg-amber-100">SPV Registry <ArrowRight size={13} /></Button></Link>
               </div>
             )}
             {pendingPayouts.length > 0 && (
@@ -53,8 +68,8 @@ export function AdminDashboard() {
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard label="Total Value Locked" value={`$${(platformStats.totalValueLocked / 1000000).toFixed(1)}M`} icon={DollarSign} color="green" trend={15} />
-          <StatCard label="Active Investors" value={platformStats.totalInvestors.toLocaleString()} icon={Users} color="blue" trend={22} />
-          <StatCard label="Properties Listed" value={platformStats.totalPropertiesListed} icon={Building2} color="purple" />
+          <StatCard label="Active Holders" value={investors.filter(i => i.kycStatus === 'verified').length.toLocaleString()} icon={Users} color="blue" trend={22} />
+          <StatCard label="Live Tokenized SPVs" value={liveSpvs.length} icon={Building2} color="purple" sub={`${reviewSpvs.length} in review pipeline`} />
           <StatCard label="Platform Fees Earned" value={fmt(platformStats.platformFeeEarned)} icon={TrendingUp} color="amber" trend={11} />
         </div>
 
@@ -62,74 +77,107 @@ export function AdminDashboard() {
           <StatCard label="Rent Distributed (Total)" value={`$${(platformStats.totalRentDistributed / 1000000).toFixed(2)}M`} icon={DollarSign} color="green" />
           <StatCard label="Bricks Issued" value={platformStats.totalBricksIssued.toLocaleString()} icon={Building2} color="blue" />
           <StatCard label="Bricks Sold" value={platformStats.totalBricksSold.toLocaleString()} icon={TrendingUp} color="purple" sub={`${(platformStats.totalBricksSold / platformStats.totalBricksIssued * 100).toFixed(0)}% of total`} />
-          <StatCard label="Active Landlords" value={platformStats.totalLandlords} icon={Users} color="amber" />
+          <StatCard label="Total SPV Registry" value={spvs.length} icon={FileText} color="amber" sub={`${liveSpvs.length} live · ${reviewSpvs.length} in review`} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Properties overview */}
+          {/* Active SPV Portfolio */}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Live / Tokenized Properties</CardTitle>
-                <Link to="/admin/tokenization"><Button variant="outline" size="sm">+ Tokenize New</Button></Link>
+                <div>
+                  <CardTitle>Live Tokenized SPVs</CardTitle>
+                  <p className="text-xs text-gray-400 mt-0.5">Fully operational — investors hold Bricks &amp; earn rent</p>
+                </div>
+                <Link to="/admin/spv"><Button variant="outline" size="sm">+ Create SPV</Button></Link>
               </div>
             </CardHeader>
             <CardContent className="p-0">
-              {properties.map(prop => (
-                <div key={prop.id} className="flex items-center gap-3 px-4 py-3 border-b border-gray-50 last:border-0">
-                  <img src={prop.image} alt="" className="w-12 h-9 rounded-lg object-cover" />
+              {liveSpvs.map(spv => (
+                <div key={spv.id} className="flex items-center gap-3 px-4 py-3 border-b border-gray-50 last:border-0">
+                  {spv.coverImage ? (
+                    <img src={spv.coverImage} alt="" className="w-12 h-9 rounded-lg object-cover flex-shrink-0" />
+                  ) : (
+                    <div className="w-12 h-9 rounded-lg bg-sky-50 flex items-center justify-center flex-shrink-0">
+                      <Building2 size={15} className="text-sky-400" />
+                    </div>
+                  )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{prop.name}</p>
-                    <p className="text-xs text-gray-400">{prop.city} · {fmt(prop.totalValue)}</p>
-                    <p className="text-xs text-green-600 font-medium">{prop.monthlyRent ? fmt(prop.monthlyRent) + '/mo expected' : '—'}</p>
+                    <p className="text-sm font-medium text-gray-900 truncate">{spv.propertyDisplayName}</p>
+                    <p className="text-xs text-gray-400">{spv.region} · {spv.propertyType}</p>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <p className="text-xs text-gray-500">{((prop.totalBricks - prop.availableBricks) / prop.totalBricks * 100).toFixed(0)}% sold</p>
-                    <Badge variant="success" className="text-xs">{prop.annualYield}%</Badge>
+                    <Badge variant="success" className="text-xs">Live</Badge>
+                    {spv.targetAPY > 0 && <p className="text-xs text-green-600 mt-0.5">{spv.targetAPY}% APY</p>}
                   </div>
                 </div>
               ))}
             </CardContent>
           </Card>
 
-          {/* Recent activity */}
+          {/* Right column */}
           <div className="space-y-4">
             <Card>
-              <CardHeader><CardTitle>Pending Actions</CardTitle></CardHeader>
-              <CardContent className="space-y-3">
-                {pendingSubmissions.slice(0, 2).map(sub => (
-                  <div key={sub.id} className="flex items-start gap-3 p-3 bg-amber-50 rounded-xl">
-                    <Clock size={15} className="text-amber-600 mt-0.5" />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">{sub.propertyName}</p>
-                      <p className="text-xs text-gray-500">Submitted by {sub.landlordName} · {sub.submittedDate}</p>
+              <CardHeader>
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText size={15} className="text-amber-500" /> Review Pipeline
+                  </CardTitle>
+                  <p className="text-xs text-gray-400 mt-0.5">SPVs in the registry not yet live — part of the {spvs.length} total</p>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2 pt-1">
+                {reviewSpvs.length === 0 && (
+                  <p className="text-sm text-gray-400 py-2">No SPVs currently under review</p>
+                )}
+                {reviewSpvs.map(spv => {
+                  const statusMap = { pending: { label: 'Pending', variant: 'warning', bg: 'bg-amber-50' }, draft: { label: 'Draft', variant: 'default', bg: 'bg-gray-50' }, rejected: { label: 'Rejected', variant: 'destructive', bg: 'bg-red-50' } }
+                  const s = statusMap[spv.status] || { label: spv.status, variant: 'default', bg: 'bg-gray-50' }
+                  return (
+                    <div key={spv.id} className={`flex items-center gap-3 p-3 rounded-xl ${s.bg}`}>
+                      {spv.coverImage
+                        ? <img src={spv.coverImage} alt="" className="w-10 h-8 rounded-lg object-cover flex-shrink-0" />
+                        : <Building2 size={16} className="text-gray-400 flex-shrink-0" />
+                      }
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">{spv.name}</p>
+                        <p className="text-xs text-gray-500">{spv.region} · {spv.propertyType}</p>
+                      </div>
+                      <Badge variant={s.variant}>{s.label}</Badge>
                     </div>
-                    <Badge variant="warning">Review</Badge>
-                  </div>
-                ))}
-                {pendingPayouts.map(p => (
-                  <div key={p.id} className="flex items-start gap-3 p-3 bg-blue-50 rounded-xl">
-                    <DollarSign size={15} className="text-blue-600 mt-0.5" />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">Payout Pending: {properties.find(pr => pr.id === p.propertyId)?.name}</p>
-                      <p className="text-xs text-gray-500">{fmt(p.amount)} · Due {p.date}</p>
-                    </div>
-                    <Badge variant="default">Process</Badge>
-                  </div>
-                ))}
+                  )
+                })}
+                <div className="pt-1">
+                  <Link to="/admin/spv" className="text-xs text-sky-600 hover:text-sky-800 font-medium flex items-center gap-1">
+                    Open SPV Registry <ArrowRight size={11} />
+                  </Link>
+                </div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader><CardTitle>Recent Rent Distributions</CardTitle></CardHeader>
+              <CardHeader><CardTitle>Rent Distributions</CardTitle></CardHeader>
               <CardContent className="p-0">
-                {recentRent.slice(0, 4).map(rent => {
-                  const prop = properties.find(p => p.id === rent.propertyId)
+                {pendingPayouts.map(p => {
+                  const spv = spvs.find(s => s.id === p.spvId)
+                  return (
+                    <div key={p.id} className="flex items-center gap-3 px-4 py-3 border-b border-gray-100 bg-amber-50/60">
+                      <Clock size={14} className="text-amber-500 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">{spv?.name}</p>
+                        <p className="text-xs text-gray-400">Due {p.date}</p>
+                      </div>
+                      <Badge variant="warning">Pending</Badge>
+                    </div>
+                  )
+                })}
+                {recentRent.slice(0, 3).map(rent => {
+                  const spv = spvs.find(s => s.id === rent.spvId)
                   return (
                     <div key={rent.id} className="flex items-center gap-3 px-4 py-3 border-b border-gray-50 last:border-0">
                       <CheckCircle2 size={14} className="text-green-500 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">{prop?.name}</p>
+                        <p className="text-sm font-medium text-gray-900 truncate">{spv?.name}</p>
                         <p className="text-xs text-gray-400">{rent.date}</p>
                       </div>
                       <div className="text-right">

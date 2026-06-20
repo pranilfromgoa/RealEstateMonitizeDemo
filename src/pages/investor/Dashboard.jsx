@@ -12,28 +12,28 @@ const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency:
 const fmtSmall = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(n)
 
 export function InvestorDashboard() {
-  const { portfolioHoldings, properties, transactions } = useData()
+  const { portfolioHoldings, spvs, transactions } = useData()
   const myHoldings = portfolioHoldings.filter(h => h.investorId === 'investor-001')
   const totalBricks = myHoldings.reduce((s, h) => s + h.bricks, 0)
   const totalInvested = myHoldings.reduce((s, h) => s + h.bricks * h.purchasePrice, 0)
   const totalEarned = myHoldings.reduce((s, h) => s + h.earnedRent, 0)
-  const myProperties = myHoldings.map(h => properties.find(p => p.id === h.propertyId)).filter(Boolean)
+  const mySpvs = myHoldings.map(h => spvs.find(s => s.id === h.spvId)).filter(Boolean)
   const recentTx = transactions.filter(t => t.investorId === 'investor-001').slice(0, 5)
 
   const monthlyRent = myHoldings.reduce((s, h) => {
-    const prop = properties.find(p => p.id === h.propertyId)
-    if (!prop) return s
-    return s + (prop.monthlyRent * h.bricks / prop.totalBricks)
+    const spv = spvs.find(s => s.id === h.spvId)
+    if (!spv) return s
+    return s + (spv.monthlyRent * h.bricks / spv.totalBricks)
   }, 0)
 
   return (
     <Layout>
-      <Header title="Investor Dashboard" subtitle="Welcome back, Alex Rivera" />
+      <Header title="Holder Dashboard" subtitle="Welcome back, Alex Rivera" />
       <div className="ds-page">
         {/* Stats row */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard label="Total Invested" value={fmt(totalInvested)} icon={DollarSign} color="blue" trend={12} />
-          <StatCard label="Total Bricks Owned" value={totalBricks.toLocaleString()} sub="across 3 properties" icon={Briefcase} color="purple" />
+          <StatCard label="Total Bricks Owned" value={totalBricks.toLocaleString()} sub={`across ${myHoldings.length} SPV${myHoldings.length !== 1 ? 's' : ''}`} icon={Briefcase} color="purple" />
           <StatCard label="Rent Earned (All-time)" value={fmt(totalEarned)} icon={TrendingUp} color="green" trend={8.4} />
           <StatCard label="Est. Monthly Income" value={fmtSmall(monthlyRent)} sub="based on current holdings" icon={Building2} color="amber" />
         </div>
@@ -54,7 +54,7 @@ export function InvestorDashboard() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-gray-100">
-                      <th className="text-left text-xs text-gray-500 font-medium px-6 py-3">Property</th>
+                      <th className="text-left text-xs text-gray-500 font-medium px-6 py-3">SPV</th>
                       <th className="text-right text-xs text-gray-500 font-medium px-4 py-3">Bricks</th>
                       <th className="text-right text-xs text-gray-500 font-medium px-4 py-3">Value</th>
                       <th className="text-right text-xs text-gray-500 font-medium px-4 py-3">Earned</th>
@@ -63,16 +63,16 @@ export function InvestorDashboard() {
                   </thead>
                   <tbody>
                     {myHoldings.map(h => {
-                      const prop = properties.find(p => p.id === h.propertyId)
-                      if (!prop) return null
+                      const spv = spvs.find(s => s.id === h.spvId)
+                      if (!spv) return null
                       return (
-                        <tr key={h.propertyId} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                        <tr key={h.spvId} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                           <td className="px-6 py-3">
                             <div className="flex items-center gap-3">
-                              <img src={prop.image} alt={prop.name} className="w-10 h-8 object-cover rounded-lg" />
+                              <img src={spv.image} alt={spv.name} className="w-10 h-8 object-cover rounded-lg" />
                               <div>
-                                <p className="font-medium text-gray-900 text-sm">{prop.name}</p>
-                                <p className="text-xs text-gray-400">{prop.city}</p>
+                                <p className="font-medium text-gray-900 text-sm">{spv.name}</p>
+                                <p className="text-xs text-gray-400">{spv.city}</p>
                               </div>
                             </div>
                           </td>
@@ -80,7 +80,7 @@ export function InvestorDashboard() {
                           <td className="px-4 py-3 text-right text-gray-700">{fmt(h.bricks * h.purchasePrice)}</td>
                           <td className="px-4 py-3 text-right text-green-600 font-medium">{fmt(h.earnedRent)}</td>
                           <td className="px-6 py-3 text-right">
-                            <Badge variant="success">{prop.annualYield}%</Badge>
+                            <Badge variant="success">{spv.annualYield}%</Badge>
                           </td>
                         </tr>
                       )
@@ -99,7 +99,7 @@ export function InvestorDashboard() {
               </CardHeader>
               <CardContent className="p-0">
                 {recentTx.map(tx => {
-                  const prop = properties.find(p => p.id === tx.propertyId)
+                  const spv = spvs.find(s => s.id === tx.spvId)
                   return (
                     <div key={tx.id} className="flex items-start gap-3 px-4 py-3 border-b border-gray-50 last:border-0">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
@@ -111,7 +111,7 @@ export function InvestorDashboard() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-gray-800 font-medium capitalize">{tx.type === 'rent' ? 'Rent received' : `${tx.type} Bricks`}</p>
-                        <p className="text-xs text-gray-400 truncate">{prop?.name}</p>
+                        <p className="text-xs text-gray-400 truncate">{spv?.name}</p>
                         <p className="text-xs text-gray-400">{tx.date}</p>
                       </div>
                       <p className={`text-sm font-semibold ${tx.type === 'sell' || tx.type === 'rent' ? 'text-green-600' : 'text-gray-900'}`}>
@@ -141,32 +141,32 @@ export function InvestorDashboard() {
           </div>
         </div>
 
-        {/* Property performance */}
+        {/* SPV performance */}
         <Card>
           <CardHeader>
-            <CardTitle>Property Performance</CardTitle>
+            <CardTitle>SPV Performance</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {myProperties.map(prop => {
-                const holding = myHoldings.find(h => h.propertyId === prop.id)
-                const myShare = holding ? (holding.bricks / prop.totalBricks * 100).toFixed(2) : 0
-                const soldPct = ((prop.totalBricks - prop.availableBricks) / prop.totalBricks * 100)
+              {mySpvs.map(spv => {
+                const holding = myHoldings.find(h => h.spvId === spv.id)
+                const myShare = holding ? (holding.bricks / spv.totalBricks * 100).toFixed(2) : 0
+                const soldPct = ((spv.totalBricks - spv.availableBricks) / spv.totalBricks * 100)
                 return (
-                  <div key={prop.id} className="flex items-center gap-4">
-                    <img src={prop.image} alt={prop.name} className="w-12 h-10 rounded-lg object-cover" />
+                  <div key={spv.id} className="flex items-center gap-4">
+                    <img src={spv.image} alt={spv.name} className="w-12 h-10 rounded-lg object-cover" />
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between text-sm mb-1">
-                        <span className="font-medium text-gray-900">{prop.name}</span>
+                        <span className="font-medium text-gray-900">{spv.name}</span>
                         <span className="text-gray-500">{myShare}% ownership</span>
                       </div>
                       <Progress value={soldPct} color="blue" />
                       <div className="flex justify-between text-xs text-gray-400 mt-1">
                         <span>{soldPct.toFixed(0)}% sold</span>
-                        <span>{prop.annualYield}% yield</span>
+                        <span>{spv.annualYield}% yield</span>
                       </div>
                     </div>
-                    <Badge variant="success">{prop.type}</Badge>
+                    <Badge variant="success">{spv.type}</Badge>
                   </div>
                 )
               })}

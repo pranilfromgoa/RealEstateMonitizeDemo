@@ -6,19 +6,13 @@ import { Login } from '@/pages/Login'
 
 // Investor
 import { InvestorDashboard } from '@/pages/investor/Dashboard'
-import { InvestorProperties } from '@/pages/investor/Properties'
+import { InvestorSpvs } from '@/pages/investor/Properties'
 import { InvestorPortfolio } from '@/pages/investor/Portfolio'
 import { InvestorKYC } from '@/pages/investor/KYC'
 import { InvestorTradingDesk } from '@/pages/investor/TradingDesk'
 import { InvestorTaxDocuments } from '@/pages/investor/TaxDocuments'
 import { InvestorVoting } from '@/pages/investor/Voting'
 import { InvestorAIReader } from '@/pages/investor/AIReader'
-
-// Landlord
-import { LandlordDashboard } from '@/pages/landlord/Dashboard'
-import { LandlordPropertyUpload } from '@/pages/landlord/PropertyUpload'
-import { LandlordPropertyManagement } from '@/pages/landlord/PropertyManagement'
-import { LandlordKYB } from '@/pages/landlord/KYB'
 
 // Admin
 import { AdminDashboard } from '@/pages/admin/Dashboard'
@@ -27,6 +21,8 @@ import { AdminApprovals } from '@/pages/admin/Approvals'
 import { AdminPayouts } from '@/pages/admin/Payouts'
 import { AdminFeeManagement } from '@/pages/admin/FeeManagement'
 import { AdminUsers } from '@/pages/admin/Users'
+import { AdminSPV } from '@/pages/admin/SPV'
+import { AdminHolders } from '@/pages/admin/Holders'
 
 function ProtectedRoute({ children, role }) {
   const { user } = useAuth()
@@ -43,19 +39,13 @@ function AppRoutes() {
 
       {/* Investor */}
       <Route path="/investor/dashboard" element={<ProtectedRoute role="investor"><InvestorDashboard /></ProtectedRoute>} />
-      <Route path="/investor/properties" element={<ProtectedRoute role="investor"><InvestorProperties /></ProtectedRoute>} />
+      <Route path="/investor/properties" element={<ProtectedRoute role="investor"><InvestorSpvs /></ProtectedRoute>} />
       <Route path="/investor/portfolio" element={<ProtectedRoute role="investor"><InvestorPortfolio /></ProtectedRoute>} />
       <Route path="/investor/kyc" element={<ProtectedRoute role="investor"><InvestorKYC /></ProtectedRoute>} />
       <Route path="/investor/trading" element={<ProtectedRoute role="investor"><InvestorTradingDesk /></ProtectedRoute>} />
       <Route path="/investor/taxes" element={<ProtectedRoute role="investor"><InvestorTaxDocuments /></ProtectedRoute>} />
       <Route path="/investor/voting" element={<ProtectedRoute role="investor"><InvestorVoting /></ProtectedRoute>} />
       <Route path="/investor/ai-reader" element={<ProtectedRoute role="investor"><InvestorAIReader /></ProtectedRoute>} />
-
-      {/* Landlord */}
-      <Route path="/landlord/dashboard" element={<ProtectedRoute role="landlord"><LandlordDashboard /></ProtectedRoute>} />
-      <Route path="/landlord/upload" element={<ProtectedRoute role="landlord"><LandlordPropertyUpload /></ProtectedRoute>} />
-      <Route path="/landlord/properties" element={<ProtectedRoute role="landlord"><LandlordPropertyManagement /></ProtectedRoute>} />
-      <Route path="/landlord/kyb" element={<ProtectedRoute role="landlord"><LandlordKYB /></ProtectedRoute>} />
 
       {/* Admin */}
       <Route path="/admin/dashboard" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
@@ -64,6 +54,8 @@ function AppRoutes() {
       <Route path="/admin/payouts" element={<ProtectedRoute role="admin"><AdminPayouts /></ProtectedRoute>} />
       <Route path="/admin/fees" element={<ProtectedRoute role="admin"><AdminFeeManagement /></ProtectedRoute>} />
       <Route path="/admin/users" element={<ProtectedRoute role="admin"><AdminUsers /></ProtectedRoute>} />
+      <Route path="/admin/spv" element={<ProtectedRoute role="admin"><AdminSPV /></ProtectedRoute>} />
+      <Route path="/admin/holders" element={<ProtectedRoute role="admin"><AdminHolders /></ProtectedRoute>} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

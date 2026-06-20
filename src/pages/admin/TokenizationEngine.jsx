@@ -11,7 +11,7 @@ import { Cpu, CheckCircle2, Hash, Zap, Layers, ArrowRight, AlertTriangle, User, 
 const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
 
 const steps = [
-  { id: 1, label: 'Property Validated', desc: 'Documents verified, legal checks passed' },
+  { id: 1, label: 'SPV Validated', desc: 'Documents verified, legal checks passed' },
   { id: 2, label: 'LLC Confirmed', desc: 'Business entity linked to property' },
   { id: 3, label: 'Valuation Set', desc: 'Appraisal reviewed and price approved' },
   { id: 4, label: 'Brick Count Defined', desc: 'Total supply and price per Brick set' },
@@ -20,7 +20,7 @@ const steps = [
 ]
 
 const defaultForm = {
-  propertyName: '',
+  spvName: '',
   address: '',
   llcName: '',
   appraisalValue: '',
@@ -30,7 +30,7 @@ const defaultForm = {
 }
 
 export function AdminTokenizationEngine() {
-  const { pendingSubmissions, properties, addProperty, updateSubmission } = useData()
+  const { pendingSubmissions, spvs, addSpv, updateSubmission } = useData()
   const approvedQueue = pendingSubmissions.filter(s => s.status === 'approved')
   const [selectedSub, setSelectedSub] = useState(null)
   const [form, setForm] = useState(defaultForm)
@@ -45,7 +45,7 @@ export function AdminTokenizationEngine() {
     setRunning(false)
     setRunStep(0)
     setForm({
-      propertyName: sub.propertyName,
+      spvName: sub.spvName,
       address: sub.address || '',
       llcName: sub.llcName || '',
       appraisalValue: String(sub.estimatedValue || ''),
@@ -76,9 +76,9 @@ export function AdminTokenizationEngine() {
         const brickCount = parseInt(form.brickCount) || 0
         const pricePerBrick = parseInt(form.pricePerBrick) || 0
         const addrParts = form.address.split(',')
-        addProperty({
+        addSpv({
           id: `prop-${Date.now()}`,
-          name: form.propertyName,
+          name: form.spvName,
           address: form.address,
           city: addrParts[1]?.trim() || addrParts[0]?.trim() || '',
           type: selectedSub?.type || 'Commercial',
@@ -89,7 +89,7 @@ export function AdminTokenizationEngine() {
           availableBricks: brickCount,
           monthlyRent: parseFloat(form.monthlyRent) || 0,
           annualYield: 0,
-          landlordId: selectedSub?.landlordId || 'landlord-001',
+          ownerId: selectedSub?.ownerId || 'owner-001',
           llcName: form.llcName,
           status: 'live',
           image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&auto=format&fit=crop&q=60',
@@ -112,11 +112,11 @@ export function AdminTokenizationEngine() {
 
   return (
     <Layout>
-      <Header title="Brick Maker — Tokenization Engine" subtitle="Convert verified properties into digital Bricks" />
+      <Header title="Brick Maker — Tokenization Engine" subtitle="Convert verified SPVs into digital Bricks" />
       <div className="ds-page">
         <div className="bg-violet-50 border border-violet-200 rounded-xl px-4 py-3 flex items-center gap-3">
           <Cpu size={16} className="text-violet-600" />
-          <p className="text-sm text-violet-700">The Brick Maker officially divides a real-world property (held in an LLC) into digital Bricks on the blockchain. Select an approved property below to pre-fill the form with the landlord's proposal, then adjust as needed before minting.</p>
+          <p className="text-sm text-violet-700">The Brick Maker officially divides a real-world property (held in an LLC) into digital Bricks on the blockchain. Select an approved property submission below to pre-fill the form, then adjust as needed before minting.</p>
         </div>
 
         {/* Approved & Ready to Tokenize queue */}
@@ -136,7 +136,7 @@ export function AdminTokenizationEngine() {
                     onClick={() => isSelected ? handleClearSub() : handleSelectSub(sub)}>
                     <div className="flex items-start justify-between mb-3">
                       <div>
-                        <p className="font-semibold text-gray-900 text-sm">{sub.propertyName}</p>
+                        <p className="font-semibold text-gray-900 text-sm">{sub.spvName}</p>
                         <p className="text-xs text-gray-400 mt-0.5">{sub.address || sub.city}</p>
                       </div>
                       {isSelected
@@ -173,7 +173,7 @@ export function AdminTokenizationEngine() {
 
                     <div className="flex items-center gap-1.5 mt-3 text-xs text-gray-400">
                       <User size={11} />
-                      <span>{sub.landlordName}</span>
+                      <span>{sub.ownerName || 'Admin'}</span>
                       <span className="mx-1">·</span>
                       <span>{sub.submittedDate}</span>
                     </div>
@@ -196,7 +196,7 @@ export function AdminTokenizationEngine() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Cpu size={16} className="text-violet-600" />
-                {selectedSub ? `Tokenize: ${selectedSub.propertyName}` : 'New Tokenization'}
+                {selectedSub ? `Tokenize: ${selectedSub.spvName}` : 'New Tokenization'}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -206,7 +206,7 @@ export function AdminTokenizationEngine() {
                     <CheckCircle2 size={32} className="text-green-600" />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900">Tokenization Complete!</h3>
-                  <p className="text-sm text-muted-foreground">{parseInt(form.brickCount).toLocaleString()} Bricks created for {form.propertyName}</p>
+                  <p className="text-sm text-muted-foreground">{parseInt(form.brickCount).toLocaleString()} Bricks created for {form.spvName}</p>
                   <div className="bg-gray-50 rounded-xl p-4 text-left space-y-2 text-sm">
                     <div className="flex justify-between"><span className="text-sm text-muted-foreground">Contract Address:</span><span className="font-mono text-xs text-blue-600">{txHash.slice(0, 20)}…</span></div>
                     <div className="flex justify-between"><span className="text-sm text-muted-foreground">Bricks Issued:</span><span className="font-medium">{parseInt(form.brickCount).toLocaleString()}</span></div>
@@ -214,7 +214,7 @@ export function AdminTokenizationEngine() {
                     <div className="flex justify-between"><span className="text-sm text-muted-foreground">Total Raise:</span><span className="font-medium">{fmt(parseInt(form.brickCount) * parseInt(form.pricePerBrick))}</span></div>
                   </div>
                   <Button onClick={handleClearSub} variant="outline" className="w-full">
-                    Tokenize Another Property
+                    Tokenize Another SPV
                   </Button>
                 </div>
               ) : running ? (
@@ -238,12 +238,12 @@ export function AdminTokenizationEngine() {
                 </div>
               ) : (
                 <>
-                  {/* Landlord proposal comparison when pre-filled */}
+                  {/* Property submission comparison when pre-filled */}
                   {selectedSub && (
                     <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-3">
                       <div className="flex items-center gap-2">
                         <AlertTriangle size={14} className="text-amber-600" />
-                        <p className="text-xs font-semibold text-amber-800">Landlord's Proposal — Review &amp; Adjust Below</p>
+                        <p className="text-xs font-semibold text-amber-800">SPV Submission — Review &amp; Adjust Below</p>
                       </div>
                       <div className="grid grid-cols-5 gap-2 text-xs">
                         {[
@@ -266,7 +266,7 @@ export function AdminTokenizationEngine() {
                         })}
                       </div>
                       <div className="grid grid-cols-2 gap-1 text-xs text-gray-400">
-                        <span>Landlord proposed ↑</span>
+                        <span>Submission proposed ↑</span>
                         <span className="text-violet-600 font-medium">Platform final (editable) ↓</span>
                       </div>
                       {selectedSub.proposal.notes && (
@@ -280,8 +280,8 @@ export function AdminTokenizationEngine() {
 
                   <div className="space-y-3">
                     <div>
-                      <label className="ds-label">Property Name</label>
-                      <input value={form.propertyName} onChange={e => setForm(f => ({ ...f, propertyName: e.target.value }))}
+                      <label className="ds-label">SPV Name</label>
+                      <input value={form.spvName} onChange={e => setForm(f => ({ ...f, spvName: e.target.value }))}
                         className="ds-input"
                         placeholder="e.g. Harbor Walk Hotel" />
                     </div>
@@ -330,7 +330,7 @@ export function AdminTokenizationEngine() {
                     <div className="flex justify-between"><span>Token standard</span><span className="font-medium">ERC-1155</span></div>
                     <div className="flex justify-between"><span>Network</span><span className="font-medium">Ethereum L2 (Polygon)</span></div>
                   </div>
-                  <Button className="w-full" onClick={handleRun} disabled={!form.propertyName || !form.brickCount || !form.pricePerBrick}>
+                  <Button className="w-full" onClick={handleRun} disabled={!form.spvName || !form.brickCount || !form.pricePerBrick}>
                     <Zap size={15} /> Run Tokenization Engine
                   </Button>
                   {selectedSub && (
@@ -345,23 +345,23 @@ export function AdminTokenizationEngine() {
 
           {/* Existing tokenized properties */}
           <Card>
-            <CardHeader><CardTitle className="flex items-center gap-2"><Layers size={15} className="text-gray-500" /> Tokenized Properties</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="flex items-center gap-2"><Layers size={15} className="text-gray-500" /> Tokenized SPVs</CardTitle></CardHeader>
             <CardContent className="p-0">
-              {properties.map(prop => (
-                <div key={prop.id} className="flex items-center gap-3 px-4 py-3 border-b border-gray-50 last:border-0">
-                  <img src={prop.image} alt="" className="w-12 h-9 rounded-lg object-cover flex-shrink-0" />
+              {spvs.map(spv => (
+                <div key={spv.id} className="flex items-center gap-3 px-4 py-3 border-b border-gray-50 last:border-0">
+                  <img src={spv.image} alt="" className="w-12 h-9 rounded-lg object-cover flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{prop.name}</p>
+                    <p className="text-sm font-medium text-gray-900 truncate">{spv.name}</p>
                     <div className="flex items-center gap-1.5 mt-0.5">
                       <Hash size={10} className="text-gray-400" />
-                      <p className="text-xs text-blue-500 font-mono">0x{prop.id.replace('prop-', '')}...a4f</p>
+                      <p className="text-xs text-blue-500 font-mono">0x{spv.id.replace('prop-', '')}...a4f</p>
                     </div>
-                    <p className="text-xs text-gray-400">{prop.totalBricks.toLocaleString()} Bricks · {fmt(prop.pricePerBrick)}/brick</p>
-                    <p className="text-xs text-green-600 font-medium">{prop.monthlyRent ? fmt(prop.monthlyRent) + '/mo expected' : '—'}</p>
+                    <p className="text-xs text-gray-400">{spv.totalBricks.toLocaleString()} Bricks · {fmt(spv.pricePerBrick)}/brick</p>
+                    <p className="text-xs text-green-600 font-medium">{spv.monthlyRent ? fmt(spv.monthlyRent) + '/mo expected' : '—'}</p>
                   </div>
                   <div className="text-right flex-shrink-0">
                     <Badge variant="success" className="text-xs">Live</Badge>
-                    <p className="text-xs text-gray-400 mt-1">{prop.tokenizationDate}</p>
+                    <p className="text-xs text-gray-400 mt-1">{spv.tokenizationDate}</p>
                   </div>
                 </div>
               ))}

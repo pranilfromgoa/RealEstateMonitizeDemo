@@ -10,15 +10,15 @@ const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency:
 const fmtSmall = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(n)
 
 export function InvestorPortfolio() {
-  const { portfolioHoldings, properties, transactions } = useData()
+  const { portfolioHoldings, spvs, transactions } = useData()
   const myHoldings = portfolioHoldings.filter(h => h.investorId === 'investor-001')
   const totalBricks = myHoldings.reduce((s, h) => s + h.bricks, 0)
   const totalInvested = myHoldings.reduce((s, h) => s + h.bricks * h.purchasePrice, 0)
   const totalEarned = myHoldings.reduce((s, h) => s + h.earnedRent, 0)
   const avgYield = myHoldings.length > 0
     ? myHoldings.reduce((s, h) => {
-        const prop = properties.find(p => p.id === h.propertyId)
-        return s + (prop?.annualYield || 0)
+        const spv = spvs.find(s2 => s2.id === h.spvId)
+        return s + (spv?.annualYield || 0)
       }, 0) / myHoldings.length
     : 0
 
@@ -38,27 +38,27 @@ export function InvestorPortfolio() {
         {/* Holdings */}
         <Card>
           <CardHeader>
-            <CardTitle>Property Holdings</CardTitle>
+            <CardTitle>SPV Holdings</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             {myHoldings.map(h => {
-              const prop = properties.find(p => p.id === h.propertyId)
-              if (!prop) return null
-              const ownershipPct = (h.bricks / prop.totalBricks * 100).toFixed(3)
-              const monthlyIncome = prop.monthlyRent * h.bricks / prop.totalBricks
-              const currentValue = h.bricks * prop.pricePerBrick
+              const spv = spvs.find(s => s.id === h.spvId)
+              if (!spv) return null
+              const ownershipPct = (h.bricks / spv.totalBricks * 100).toFixed(3)
+              const monthlyIncome = spv.monthlyRent * h.bricks / spv.totalBricks
+              const currentValue = h.bricks * spv.pricePerBrick
               const gain = currentValue - (h.bricks * h.purchasePrice)
               return (
-                <div key={h.propertyId} className="px-6 py-5 border-b border-gray-100 last:border-0">
+                <div key={h.spvId} className="px-6 py-5 border-b border-gray-100 last:border-0">
                   <div className="flex flex-wrap gap-4 items-start">
-                    <img src={prop.image} alt={prop.name} className="w-20 h-16 rounded-xl object-cover flex-shrink-0" />
+                    <img src={spv.image} alt={spv.name} className="w-20 h-16 rounded-xl object-cover flex-shrink-0" />
                     <div className="flex-1 min-w-48">
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <h4 className="font-semibold text-gray-900">{prop.name}</h4>
-                          <p className="text-sm text-gray-400">{prop.city} · {prop.type}</p>
+                          <h4 className="font-semibold text-gray-900">{spv.name}</h4>
+                          <p className="text-sm text-gray-400">{spv.city} · {spv.type}</p>
                         </div>
-                        <Badge variant="success">{prop.annualYield}% yield</Badge>
+                        <Badge variant="success">{spv.annualYield}% yield</Badge>
                       </div>
                       <div className="mt-3 grid grid-cols-2 sm:grid-cols-5 gap-3">
                         <div>
@@ -74,8 +74,8 @@ export function InvestorPortfolio() {
                           <p className="font-bold text-green-600">{fmt(h.earnedRent)}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-400">Expected Property Rent/mo</p>
-                          <p className="font-bold text-gray-700">{fmt(prop.monthlyRent)}</p>
+                          <p className="text-xs text-gray-400">Expected SPV Rent/mo</p>
+                          <p className="font-bold text-gray-700">{fmt(spv.monthlyRent)}</p>
                         </div>
                         <div>
                           <p className="text-xs text-gray-400">Expected Rent Share/mo</p>
@@ -114,18 +114,18 @@ export function InvestorPortfolio() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100">
-                    {['Date', 'Property', 'Amount', 'Tx Hash'].map(h => (
+                    {['Date', 'SPV', 'Amount', 'Tx Hash'].map(h => (
                       <th key={h} className="text-left text-xs text-gray-500 font-medium px-6 py-3">{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {allTx.map(tx => {
-                    const prop = properties.find(p => p.id === tx.propertyId)
+                    const spv = spvs.find(s => s.id === tx.spvId)
                     return (
                       <tr key={tx.id} className="border-b border-gray-50 hover:bg-gray-50">
                         <td className="px-6 py-3 text-gray-600">{tx.date}</td>
-                        <td className="px-6 py-3 text-gray-700">{prop?.name}</td>
+                        <td className="px-6 py-3 text-gray-700">{spv?.name}</td>
                         <td className="px-6 py-3 font-medium text-green-600">+{fmt(tx.amount)}</td>
                         <td className="px-6 py-3">
                           <a href="#" className="text-xs text-blue-500 font-mono hover:underline">{tx.txHash.slice(0, 10)}…</a>
