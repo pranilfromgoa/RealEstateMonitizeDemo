@@ -4,15 +4,15 @@ import { DataProvider } from '@/context/DataContext'
 
 import { Login } from '@/pages/Login'
 
-// Investor
-import { InvestorDashboard } from '@/pages/investor/Dashboard'
-import { InvestorSpvs } from '@/pages/investor/Properties'
-import { InvestorPortfolio } from '@/pages/investor/Portfolio'
-import { InvestorKYC } from '@/pages/investor/KYC'
-import { InvestorTradingDesk } from '@/pages/investor/TradingDesk'
-import { InvestorTaxDocuments } from '@/pages/investor/TaxDocuments'
-import { InvestorVoting } from '@/pages/investor/Voting'
-import { InvestorAIReader } from '@/pages/investor/AIReader'
+// Holder
+import { HolderDashboard } from '@/pages/holder/Dashboard'
+import { HolderSpvs } from '@/pages/holder/Properties'
+import { HolderPortfolio } from '@/pages/holder/Portfolio'
+import { HolderKYC } from '@/pages/holder/KYC'
+import { HolderTradingDesk } from '@/pages/holder/TradingDesk'
+import { HolderTaxDocuments } from '@/pages/holder/TaxDocuments'
+import { HolderVoting } from '@/pages/holder/Voting'
+import { HolderAIReader } from '@/pages/holder/AIReader'
 
 // Admin
 import { AdminDashboard } from '@/pages/admin/Dashboard'
@@ -23,6 +23,8 @@ import { AdminFeeManagement } from '@/pages/admin/FeeManagement'
 import { AdminUsers } from '@/pages/admin/Users'
 import { AdminSPV } from '@/pages/admin/SPV'
 import { AdminHolders } from '@/pages/admin/Holders'
+import { SpvManagerMyProperties } from '@/pages/spv-manager/MyProperties'
+
 
 function ProtectedRoute({ children, role }) {
   const { user } = useAuth()
@@ -37,15 +39,15 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={user ? <Navigate to={`/${user.role}/dashboard`} replace /> : <Login />} />
 
-      {/* Investor */}
-      <Route path="/investor/dashboard" element={<ProtectedRoute role="investor"><InvestorDashboard /></ProtectedRoute>} />
-      <Route path="/investor/properties" element={<ProtectedRoute role="investor"><InvestorSpvs /></ProtectedRoute>} />
-      <Route path="/investor/portfolio" element={<ProtectedRoute role="investor"><InvestorPortfolio /></ProtectedRoute>} />
-      <Route path="/investor/kyc" element={<ProtectedRoute role="investor"><InvestorKYC /></ProtectedRoute>} />
-      <Route path="/investor/trading" element={<ProtectedRoute role="investor"><InvestorTradingDesk /></ProtectedRoute>} />
-      <Route path="/investor/taxes" element={<ProtectedRoute role="investor"><InvestorTaxDocuments /></ProtectedRoute>} />
-      <Route path="/investor/voting" element={<ProtectedRoute role="investor"><InvestorVoting /></ProtectedRoute>} />
-      <Route path="/investor/ai-reader" element={<ProtectedRoute role="investor"><InvestorAIReader /></ProtectedRoute>} />
+      {/* Holder */}
+      <Route path="/holder/dashboard" element={<ProtectedRoute role="holder"><HolderDashboard /></ProtectedRoute>} />
+      <Route path="/holder/properties" element={<ProtectedRoute role="holder"><HolderSpvs /></ProtectedRoute>} />
+      <Route path="/holder/portfolio" element={<ProtectedRoute role="holder"><HolderPortfolio /></ProtectedRoute>} />
+      <Route path="/holder/kyc" element={<ProtectedRoute role="holder"><HolderKYC /></ProtectedRoute>} />
+      <Route path="/holder/trading" element={<ProtectedRoute role="holder"><HolderTradingDesk /></ProtectedRoute>} />
+      <Route path="/holder/taxes" element={<ProtectedRoute role="holder"><HolderTaxDocuments /></ProtectedRoute>} />
+      <Route path="/holder/voting" element={<ProtectedRoute role="holder"><HolderVoting /></ProtectedRoute>} />
+      <Route path="/holder/ai-reader" element={<ProtectedRoute role="holder"><HolderAIReader /></ProtectedRoute>} />
 
       {/* Admin */}
       <Route path="/admin/dashboard" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
@@ -56,6 +58,11 @@ function AppRoutes() {
       <Route path="/admin/users" element={<ProtectedRoute role="admin"><AdminUsers /></ProtectedRoute>} />
       <Route path="/admin/spv" element={<ProtectedRoute role="admin"><AdminSPV /></ProtectedRoute>} />
       <Route path="/admin/holders" element={<ProtectedRoute role="admin"><AdminHolders /></ProtectedRoute>} />
+
+      {/* SPV Manager */}
+      <Route path="/spv_manager/dashboard"   element={<Navigate to="/spv_manager/spv" replace />} />
+      <Route path="/spv_manager/spv"         element={<ProtectedRoute role="spv_manager"><AdminSPV /></ProtectedRoute>} />
+      <Route path="/spv_manager/properties"  element={<ProtectedRoute role="spv_manager"><SpvManagerMyProperties /></ProtectedRoute>} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

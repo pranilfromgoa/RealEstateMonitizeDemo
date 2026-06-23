@@ -151,7 +151,7 @@ export function AdminApprovals() {
               <div className="col-span-2"><p className="text-xs text-gray-400 mb-1">Documents Submitted</p>
                 <div className="flex flex-wrap gap-2">
                   {detail.documents.map(doc => (
-                    <span key={doc} className="flex items-center gap-1 bg-green-50 text-green-700 text-xs px-2 py-1 rounded-lg">
+                    <span key={doc} className="flex items-center gap-1 bg-sky-50 text-sky-700 text-xs px-2 py-1 rounded-lg">
                       <CheckCircle2 size={11} /> {doc.replace('_', ' ')}
                     </span>
                   ))}
@@ -162,9 +162,9 @@ export function AdminApprovals() {
             {/* Already decided */}
             {detail.status !== 'pending' && (
               <div className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium ${
-                detail.status === 'approved' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-              }`}>
-                {detail.status === 'approved' ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
+                detail.status === 'approved' ? 'bg-sky-50 text-sky-700' : 'bg-gray-50 border-l-4 border-red-400 text-gray-700'
+              }`} style={detail.status !== 'approved' ? {borderRadius: '0 0.75rem 0.75rem 0'} : {}}>
+                {detail.status === 'approved' ? <CheckCircle2 size={16} /> : <XCircle size={16} className="text-red-400" />}
                 This request has been <span className="font-bold ml-1">{detail.status}</span>.
                 {detail.rejectionReason && <span className="ml-1 font-normal">— {detail.rejectionReason}</span>}
               </div>
@@ -191,7 +191,7 @@ export function AdminApprovals() {
                   <Button variant="destructive" className="flex-1" onClick={() => handleReject(detail.id)}>
                     <XCircle size={14} /> Reject
                   </Button>
-                  <Button className="flex-1 bg-green-600 hover:bg-green-700 text-white" onClick={() => handleApprove(detail.id)}>
+                  <Button className="flex-1" onClick={() => handleApprove(detail.id)}>
                     <CheckCircle2 size={14} /> Approve
                   </Button>
                 </div>

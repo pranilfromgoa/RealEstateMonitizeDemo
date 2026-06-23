@@ -4,13 +4,15 @@ import { useNavigate } from 'react-router-dom'
 import { useState, useRef, useEffect } from 'react'
 
 const roleColors = {
-  investor: 'from-sky-500 to-sky-600',
-  admin:    'from-violet-500 to-violet-600',
+  holder:      'from-sky-500 to-sky-600',
+  admin:       'from-sky-500 to-sky-600',
+  spv_manager: 'from-sky-500 to-sky-600',
 }
 
 const roleRingColors = {
-  investor: 'ring-sky-500/30',
-  admin:    'ring-violet-500/30',
+  holder:      'ring-sky-500/30',
+  admin:       'ring-sky-500/30',
+  spv_manager: 'ring-sky-500/30',
 }
 
 export function Header({ title, subtitle }) {
@@ -42,8 +44,9 @@ export function Header({ title, subtitle }) {
   ]
 
   const roleBadgeColors = {
-    investor: 'bg-sky-100 text-sky-700',
-    admin:    'bg-violet-100 text-violet-700',
+    holder:      'bg-sky-100 text-sky-700',
+    admin:       'bg-sky-100 text-sky-700',
+    spv_manager: 'bg-sky-100 text-sky-700',
   }
 
   return (

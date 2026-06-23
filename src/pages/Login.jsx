@@ -1,9 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
+import { useData } from '@/context/DataContext'
 import { Layers, ArrowRight, RotateCcw, ShieldCheck, TrendingUp } from 'lucide-react'
-
-const STORAGE_KEY = 'brickchain_demo_v3'
 
 const roles = [
   {
@@ -16,7 +15,16 @@ const roles = [
     icon: ShieldCheck,
   },
   {
-    key: 'investor',
+    key: 'spv_manager',
+    initials: 'SM',
+    label: 'SPV Manager',
+    sublabel: 'SPV Manager (Registry & Structuring)',
+    description: 'Create, edit and manage SPV assets',
+    demo: { name: 'Sara Chen', id: 'spv-mgr-001' },
+    icon: Layers,
+  },
+  {
+    key: 'holder',
     initials: 'HO',
     label: 'Holder',
     sublabel: 'Holder (Portfolio, Trade, Rent...)',
@@ -26,14 +34,33 @@ const roles = [
   },
 ]
 
+const roleTheme = {
+  admin: {
+    cardSelected:  'border-violet-500 bg-violet-50 shadow-sm ring-2 ring-violet-200',
+    badgeSelected: 'bg-violet-600 text-white',
+    badgeDefault:  'bg-violet-100 text-violet-700 group-hover:bg-violet-600 group-hover:text-white',
+  },
+  spv_manager: {
+    cardSelected:  'border-teal-500 bg-teal-50 shadow-sm ring-2 ring-teal-200',
+    badgeSelected: 'bg-teal-600 text-white',
+    badgeDefault:  'bg-teal-100 text-teal-700 group-hover:bg-teal-600 group-hover:text-white',
+  },
+  holder: {
+    cardSelected:  'border-sky-500 bg-sky-50 shadow-sm ring-2 ring-sky-200',
+    badgeSelected: 'bg-sky-600 text-white',
+    badgeDefault:  'bg-sky-100 text-sky-700 group-hover:bg-sky-600 group-hover:text-white',
+  },
+}
+
 export function Login() {
-  const [selected, setSelected] = useState(null)
+  const [selected, setSelected] = useState('spv_manager')
   const [cleared, setCleared] = useState(false)
   const { login } = useAuth()
+  const { resetData } = useData()
   const navigate = useNavigate()
 
   const handleClear = () => {
-    localStorage.removeItem(STORAGE_KEY)
+    resetData()
     setCleared(true)
     setTimeout(() => setCleared(false), 2000)
   }
@@ -41,7 +68,8 @@ export function Login() {
   const handleLogin = () => {
     if (!selected) return
     login(selected)
-    if (selected === 'investor') navigate('/investor/dashboard')
+    if (selected === 'holder') navigate('/holder/dashboard')
+    else if (selected === 'spv_manager') navigate('/spv_manager/spv')
     else navigate('/admin/dashboard')
   }
 
@@ -52,7 +80,7 @@ export function Login() {
 
       {/* ── LEFT PANEL ────────────────────────────────────────── */}
       <div
-        className="hidden lg:flex flex-col justify-between w-[40rem] p-12 select-none"
+        className="hidden lg:flex flex-col justify-between w-[32rem] p-10 select-none"
         style={{ background: '#0369a1' }}
       >
         {/* Logo */}
@@ -72,7 +100,7 @@ export function Login() {
         <div>
           <h1
             className="text-white font-black leading-[1.0] uppercase"
-            style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: '3.5rem', letterSpacing: '-0.02em' }}
+            style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: '2.75rem', letterSpacing: '-0.02em' }}
           >
             FRACTIONAL<br />REAL ESTATE<br />ASSETS
           </h1>
@@ -87,7 +115,7 @@ export function Login() {
 
       {/* ── RIGHT PANEL ───────────────────────────────────────── */}
       <div className="flex-1 bg-white flex items-center justify-center p-10">
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-lg">
 
           {/* Mobile logo */}
           <div className="flex lg:hidden items-center gap-3 mb-8">
@@ -116,7 +144,7 @@ export function Login() {
           {/* One-click sign-in label */}
           <div className="flex items-center justify-between mb-3">
             <p className="text-[10px] text-gray-400 tracking-[0.18em] uppercase font-semibold">
-              One-Click Sandbox Sign-In
+              Sandbox Sign-In
             </p>
             <p className="text-[10px] text-sky-600 tracking-[0.15em] uppercase font-semibold">
               Instant Entry
@@ -124,7 +152,7 @@ export function Login() {
           </div>
 
           {/* Role cards */}
-          <div className="grid grid-cols-2 gap-3 mb-6">
+          <div className="grid grid-cols-3 gap-3 mb-6">
             {roles.map(role => {
               const isSelected = selected === role.key
               return (
@@ -133,27 +161,21 @@ export function Login() {
                   onClick={() => setSelected(role.key)}
                   onDoubleClick={() => {
                     login(role.key)
-                    if (role.key === 'investor') navigate('/investor/dashboard')
+                    if (role.key === 'holder') navigate('/holder/dashboard')
+                    else if (role.key === 'spv_manager') navigate('/spv_manager/spv')
                     else navigate('/admin/dashboard')
                   }}
-                  className={`text-left p-4 rounded-xl border transition-all duration-150 ${
-                    isSelected
-                      ? 'border-sky-500 bg-sky-50 shadow-sm ring-2 ring-sky-200'
-                      : 'border-gray-200 bg-gray-50 hover:border-gray-900 hover:bg-gray-50'
+                  className={`group text-center p-4 rounded-xl border transition-all duration-150 ${
+                    isSelected ? roleTheme[role.key].cardSelected : 'border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-white'
                   }`}
                 >
-                  <div className="flex items-start gap-3">
-                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-xs font-black flex-shrink-0 tracking-wider ${
-                      isSelected ? 'bg-sky-600 text-white' : 'bg-sky-100 text-sky-700'
-                    }`}>
-                      {role.initials}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-bold text-gray-900 text-base leading-tight">{role.label}</p>
-                      <p className="text-xs text-gray-500 mt-1 leading-snug">{role.sublabel}</p>
-                      <p className="text-xs text-gray-400 mt-0.5 leading-snug">{role.description}</p>
-                    </div>
+                  <div className={`w-10 h-10 rounded-xl mx-auto mb-2.5 flex items-center justify-center text-xs font-black tracking-wider transition-colors ${
+                    isSelected ? roleTheme[role.key].badgeSelected : roleTheme[role.key].badgeDefault
+                  }`}>
+                    {role.initials}
                   </div>
+                  <p className="font-bold text-gray-900 text-sm leading-tight">{role.label}</p>
+                  <p className="text-[11px] text-gray-400 mt-1 leading-snug">{role.description}</p>
                 </button>
               )
             })}

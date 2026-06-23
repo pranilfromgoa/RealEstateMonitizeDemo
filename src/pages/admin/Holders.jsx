@@ -1,4 +1,8 @@
 import { useState } from 'react'
+import {
+  PieChart, Pie, Cell,
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
+} from 'recharts'
 import { Layout } from '@/components/layout/Layout'
 import { Header } from '@/components/layout/Header'
 import { Badge } from '@/components/ui/badge'
@@ -10,7 +14,7 @@ import { useData } from '@/context/DataContext'
 import {
   Search, ArrowLeft, Wallet, Mail, Calendar, ShieldCheck,
   Building2, DollarSign, TrendingUp, Briefcase, Phone, Globe,
-  ArrowUpRight, CheckCircle2, XCircle,
+  ArrowUpRight, CheckCircle2, XCircle, Users, AlertTriangle,
 } from 'lucide-react'
 
 const fmt      = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
@@ -20,7 +24,7 @@ const KYC_VARIANT = { verified: 'success', pending: 'warning', rejected: 'destru
 const KYC_LABEL   = { verified: 'KYC Verified', pending: 'KYC Pending', rejected: 'KYC Rejected' }
 
 const AVATAR_GRADIENT = {
-  verified: 'from-violet-500 to-violet-600',
+  verified: 'from-sky-500 to-sky-600',
   pending:  'from-amber-400 to-amber-500',
   rejected: 'from-red-400 to-red-500',
 }
@@ -104,7 +108,7 @@ function HolderDetail({ holder, onBack, onApproveKyc, onOpenReject, portfolioHol
               <div className="flex flex-col gap-2 flex-shrink-0 self-start pt-1">
                 <Button
                   onClick={() => onApproveKyc(holder.id)}
-                  className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-xs px-4 py-2"
+                  className="flex items-center gap-2 text-xs px-4 py-2"
                 >
                   <CheckCircle2 size={14} /> Approve KYC
                 </Button>
@@ -316,118 +320,328 @@ export function AdminHolders() {
     rejected: investors.filter(i => i.kycStatus === 'rejected').length,
   }
 
+  const totalCapital    = investors.reduce((s, i) => s + (i.totalInvested || 0), 0)
+  const activeVerified  = investors.filter(i => i.kycStatus === 'verified' && (i.totalBricks || 0) > 0).length
+  const pendingKyc      = counts.pending
+  const avgPortfolio    = activeVerified > 0 ? Math.round(totalCapital / activeVerified) : 0
+
+  // ── Chart data ──────────────────────────────────────────────────────────────
+
+  const geoData = (() => {
+    const swiss = investors.filter(i => i.country === 'Switzerland').length
+    const intl  = investors.length - swiss
+    const total = investors.length || 1
+    return [
+      { name: 'Swiss',         value: swiss, pct: Math.round(swiss / total * 100) },
+      { name: 'International', value: intl,  pct: Math.round(intl  / total * 100) },
+    ]
+  })()
+
+  const diversData = (() => {
+    const LABELS = { 0: '0 SPVs', 1: '1 SPV', 2: '2 SPVs', 3: '3 SPVs', '4+': '4+ SPVs' }
+    const buckets = {}
+    investors.forEach(inv => {
+      const n = portfolioHoldings.filter(h => h.investorId === inv.id).length
+      const k = n >= 4 ? '4+' : String(n)
+      buckets[k] = (buckets[k] || 0) + 1
+    })
+    return ['0', '1', '2', '3', '4+'].filter(k => buckets[k]).map(k => ({
+      label:   LABELS[k],
+      holders: buckets[k],
+    }))
+  })()
+
+  const CONC_BRACKETS = [
+    { label: '< 1k',       min: 0,      max: 1000,      fill: '#94a3b8' },
+    { label: '1k – 10k',  min: 1000,   max: 10000,     fill: '#34d399' },
+    { label: '10k – 100k',min: 10000,  max: 100000,    fill: '#0ea5e9' },
+    { label: '100k+',     min: 100000, max: Infinity,  fill: '#f59e0b' },
+  ]
+  const concData = CONC_BRACKETS.map(b => ({
+    label:   b.label,
+    holders: investors.filter(i => (i.totalInvested || 0) >= b.min && (i.totalInvested || 0) < b.max).length,
+    fill:    b.fill,
+  }))
+
   return (
     <Layout>
       <Header title="Holders" subtitle={`${counts.verified} verified · ${counts.pending} pending · ${counts.rejected} rejected`} />
       <div className="ds-page">
 
-        {/* Filter bar */}
-        <div className="bg-white rounded-2xl border border-gray-200 px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-gray-400 w-10 flex-shrink-0">KYC</span>
-            <div className="flex gap-1.5">
-              {[
-                { key: 'all',      label: 'All',      activeCls: 'bg-sky-600 text-white'  },
-                { key: 'verified', label: 'Verified', activeCls: 'bg-green-600 text-white' },
-                { key: 'pending',  label: 'Pending',  activeCls: 'bg-amber-500 text-white' },
-                { key: 'rejected', label: 'Rejected', activeCls: 'bg-red-600 text-white'   },
-              ].map(p => (
-                <button
-                  key={p.key}
-                  onClick={() => setKycFilter(p.key)}
-                  className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${kycFilter === p.key ? p.activeCls : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
-                >
-                  {p.label} <span className={kycFilter === p.key ? 'opacity-80' : 'text-gray-400'}>{counts[p.key]}</span>
-                </button>
+        {/* Analytics Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+          {/* Chart 1 — Geographic Distribution (Donut) */}
+          <div className="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col">
+            <p className="text-sm font-semibold text-gray-900">Geographic Distribution</p>
+            <p className="text-xs text-gray-400 mt-0.5 mb-4">Swiss vs. International — Lex Koller compliance</p>
+            <div className="relative" style={{ height: 135 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={geoData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={40}
+                    outerRadius={58}
+                    dataKey="value"
+                    startAngle={90}
+                    endAngle={-270}
+                    strokeWidth={0}
+                  >
+                    <Cell fill="#0ea5e9" />
+                    <Cell fill="#e2e8f0" />
+                  </Pie>
+                  <Tooltip
+                    formatter={(v, n) => [v + ' holders', n]}
+                    contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e5e7eb', boxShadow: 'none' }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <span className="text-xl font-bold text-gray-900">{geoData[0].pct}%</span>
+                <span className="text-xs text-gray-400 mt-0.5">Swiss</span>
+              </div>
+            </div>
+            <div className="flex justify-center gap-6 mt-4">
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-sky-400 flex-shrink-0" />
+                <span className="text-xs text-gray-500">Swiss ({geoData[0].value})</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-slate-200 flex-shrink-0" />
+                <span className="text-xs text-gray-500">International ({geoData[1].value})</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Chart 2 — Portfolio Diversification (Bar) */}
+          <div className="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col">
+            <p className="text-sm font-semibold text-gray-900">Portfolio Diversification</p>
+            <p className="text-xs text-gray-400 mt-0.5 mb-4">SPVs owned per holder — user stickiness</p>
+            <div style={{ height: 135 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={diversData} barSize={32} margin={{ top: 8, right: 8, left: -24, bottom: 0 }}>
+                  <XAxis
+                    dataKey="label"
+                    tick={{ fontSize: 11, fill: '#9ca3af' }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    allowDecimals={false}
+                    tick={{ fontSize: 11, fill: '#9ca3af' }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    formatter={(v) => [v + ' holders', 'Count']}
+                    contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e5e7eb', boxShadow: 'none' }}
+                    cursor={{ fill: '#f8fafc' }}
+                  />
+                  <Bar dataKey="holders" fill="#0ea5e9" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <p className="text-xs text-gray-400 mt-3 text-center">
+              {diversData.find(d => d.label.startsWith('1'))?.holders || 0} single-SPV holders ·{' '}
+              {diversData.filter(d => !d.label.startsWith('0') && !d.label.startsWith('1')).reduce((s, d) => s + d.holders, 0)} diversified
+            </p>
+          </div>
+
+          {/* Chart 3 — Investor Concentration (Bar + colour coding) */}
+          <div className="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col">
+            <p className="text-sm font-semibold text-gray-900">Investor Concentration</p>
+            <p className="text-xs text-gray-400 mt-0.5 mb-4">Retail vs. Whale — liquidity risk indicator</p>
+            <div style={{ height: 135 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={concData} barSize={32} margin={{ top: 8, right: 8, left: -24, bottom: 0 }}>
+                  <XAxis
+                    dataKey="label"
+                    tick={{ fontSize: 11, fill: '#9ca3af' }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    allowDecimals={false}
+                    tick={{ fontSize: 11, fill: '#9ca3af' }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    formatter={(v) => [v + ' holders', 'Count']}
+                    contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e5e7eb', boxShadow: 'none' }}
+                    cursor={{ fill: '#f8fafc' }}
+                  />
+                  <Bar dataKey="holders" radius={[4, 4, 0, 0]}>
+                    {concData.map((entry, i) => (
+                      <Cell key={i} fill={entry.fill} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3 justify-center">
+              {concData.map((d, i) => (
+                <div key={i} className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-sm flex-shrink-0" style={{ backgroundColor: d.fill }} />
+                  <span className="text-xs text-gray-400">{d.label}</span>
+                </div>
               ))}
             </div>
           </div>
-          <div className="relative min-w-56">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search name or email…"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="w-full border border-gray-200 rounded-lg pl-8 pr-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent"
-            />
-          </div>
+
         </div>
 
-        {/* Table */}
-        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-100 bg-gray-50">
-                <th className="text-left  text-xs text-gray-500 font-semibold px-6 py-3">Holder</th>
-                <th className="text-left  text-xs text-gray-500 font-semibold px-4 py-3">KYC Status</th>
-                <th className="text-left  text-xs text-gray-500 font-semibold px-4 py-3">Country</th>
-                <th className="text-right text-xs text-gray-500 font-semibold px-4 py-3">Invested</th>
-                <th className="text-right text-xs text-gray-500 font-semibold px-4 py-3">Bricks</th>
-                <th className="text-right text-xs text-gray-500 font-semibold px-4 py-3">SPVs</th>
-                <th className="text-left  text-xs text-gray-500 font-semibold px-4 py-3">Wallet</th>
-                <th className="text-left  text-xs text-gray-500 font-semibold px-4 py-3">Joined</th>
-                <th className="px-6 py-3"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map(inv => {
-                const spvCount = portfolioHoldings.filter(h => h.investorId === inv.id).length
-                const isPending = inv.kycStatus === 'pending'
-                return (
-                  <tr key={inv.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-bold flex-shrink-0 bg-gradient-to-br ${AVATAR_GRADIENT[inv.kycStatus]}`}>
-                          {initials(inv.name)}
-                        </div>
-                        <div>
-                          <p className="font-semibold text-gray-900">{inv.name}</p>
-                          <p className="text-xs text-gray-400">{inv.email}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <Badge variant={KYC_VARIANT[inv.kycStatus]} className="text-xs">{KYC_LABEL[inv.kycStatus]}</Badge>
-                    </td>
-                    <td className="px-4 py-3 text-gray-500 text-sm">{inv.country || '—'}</td>
-                    <td className="px-4 py-3 text-right font-semibold text-gray-900">{inv.totalInvested > 0 ? fmt(inv.totalInvested) : <span className="text-gray-300">—</span>}</td>
-                    <td className="px-4 py-3 text-right text-gray-700">{inv.totalBricks > 0 ? inv.totalBricks.toLocaleString() : <span className="text-gray-300">—</span>}</td>
-                    <td className="px-4 py-3 text-right text-gray-700">{spvCount > 0 ? spvCount : <span className="text-gray-300">—</span>}</td>
-                    <td className="px-4 py-3">
-                      <code className="text-xs font-mono text-gray-400 bg-gray-50 border border-gray-100 px-2 py-0.5 rounded">
-                        {truncateWallet(inv.walletAddress)}
-                      </code>
-                    </td>
-                    <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">{inv.joinDate}</td>
-                    <td className="px-6 py-3">
-                      <div className="flex items-center gap-2 justify-end">
-                        {isPending && (
-                          <>
-                            <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-1" onClick={() => handleApproveKyc(inv.id)}>
-                              <CheckCircle2 size={12} /> Approve
-                            </Button>
-                            <Button size="sm" variant="destructive" className="flex items-center gap-1" onClick={() => openRejectModal(inv.id)}>
-                              <XCircle size={12} /> Reject
-                            </Button>
-                          </>
-                        )}
-                        <Button variant="outline" size="sm" onClick={() => setSelectedId(inv.id)}>View</Button>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-              {filtered.length === 0 && (
-                <tr>
-                  <td colSpan={9} className="px-6 py-12 text-center text-sm text-gray-400">
-                    No holders match this filter.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        {/* Table area + Metrics sidebar */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_232px] gap-4 items-start">
+
+          {/* Left: Filter bar + Table */}
+          <div className="space-y-3 min-w-0">
+
+            {/* Filter bar */}
+            <div className="bg-white rounded-2xl border border-gray-200 px-4 py-2.5 flex items-center justify-between gap-4 flex-wrap">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-gray-400 w-10 flex-shrink-0">KYC</span>
+                <div className="flex gap-1.5">
+                  {[
+                    { key: 'all',      label: 'All',      activeCls: 'bg-sky-600 text-white'  },
+                    { key: 'verified', label: 'Verified', activeCls: 'bg-sky-600 text-white' },
+                    { key: 'pending',  label: 'Pending',  activeCls: 'bg-sky-600 text-white' },
+                    { key: 'rejected', label: 'Rejected', activeCls: 'bg-sky-600 text-white' },
+                  ].map(p => (
+                    <button
+                      key={p.key}
+                      onClick={() => setKycFilter(p.key)}
+                      className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${kycFilter === p.key ? p.activeCls : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                    >
+                      {p.label} <span className={kycFilter === p.key ? 'opacity-80' : 'text-gray-400'}>{counts[p.key]}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="relative min-w-48">
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search name or email…"
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  className="w-full border border-gray-200 rounded-lg pl-8 pr-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            {/* Table */}
+            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm min-w-[680px]">
+                  <thead>
+                    <tr className="border-b border-gray-100 bg-gray-50">
+                      <th className="text-left  text-xs text-gray-500 font-semibold px-4 py-2.5">Holder</th>
+                      <th className="text-left  text-xs text-gray-500 font-semibold px-3 py-2.5">KYC</th>
+                      <th className="text-left  text-xs text-gray-500 font-semibold px-3 py-2.5">Country</th>
+                      <th className="text-right text-xs text-gray-500 font-semibold px-3 py-2.5">Portfolio Size</th>
+                      <th className="text-left  text-xs text-gray-500 font-semibold px-3 py-2.5">Wallet</th>
+                      <th className="text-left  text-xs text-gray-500 font-semibold px-3 py-2.5">Joined</th>
+                      <th className="px-4 py-2.5 w-20"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.map(inv => {
+                      const spvCount = portfolioHoldings.filter(h => h.investorId === inv.id).length
+                      return (
+                        <tr key={inv.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                          <td className="px-4 py-2">
+                            <div className="flex items-center gap-2.5">
+                              <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0 bg-gradient-to-br ${AVATAR_GRADIENT[inv.kycStatus]}`}>
+                                {initials(inv.name)}
+                              </div>
+                              <div>
+                                <p className="font-semibold text-gray-900 text-xs leading-tight flex items-center gap-1">
+                                  {inv.name}
+                                  {inv.totalInvested > 100000 && (
+                                    <span title="Portfolio value above CHF 100,000">⭐</span>
+                                  )}
+                                </p>
+                                <p className="text-xs text-gray-400 leading-tight">{inv.email}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-3 py-2">
+                            <Badge variant={KYC_VARIANT[inv.kycStatus]} className="text-xs">{KYC_LABEL[inv.kycStatus]}</Badge>
+                          </td>
+                          <td className="px-3 py-2 text-gray-500 text-xs">{inv.country || '—'}</td>
+                          <td className="px-3 py-2 text-right">
+                            {inv.totalInvested > 0 ? (
+                              <>
+                                <p className="font-semibold text-gray-900 text-xs">{fmt(inv.totalInvested)}</p>
+                                <p className="text-xs text-gray-400">Across {spvCount} SPV{spvCount !== 1 ? 's' : ''}</p>
+                              </>
+                            ) : (
+                              <span className="text-gray-300">—</span>
+                            )}
+                          </td>
+                          <td className="px-3 py-2">
+                            <code className="text-xs font-mono text-gray-400 bg-gray-50 border border-gray-100 px-1.5 py-0.5 rounded">
+                              {truncateWallet(inv.walletAddress)}
+                            </code>
+                          </td>
+                          <td className="px-3 py-2 text-gray-500 text-xs whitespace-nowrap">{inv.joinDate}</td>
+                          <td className="px-4 py-2">
+                            <Button variant="outline" size="sm" onClick={() => setSelectedId(inv.id)}>View</Button>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                    {filtered.length === 0 && (
+                      <tr>
+                        <td colSpan={7} className="px-6 py-10 text-center text-sm text-gray-400">
+                          No holders match this filter.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>{/* /left column */}
+
+          {/* Right: Metrics sidebar */}
+          <div className="space-y-3 sticky top-6">
+            <StatCard
+              label="Total Capital Deployed"
+              value={fmt(totalCapital)}
+              sub="sum of all invested capital"
+              icon={DollarSign}
+              color="blue"
+            />
+            <StatCard
+              label="Active Verified Holders"
+              value={activeVerified.toLocaleString()}
+              sub="KYC approved · owns 1+ Brick"
+              icon={Users}
+              color="green"
+            />
+            <StatCard
+              label="Pending KYC / Compliance"
+              value={pendingKyc.toLocaleString()}
+              sub={pendingKyc > 0 ? 'awaiting verification' : 'queue clear'}
+              icon={AlertTriangle}
+              color={pendingKyc > 0 ? 'amber' : 'green'}
+            />
+            <StatCard
+              label="Avg. Portfolio Size"
+              value={fmt(avgPortfolio)}
+              sub="total capital ÷ active holders"
+              icon={TrendingUp}
+              color="purple"
+            />
+          </div>{/* /right sidebar */}
+
+        </div>{/* /two-column grid */}
+
       </div>
 
       {/* Reject modal — for list view quick actions */}

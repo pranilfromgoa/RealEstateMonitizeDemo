@@ -536,21 +536,25 @@
   }
 
   .ds-alert-warning {
-    background-color: hsl(45 100% 95%);
-    border: 1px solid hsl(38 92% 78%);
-    color: hsl(35 70% 30%);
+    background-color: hsl(0 0% 98%);
+    border: 1px solid hsl(0 0% 88%);
+    border-left: 4px solid hsl(38 92% 54%);
+    color: hsl(0 0% 30%);
+    border-radius: 0 var(--radius-card) var(--radius-card) 0;
   }
 
   .ds-alert-success {
-    background-color: hsl(142 72% 95%);
-    border: 1px solid hsl(142 70% 72%);
-    color: hsl(142 60% 22%);
+    background-color: hsl(204 100% 97%);
+    border: 1px solid hsl(201 90% 80%);
+    color: hsl(201 96% 28%);
   }
 
   .ds-alert-error {
-    background-color: hsl(0 86% 97%);
-    border: 1px solid hsl(0 86% 84%);
-    color: hsl(0 65% 38%);
+    background-color: hsl(0 0% 98%);
+    border: 1px solid hsl(0 0% 88%);
+    border-left: 4px solid hsl(0 86% 60%);
+    color: hsl(0 0% 30%);
+    border-radius: 0 var(--radius-card) var(--radius-card) 0;
   }
 
 

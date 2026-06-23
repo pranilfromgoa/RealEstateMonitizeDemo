@@ -3,11 +3,11 @@ import { createContext, useContext, useState } from 'react'
 const AuthContext = createContext(null)
 
 const userProfiles = {
-  investor: {
+  holder: {
     id: 'investor-001',
     name: 'Alex Rivera',
     email: 'alex.rivera@email.com',
-    role: 'investor',
+    role: 'holder',
     avatar: 'AR',
   },
   admin: {
@@ -16,6 +16,13 @@ const userProfiles = {
     email: 'daniel@brickchain.com',
     role: 'admin',
     avatar: 'D',
+  },
+  spv_manager: {
+    id: 'pu-001',
+    name: 'Sara Chen',
+    email: 'sara.chen@brickchain.com',
+    role: 'spv_manager',
+    avatar: 'SC',
   },
 }
 

@@ -11,7 +11,7 @@ import {
 } from '@/data/mockData'
 
 const DataContext = createContext(null)
-const STORAGE_KEY = 'brickchain_demo_v3'
+const STORAGE_KEY = 'brickchain_demo_v5'
 
 function getDefaults() {
   return {
@@ -34,9 +34,13 @@ export function DataProvider({ children }) {
         const parsed = JSON.parse(saved)
         // Backfill coverImage for any SPV that was saved before the field existed
         const defaultImageMap = Object.fromEntries(defaultSpvs.map(s => [s.id, s.coverImage]))
+        // Remap legacy propertyType values to the canonical set
+        const TYPE_REMAP = { 'Retail': 'Commercial', 'Self-Storage': 'Industrial', 'Luxury Residential': 'Residential' }
         parsed.spvs = (parsed.spvs || defaultSpvs).map(s => ({
           ...s,
           coverImage: s.coverImage || defaultImageMap[s.id] || '',
+          propertyType: TYPE_REMAP[s.propertyType] || s.propertyType || 'Residential',
+          type:         TYPE_REMAP[s.type]         || s.type         || 'Residential',
         }))
         return parsed
       }

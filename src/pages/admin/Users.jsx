@@ -6,14 +6,28 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Modal } from '@/components/ui/modal'
 import { StatCard } from '@/components/ui/stat-card'
-import { platformUsers, regions } from '@/data/mockData'
-import { Users, ShieldCheck, UserX, Globe, Plus, UserCheck, UserMinus } from 'lucide-react'
+import { platformUsers, regions, auditActions } from '@/data/mockData'
+import { Users, ShieldCheck, UserX, Globe, Plus, UserCheck, UserMinus, Activity, ShieldAlert } from 'lucide-react'
+import {
+  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell,
+} from 'recharts'
+
+const TIER_COLORS = {
+  'Super Admin':        '#7c3aed',
+  'Tech Admin':         '#0ea5e9',
+  'Compliance Officer': '#10b981',
+  'SPV Manager':        '#f59e0b',
+  'Support Tier 1':     '#94a3b8',
+  'Support Tier 2':     '#64748b',
+}
+const TIER_ORDER = ['Super Admin', 'Tech Admin', 'Compliance Officer', 'SPV Manager', 'Support Tier 1', 'Support Tier 2']
 
 const ROLES = ['SPV Manager', 'Platform User']
 const ALL_REGIONS = ['All', ...regions]
 
 const roleColors = {
-  'SPV Manager':   'bg-violet-100 text-violet-700',
+  'SPV Manager':   'bg-sky-100 text-sky-700',
   'Platform User': 'bg-sky-100 text-sky-700',
 }
 
@@ -40,10 +54,21 @@ export function AdminUsers() {
     ? users
     : users.filter(u => u.region === regionFilter)
 
-  const total    = users.length
-  const spvCount = users.filter(u => u.role === 'SPV Manager').length
-  const puCount  = users.filter(u => u.role === 'Platform User').length
-  const disabled = users.filter(u => u.status === 'disabled').length
+  const total           = users.length
+  const spvCount        = users.filter(u => u.role === 'SPV Manager').length
+  const puCount         = users.filter(u => u.role === 'Platform User').length
+  const disabled        = users.filter(u => u.status === 'disabled').length
+  const activeSessions  = users.filter(u => u.sessionActive).length
+  const flaggedUsers    = users.filter(u => u.securityFlag)
+  const securityFlags   = flaggedUsers.length
+
+  const tierData = TIER_ORDER
+    .map(tier => ({
+      name: tier,
+      value: users.filter(u => u.permissionTier === tier).length,
+      fill: TIER_COLORS[tier],
+    }))
+    .filter(d => d.value > 0)
 
   const toggleStatus = (id) => {
     setUsers(prev => prev.map(u =>
@@ -83,12 +108,139 @@ export function AdminUsers() {
       <Header title="Users" subtitle="Manage platform users, roles and regional access" />
       <div className="ds-page">
 
-        {/* Stats */}
+        {/* Stats row 1 */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard label="Total Users"     value={total}    icon={Users}       color="blue" />
-          <StatCard label="SPV Managers"    value={spvCount} icon={ShieldCheck} color="violet" />
+          <StatCard label="SPV Managers"    value={spvCount} icon={ShieldCheck} color="blue" />
           <StatCard label="Platform Users"  value={puCount}  icon={UserCheck}   color="green" />
           <StatCard label="Disabled"        value={disabled} icon={UserX}       color="amber" />
+        </div>
+
+        {/* Stats row 2: highlighted security metrics */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Active Sessions */}
+          <div className="bg-gradient-to-br from-emerald-50 to-sky-50 border border-emerald-200 rounded-2xl p-5 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-emerald-500 flex items-center justify-center flex-shrink-0 shadow-md shadow-emerald-200">
+              <Activity size={22} className="text-white" strokeWidth={2} />
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-emerald-700 uppercase tracking-wide">🌟 Active Sessions</p>
+              <p className="text-4xl font-extrabold text-emerald-700 leading-none mt-1">{activeSessions}</p>
+              <p className="text-xs text-emerald-600 mt-1">staff members logged in right now</p>
+            </div>
+          </div>
+
+          {/* Security Flags */}
+          <div className={`border rounded-2xl p-5 flex items-start gap-4 ${
+            securityFlags > 0
+              ? 'bg-gradient-to-br from-red-50 to-rose-50 border-red-300'
+              : 'bg-gray-50 border-gray-200'
+          }`}>
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md ${
+              securityFlags > 0 ? 'bg-red-500 shadow-red-200' : 'bg-gray-400 shadow-gray-200'
+            }`}>
+              <ShieldAlert size={22} className="text-white" strokeWidth={2} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <p className={`text-xs font-semibold uppercase tracking-wide ${securityFlags > 0 ? 'text-red-700' : 'text-gray-500'}`}>
+                  🌟 Security Flags
+                </p>
+                {securityFlags > 0 && (
+                  <span className="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pulse">
+                    {securityFlags}
+                  </span>
+                )}
+              </div>
+              <p className={`text-4xl font-extrabold leading-none mt-1 ${securityFlags > 0 ? 'text-red-600' : 'text-gray-400'}`}>
+                {securityFlags}
+              </p>
+              {securityFlags > 0 ? (
+                <div className="mt-2 space-y-1">
+                  {flaggedUsers.map(u => (
+                    <p key={u.id} className="text-xs text-red-600 truncate">
+                      <span className="font-semibold">{u.name}:</span> {u.securityFlagReason}
+                    </p>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-gray-400 mt-1">No suspicious activity detected</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+          {/* Chart 1: Role & Privilege Distribution */}
+          <div className="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col">
+            <p className="text-sm font-semibold text-gray-900">Role & Privilege Distribution</p>
+            <p className="text-xs text-gray-400 mt-0.5 mb-4">Permission tier breakdown across all staff</p>
+            <div className="flex gap-5 flex-1 items-center">
+              <div style={{ width: 160, height: 160, flexShrink: 0 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={tierData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={44}
+                      outerRadius={70}
+                      dataKey="value"
+                      startAngle={90}
+                      endAngle={-270}
+                      strokeWidth={0}
+                    >
+                      {tierData.map((e, i) => <Cell key={i} fill={e.fill} />)}
+                    </Pie>
+                    <Tooltip
+                      formatter={(v, name) => [v + ' users', name]}
+                      contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e5e7eb', boxShadow: 'none' }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex-1 space-y-2.5 min-w-0">
+                {tierData.map((d, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <div className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ backgroundColor: d.fill }} />
+                    <span className="text-xs text-gray-600 truncate flex-1">{d.name}</span>
+                    <span className="text-xs font-bold text-gray-800 flex-shrink-0">{d.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Chart 2: Audit Trail / System Action Volume */}
+          <div className="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col">
+            <p className="text-sm font-semibold text-gray-900">System Action Volume</p>
+            <p className="text-xs text-gray-400 mt-0.5 mb-4">Audit trail — admin actions over the last 7 days</p>
+            <div style={{ height: 160 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={auditActions} margin={{ top: 4, right: 8, left: -24, bottom: 0 }}>
+                  <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+                  <Tooltip
+                    contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e5e7eb', boxShadow: 'none' }}
+                  />
+                  <Line type="monotone" dataKey="kycApprovals" name="KYC Approvals" stroke="#10b981" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="propEdits"    name="Property Edits" stroke="#0ea5e9" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="resets"       name="Resets"         stroke="#f59e0b" strokeWidth={2} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex gap-4 mt-2 justify-center">
+              {[['#10b981','KYC Approvals'],['#0ea5e9','Property Edits'],['#f59e0b','Resets']].map(([c,l]) => (
+                <div key={l} className="flex items-center gap-1.5">
+                  <div className="w-3 h-0.5 rounded-full" style={{ backgroundColor: c }} />
+                  <span className="text-xs text-gray-500">{l}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
         </div>
 
         {/* Region filter + Add button */}
@@ -129,7 +281,7 @@ export function AdminUsers() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100">
-                  {['User', 'Email', 'Role', 'Region', 'Status', 'Joined', 'Actions'].map(h => (
+                  {['User', 'Permission Tier', 'Region', 'Session', 'Status', 'Last Login', 'Actions'].map(h => (
                     <th key={h} className="text-left text-xs text-gray-500 font-medium px-5 py-3">{h}</th>
                   ))}
                 </tr>
@@ -139,18 +291,31 @@ export function AdminUsers() {
                   <tr key={user.id} className={`border-b border-gray-50 hover:bg-gray-50 transition-colors ${user.status === 'disabled' ? 'opacity-50' : ''}`}>
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-2.5">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                          user.role === 'SPV Manager' ? 'bg-violet-100 text-violet-600' : 'bg-sky-100 text-sky-600'
-                        }`}>
-                          {initials(user.name)}
+                        <div className="relative">
+                          <div className="w-8 h-8 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                            {initials(user.name)}
+                          </div>
+                          {user.sessionActive && (
+                            <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full" title="Active session" />
+                          )}
                         </div>
-                        <span className="font-medium text-gray-900">{user.name}</span>
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-medium text-gray-900 text-sm">{user.name}</span>
+                            {user.securityFlag && (
+                              <ShieldAlert size={13} className="text-red-500 flex-shrink-0" title={user.securityFlagReason} />
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-400">{user.email}</p>
+                        </div>
                       </div>
                     </td>
-                    <td className="px-5 py-3 text-gray-500">{user.email}</td>
                     <td className="px-5 py-3">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${roleColors[user.role]}`}>
-                        {user.role}
+                      <span
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white"
+                        style={{ backgroundColor: TIER_COLORS[user.permissionTier] || '#94a3b8' }}
+                      >
+                        {user.permissionTier || user.role}
                       </span>
                     </td>
                     <td className="px-5 py-3">
@@ -159,11 +324,17 @@ export function AdminUsers() {
                       </span>
                     </td>
                     <td className="px-5 py-3">
+                      {user.sessionActive
+                        ? <span className="flex items-center gap-1.5 text-xs text-emerald-700 font-medium"><span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />Live</span>
+                        : <span className="text-xs text-gray-400">Offline</span>
+                      }
+                    </td>
+                    <td className="px-5 py-3">
                       <Badge variant={user.status === 'active' ? 'success' : 'secondary'}>
                         {user.status}
                       </Badge>
                     </td>
-                    <td className="px-5 py-3 text-gray-400 text-xs">{user.joinDate}</td>
+                    <td className="px-5 py-3 text-gray-400 text-xs">{user.lastLogin || user.joinDate}</td>
                     <td className="px-5 py-3">
                       <button
                         onClick={() => toggleStatus(user.id)}
@@ -183,9 +354,7 @@ export function AdminUsers() {
                 ))}
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="px-5 py-10 text-center text-sm text-gray-400">
-                      No users found for this region.
-                    </td>
+                    <td colSpan={7} className="px-5 py-10 text-center text-sm text-gray-400">No users found for this region.</td>
                   </tr>
                 )}
               </tbody>
@@ -231,7 +400,7 @@ export function AdminUsers() {
                   className={`py-2.5 px-3 rounded-xl border-2 text-sm font-medium transition-colors text-left ${
                     form.role === r
                       ? r === 'SPV Manager'
-                        ? 'border-violet-500 bg-violet-50 text-violet-700'
+                        ? 'border-sky-500 bg-sky-50 text-sky-700'
                         : 'border-sky-500 bg-sky-50 text-sky-700'
                       : 'border-gray-200 text-gray-600 hover:border-gray-300'
                   }`}

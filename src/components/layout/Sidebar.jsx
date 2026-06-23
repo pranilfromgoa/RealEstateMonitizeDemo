@@ -4,33 +4,38 @@ import { cn } from '@/lib/utils'
 import {
   LayoutDashboard, Building2, Briefcase, ShieldCheck,
   FileText, Vote, Bot, LogOut, TrendingUp, Settings,
-  Banknote, Cpu, Users, Layers, Landmark, UserCheck
+  Banknote, Cpu, Users, Layers, Landmark, UserCheck, Home
 } from 'lucide-react'
 
-const investorNav = [
-  { label: 'Dashboard',            icon: LayoutDashboard, to: '/investor/dashboard',  group: 'PLATFORM' },
-  { label: 'SPVs',                  icon: Building2,       to: '/investor/properties', group: 'PLATFORM' },
-  { label: 'My Portfolio',         icon: Briefcase,       to: '/investor/portfolio',  group: 'PLATFORM' },
-  { label: 'KYC Verification',     icon: ShieldCheck,     to: '/investor/kyc',        group: 'PLATFORM' },
-  { label: 'Trading Desk',         icon: TrendingUp,      to: '/investor/trading',    group: 'TRADING'  },
-  { label: 'Tax Documents',        icon: FileText,        to: '/investor/taxes',      group: 'TRADING'  },
-  { label: "Brick Owners' Circle", icon: Vote,            to: '/investor/voting',     group: 'COMMUNITY'},
-  { label: 'SPV Intelligence',      icon: Bot,             to: '/investor/ai-reader',  group: 'COMMUNITY'},
+const holderNav = [
+  { label: 'Dashboard',            icon: LayoutDashboard, to: '/holder/dashboard',  group: 'PLATFORM' },
+  { label: 'SPVs',                  icon: Building2,       to: '/holder/properties', group: 'PLATFORM' },
+  { label: 'My Portfolio',         icon: Briefcase,       to: '/holder/portfolio',  group: 'PLATFORM' },
+  { label: 'KYC Verification',     icon: ShieldCheck,     to: '/holder/kyc',        group: 'PLATFORM' },
+  { label: 'Trading Desk',         icon: TrendingUp,      to: '/holder/trading',    group: 'TRADING'  },
+  { label: 'Tax Documents',        icon: FileText,        to: '/holder/taxes',      group: 'TRADING'  },
+  { label: "Brick Owners' Circle", icon: Vote,            to: '/holder/voting',     group: 'COMMUNITY'},
+  { label: 'SPV Intelligence',      icon: Bot,             to: '/holder/ai-reader',  group: 'COMMUNITY'},
 ]
 
 const adminNav = [
-  { label: 'Dashboard',     icon: LayoutDashboard, to: '/admin/dashboard',    group: 'PLATFORM'   },
-  { label: 'Brick Maker',   icon: Cpu,             to: '/admin/tokenization', group: 'PLATFORM'   },
-  { label: 'KYC Verification', icon: ShieldCheck,  to: '/admin/approvals',    group: 'PLATFORM'   },
-  { label: 'Rent Payouts',  icon: Banknote,        to: '/admin/payouts',      group: 'PLATFORM'   },
-  { label: 'SPV Registry',   icon: Landmark,        to: '/admin/spv',          group: 'MANAGEMENT' },
-  { label: 'Holders',        icon: UserCheck,       to: '/admin/holders',      group: 'MANAGEMENT' },
-  { label: 'Fee Management', icon: Settings,        to: '/admin/fees',         group: 'MANAGEMENT' },
-  { label: 'Users',          icon: Users,           to: '/admin/users',        group: 'MANAGEMENT' },
+  { label: 'Dashboard',        icon: LayoutDashboard, to: '/admin/dashboard',    group: 'PLATFORM'   },
+  { label: 'Brick Maker',      icon: Cpu,             to: '/admin/tokenization', group: 'PLATFORM'   },
+  { label: 'KYC Verification', icon: ShieldCheck,     to: '/admin/approvals',    group: 'PLATFORM'   },
+  { label: 'Rent Payouts',     icon: Banknote,        to: '/admin/payouts',      group: 'PLATFORM'   },
+  { label: 'SPV Registry',     icon: Landmark,        to: '/admin/spv',          group: 'MANAGEMENT' },
+  { label: 'Holders',          icon: UserCheck,       to: '/admin/holders',      group: 'MANAGEMENT' },
+  { label: 'Fee Management',   icon: Settings,        to: '/admin/fees',         group: 'MANAGEMENT' },
+  { label: 'Users',            icon: Users,           to: '/admin/users',        group: 'MANAGEMENT' },
+]
+
+const spvManagerNav = [
+  { label: 'My Properties',  icon: Home,    to: '/spv_manager/properties', group: 'MANAGEMENT' },
+  { label: 'SPV Registry',   icon: Landmark, to: '/spv_manager/spv',       group: 'MANAGEMENT' },
 ]
 
 const roleConfig = {
-  investor: {
+  holder: {
     dot:            'bg-sky-500',
     portalLabel:    'HOLDER PORTAL',
     accessLabel:    'PERSONAL ACCESS',
@@ -40,13 +45,22 @@ const roleConfig = {
     gradient:       'from-sky-500 to-sky-600',
   },
   admin: {
-    dot:            'bg-violet-500',
+    dot:            'bg-sky-500',
     portalLabel:    'ADMIN PORTAL',
     accessLabel:    'WHOLE SYSTEM ACCESS',
-    accessColor:    'text-violet-600',
+    accessColor:    'text-sky-600',
     description:    'Manage tokenization, approvals, payouts & platform settings.',
-    activeClass:    'bg-violet-600 text-white shadow-sm',
-    gradient:       'from-violet-500 to-violet-600',
+    activeClass:    'bg-sky-600 text-white shadow-sm',
+    gradient:       'from-sky-500 to-sky-600',
+  },
+  spv_manager: {
+    dot:            'bg-sky-500',
+    portalLabel:    'SPV MANAGER PORTAL',
+    accessLabel:    'SPV REGISTRY ACCESS',
+    accessColor:    'text-sky-600',
+    description:    'Create and manage real estate SPVs.',
+    activeClass:    'bg-sky-600 text-white shadow-sm',
+    gradient:       'from-sky-500 to-sky-600',
   },
 }
 
@@ -54,7 +68,7 @@ export function Sidebar() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
 
-  const navItems = user?.role === 'investor' ? investorNav : adminNav
+  const navItems = user?.role === 'holder' ? holderNav : user?.role === 'spv_manager' ? spvManagerNav : adminNav
 
   const cfg = roleConfig[user?.role] || roleConfig.admin
 

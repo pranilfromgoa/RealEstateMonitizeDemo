@@ -37,9 +37,9 @@ export function AdminFeeManagement() {
     <Layout>
       <Header title="Fee Management" subtitle="Phase 2 — Automated fee configuration and revenue tracking" />
       <div className="ds-page">
-        <div className="bg-purple-50 border border-purple-200 rounded-xl px-4 py-3 flex items-center gap-3">
-          <Badge className="bg-purple-600 text-white">Phase 2</Badge>
-          <p className="text-sm text-purple-700">In Phase 2, fees are automatically deducted by smart contracts. Configure fee rates and monitor revenue in real-time.</p>
+        <div className="bg-sky-50 border border-sky-200 rounded-xl px-4 py-3 flex items-center gap-3">
+          <Badge className="bg-sky-600 text-white">Phase 2</Badge>
+          <p className="text-sm text-sky-700">In Phase 2, fees are automatically deducted by smart contracts. Configure fee rates and monitor revenue in real-time.</p>
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
