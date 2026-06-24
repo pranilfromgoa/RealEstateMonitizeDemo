@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Modal } from '@/components/ui/modal'
 import { StatCard } from '@/components/ui/stat-card'
-import { platformUsers, regions, auditActions } from '@/data/mockData'
+import { researchUsers, regions, auditActions } from '@/data/mockData'
 import { Users, ShieldCheck, UserX, Globe, Plus, UserCheck, UserMinus, Activity, ShieldAlert } from 'lucide-react'
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -23,12 +23,12 @@ const TIER_COLORS = {
 }
 const TIER_ORDER = ['Super Admin', 'Tech Admin', 'Compliance Officer', 'SPV Manager', 'Support Tier 1', 'Support Tier 2']
 
-const ROLES = ['SPV Manager', 'Platform User']
+const ROLES = ['SPV Manager', 'Research User']
 const ALL_REGIONS = ['All', ...regions]
 
 const roleColors = {
   'SPV Manager':   'bg-sky-100 text-sky-700',
-  'Platform User': 'bg-sky-100 text-sky-700',
+  'Research User': 'bg-sky-100 text-sky-700',
 }
 
 const regionColors = {
@@ -41,10 +41,10 @@ function initials(name) {
   return name.split(' ').map(n => n[0]).join('').toUpperCase()
 }
 
-const emptyForm = { name: '', email: '', role: 'Platform User', region: 'US' }
+const emptyForm = { name: '', email: '', role: 'Research User', region: 'US' }
 
 export function AdminUsers() {
-  const [users, setUsers] = useState(platformUsers)
+  const [users, setUsers] = useState(researchUsers)
   const [regionFilter, setRegionFilter] = useState('All')
   const [addOpen, setAddOpen] = useState(false)
   const [form, setForm] = useState(emptyForm)
@@ -56,7 +56,7 @@ export function AdminUsers() {
 
   const total           = users.length
   const spvCount        = users.filter(u => u.role === 'SPV Manager').length
-  const puCount         = users.filter(u => u.role === 'Platform User').length
+  const puCount         = users.filter(u => u.role === 'Research User').length
   const disabled        = users.filter(u => u.status === 'disabled').length
   const activeSessions  = users.filter(u => u.sessionActive).length
   const flaggedUsers    = users.filter(u => u.securityFlag)
@@ -105,14 +105,14 @@ export function AdminUsers() {
 
   return (
     <Layout>
-      <Header title="Users" subtitle="Manage platform users, roles and regional access" />
+      <Header title="Users" subtitle="Manage research users, roles and regional access" />
       <div className="ds-page">
 
         {/* Stats row 1 */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard label="Total Users"     value={total}    icon={Users}       color="blue" />
           <StatCard label="SPV Managers"    value={spvCount} icon={ShieldCheck} color="blue" />
-          <StatCard label="Platform Users"  value={puCount}  icon={UserCheck}   color="green" />
+          <StatCard label="Research Users"  value={puCount}  icon={UserCheck}   color="green" />
           <StatCard label="Disabled"        value={disabled} icon={UserX}       color="amber" />
         </div>
 

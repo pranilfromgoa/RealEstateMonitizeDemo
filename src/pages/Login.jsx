@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { useData } from '@/context/DataContext'
-import { Layers, ArrowRight, RotateCcw, ShieldCheck, TrendingUp } from 'lucide-react'
+import { Layers, ArrowRight, RotateCcw, ShieldCheck, TrendingUp, Search } from 'lucide-react'
 
 const roles = [
   {
@@ -32,6 +32,15 @@ const roles = [
     demo: { name: 'Alex Rivera', id: 'investor-001' },
     icon: TrendingUp,
   },
+  {
+    key: 'research',
+    initials: 'RU',
+    label: 'Research User',
+    sublabel: 'Research (Property Scouting & Simulation)',
+    description: 'Scout properties & run investment simulations',
+    demo: { name: 'Emily Watson', id: 'research-001' },
+    icon: Search,
+  },
 ]
 
 const roleTheme = {
@@ -49,6 +58,11 @@ const roleTheme = {
     cardSelected:  'border-sky-500 bg-sky-50 shadow-sm ring-2 ring-sky-200',
     badgeSelected: 'bg-sky-600 text-white',
     badgeDefault:  'bg-sky-100 text-sky-700 group-hover:bg-sky-600 group-hover:text-white',
+  },
+  research: {
+    cardSelected:  'border-amber-500 bg-amber-50 shadow-sm ring-2 ring-amber-200',
+    badgeSelected: 'bg-amber-600 text-white',
+    badgeDefault:  'bg-amber-100 text-amber-700 group-hover:bg-amber-600 group-hover:text-white',
   },
 }
 
@@ -70,6 +84,7 @@ export function Login() {
     login(selected)
     if (selected === 'holder') navigate('/holder/dashboard')
     else if (selected === 'spv_manager') navigate('/spv_manager/spv')
+    else if (selected === 'research') navigate('/research/board')
     else navigate('/admin/dashboard')
   }
 
@@ -152,7 +167,7 @@ export function Login() {
           </div>
 
           {/* Role cards */}
-          <div className="grid grid-cols-3 gap-3 mb-6">
+          <div className="grid grid-cols-2 gap-3 mb-6">
             {roles.map(role => {
               const isSelected = selected === role.key
               return (
@@ -163,19 +178,22 @@ export function Login() {
                     login(role.key)
                     if (role.key === 'holder') navigate('/holder/dashboard')
                     else if (role.key === 'spv_manager') navigate('/spv_manager/spv')
+                    else if (role.key === 'research') navigate('/research/board')
                     else navigate('/admin/dashboard')
                   }}
-                  className={`group text-center p-4 rounded-xl border transition-all duration-150 ${
+                  className={`group text-left p-3 rounded-xl border transition-all duration-150 flex items-center gap-3 ${
                     isSelected ? roleTheme[role.key].cardSelected : 'border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-white'
                   }`}
                 >
-                  <div className={`w-10 h-10 rounded-xl mx-auto mb-2.5 flex items-center justify-center text-xs font-black tracking-wider transition-colors ${
+                  <div className={`w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center text-xs font-black tracking-wider transition-colors ${
                     isSelected ? roleTheme[role.key].badgeSelected : roleTheme[role.key].badgeDefault
                   }`}>
                     {role.initials}
                   </div>
-                  <p className="font-bold text-gray-900 text-sm leading-tight">{role.label}</p>
-                  <p className="text-[11px] text-gray-400 mt-1 leading-snug">{role.description}</p>
+                  <div className="min-w-0">
+                    <p className="font-bold text-gray-900 text-sm leading-tight truncate">{role.label}</p>
+                    <p className="text-[11px] text-gray-400 mt-0.5 leading-snug truncate">{role.sublabel}</p>
+                  </div>
                 </button>
               )
             })}

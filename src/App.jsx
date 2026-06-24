@@ -25,6 +25,10 @@ import { AdminSPV } from '@/pages/admin/SPV'
 import { AdminHolders } from '@/pages/admin/Holders'
 import { SpvManagerMyProperties } from '@/pages/spv-manager/MyProperties'
 
+// Research
+import { ResearchBoard } from '@/pages/research/ProspectingBoard'
+import { ScenarioModeler } from '@/pages/research/ScenarioModeler'
+
 
 function ProtectedRoute({ children, role }) {
   const { user } = useAuth()
@@ -63,6 +67,11 @@ function AppRoutes() {
       <Route path="/spv_manager/dashboard"   element={<Navigate to="/spv_manager/spv" replace />} />
       <Route path="/spv_manager/spv"         element={<ProtectedRoute role="spv_manager"><AdminSPV /></ProtectedRoute>} />
       <Route path="/spv_manager/properties"  element={<ProtectedRoute role="spv_manager"><SpvManagerMyProperties /></ProtectedRoute>} />
+
+      {/* Research */}
+      <Route path="/research/dashboard"  element={<Navigate to="/research/board" replace />} />
+      <Route path="/research/board"      element={<ProtectedRoute role="research"><ResearchBoard /></ProtectedRoute>} />
+      <Route path="/research/simulate"   element={<ProtectedRoute role="research"><ScenarioModeler /></ProtectedRoute>} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

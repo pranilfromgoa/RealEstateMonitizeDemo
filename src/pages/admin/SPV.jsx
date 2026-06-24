@@ -6,7 +6,7 @@ import { useAuth } from '@/context/AuthContext'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Modal } from '@/components/ui/modal'
-import { regions, platformUsers } from '@/data/mockData'
+import { regions, researchUsers } from '@/data/mockData'
 import { useData } from '@/context/DataContext'
 import {
   Building2, Plus, ArrowLeft, ArrowRight, AlertTriangle, CheckCircle2, XCircle,
@@ -45,7 +45,7 @@ const COVER_IMAGES = [
 
 const LEGAL_FORMS    = ['AG', 'GmbH', 'LLC']
 const PROPERTY_TYPES = ['Residential', 'Commercial', 'Multi-Family', 'Industrial', 'Hospitality', 'Mixed-Use']
-const SPV_MANAGERS   = platformUsers.filter(u => u.role === 'SPV Manager' && u.status === 'active')
+const SPV_MANAGERS   = researchUsers.filter(u => u.role === 'SPV Manager' && u.status === 'active')
 
 const fmtCHF = n =>
   new Intl.NumberFormat('de-CH', { style: 'currency', currency: 'CHF', maximumFractionDigits: 0 }).format(n || 0)
@@ -534,7 +534,7 @@ export function AdminSPV() {
     return mr && ms
   }).length
 
-  // ── Auto-open SPV from navigation state (e.g. from My Properties page) ──────
+  // ── Auto-open SPV from navigation state (e.g. from SPVs Managed By Me page) ──────
 
   useEffect(() => {
     const id = location.state?.openSpvId

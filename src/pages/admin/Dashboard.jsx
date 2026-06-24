@@ -4,10 +4,14 @@ import { StatCard } from '@/components/ui/stat-card'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { platformStats } from '@/data/mockData'
+import { platformStats, aumHistory, spvPipeline, financialFlow } from '@/data/mockData'
 import { useData } from '@/context/DataContext'
 import { Building2, DollarSign, Users, TrendingUp, Clock, CheckCircle2, AlertCircle, ArrowRight, FileText, ShieldCheck } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import {
+  AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip,
+  ResponsiveContainer, CartesianGrid, Cell,
+} from 'recharts'
 
 const fmt    = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
 const fmtChf = (n) => new Intl.NumberFormat('de-CH', { style: 'currency', currency: 'CHF', maximumFractionDigits: 0 }).format(n)
@@ -54,10 +58,10 @@ export function AdminDashboard() {
   return (
     <Layout>
       <Header title="Admin Dashboard" subtitle="Platform overview and operations" />
-      <div className="ds-page">
-        <div className="flex gap-6 items-start">
+      <div className="ds-page space-y-5">
 
-          {/* ── Main content ── */}
+        {/* ══ Zone 1: Stats + Charts | Actions Required ══ */}
+        <div className="flex gap-6 items-start">
           <div className="flex-1 min-w-0 space-y-5">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <StatCard label="Total Value Locked" value={`$${(platformStats.totalValueLocked / 1000000).toFixed(1)}M`} icon={DollarSign} color="green" trend={15} />
@@ -72,120 +76,132 @@ export function AdminDashboard() {
               <StatCard label="Platform Funding Rate" value={`${fundingRate.toFixed(1)}%`} icon={TrendingUp} color="purple" sub={`${soldBricksAll.toLocaleString()} of ${totalBricksAll.toLocaleString()} bricks sold`} trend={fundingRate > 50 ? Math.round(fundingRate) : undefined} />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Live SPVs */}
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle>Live Tokenized SPVs</CardTitle>
-                      <p className="text-xs text-gray-400 mt-0.5">Fully operational — investors hold Bricks &amp; earn rent</p>
-                    </div>
+            {/* ── Charts ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+              {/* Chart 1: AUM Growth (spans 2 cols) */}
+              <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-200 p-5 flex flex-col">
+                <div className="flex items-start justify-between mb-1">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">AUM Growth Over Time</p>
+                    <p className="text-xs text-gray-400 mt-0.5">Total assets under management — last 12 months</p>
                   </div>
-                </CardHeader>
-                <CardContent className="p-0">
-                  {liveSpvs.map(spv => (
-                    <div key={spv.id} className="flex items-center gap-3 px-4 py-3 border-b border-gray-50 last:border-0">
-                      {spv.coverImage ? (
-                        <img src={spv.coverImage} alt="" className="w-12 h-9 rounded-lg object-cover flex-shrink-0" />
-                      ) : (
-                        <div className="w-12 h-9 rounded-lg bg-sky-50 flex items-center justify-center flex-shrink-0">
-                          <Building2 size={15} className="text-sky-400" />
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">{spv.propertyDisplayName}</p>
-                        <p className="text-xs text-gray-400">{spv.region} · {spv.propertyType}</p>
-                      </div>
-                      <div className="text-right flex-shrink-0">
-                        <Badge variant="success" className="text-xs">Live</Badge>
-                        {spv.targetAPY > 0 && <p className="text-xs text-green-600 mt-0.5">{spv.targetAPY}% APY</p>}
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-
-              {/* Right column */}
-              <div className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <div>
-                      <CardTitle className="flex items-center gap-2">
-                        <FileText size={15} className="text-amber-500" /> Review Pipeline
-                      </CardTitle>
-                      <p className="text-xs text-gray-400 mt-0.5">SPVs in the registry not yet live — part of the {spvs.length} total</p>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-2 pt-1">
-                    {reviewSpvs.length === 0 && (
-                      <p className="text-sm text-gray-400 py-2">No SPVs currently under review</p>
-                    )}
-                    {reviewSpvs.map(spv => {
-                      const statusMap = { pending: { label: 'Pending', variant: 'warning', bg: 'bg-gray-50' }, draft: { label: 'Draft', variant: 'default', bg: 'bg-gray-50' }, rejected: { label: 'Rejected', variant: 'destructive', bg: 'bg-gray-50' } }
-                      const s = statusMap[spv.status] || { label: spv.status, variant: 'default', bg: 'bg-gray-50' }
-                      return (
-                        <div key={spv.id} className={`flex items-center gap-3 p-3 rounded-xl ${s.bg}`}>
-                          {spv.coverImage
-                            ? <img src={spv.coverImage} alt="" className="w-10 h-8 rounded-lg object-cover flex-shrink-0" />
-                            : <Building2 size={16} className="text-gray-400 flex-shrink-0" />
-                          }
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 truncate">{spv.name}</p>
-                            <p className="text-xs text-gray-500">{spv.region} · {spv.propertyType}</p>
-                          </div>
-                          <Badge variant={s.variant}>{s.label}</Badge>
-                        </div>
-                      )
-                    })}
-                    <div className="pt-1">
-                      <Link to="/admin/spv" className="text-xs text-sky-600 hover:text-sky-800 font-medium flex items-center gap-1">
-                        Open SPV Registry <ArrowRight size={11} />
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader><CardTitle>Rent Distributions</CardTitle></CardHeader>
-                  <CardContent className="p-0">
-                    {pendingPayouts.map(p => {
-                      const spv = spvs.find(s => s.id === p.spvId)
-                      return (
-                        <div key={p.id} className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
-                          <Clock size={14} className="text-amber-500 flex-shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 truncate">{spv?.name}</p>
-                            <p className="text-xs text-gray-400">Due {p.date}</p>
-                          </div>
-                          <Badge variant="warning">Pending</Badge>
-                        </div>
-                      )
-                    })}
-                    {recentRent.slice(0, 3).map(rent => {
-                      const spv = spvs.find(s => s.id === rent.spvId)
-                      return (
-                        <div key={rent.id} className="flex items-center gap-3 px-4 py-3 border-b border-gray-50 last:border-0">
-                          <CheckCircle2 size={14} className="text-green-500 flex-shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 truncate">{spv?.name}</p>
-                            <p className="text-xs text-gray-400">{rent.date}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm font-semibold text-green-600">{fmt(rent.amount)}</p>
-                            <p className="text-xs text-gray-400">fee: {fmt(rent.fee || 0)}</p>
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </CardContent>
-                </Card>
+                  <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
+                    +{(((aumHistory.at(-1).aum - aumHistory[0].aum) / aumHistory[0].aum) * 100).toFixed(0)}% YTD
+                  </span>
+                </div>
+                <div style={{ height: 180 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={aumHistory} margin={{ top: 8, right: 8, left: -10, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="aumGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%"  stopColor="#8b5cf6" stopOpacity={0.18} />
+                          <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                      <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+                      <YAxis
+                        tickFormatter={(v) => `$${(v / 1000000).toFixed(1)}M`}
+                        tick={{ fontSize: 11, fill: '#9ca3af' }}
+                        axisLine={false}
+                        tickLine={false}
+                        width={52}
+                      />
+                      <Tooltip
+                        formatter={(v) => [`$${(v / 1000000).toFixed(2)}M`, 'AUM']}
+                        contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e5e7eb', boxShadow: 'none' }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="aum"
+                        stroke="#8b5cf6"
+                        strokeWidth={2.5}
+                        fill="url(#aumGrad)"
+                        dot={false}
+                        activeDot={{ r: 4, fill: '#8b5cf6' }}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
+
+              {/* Chart 2: SPV Pipeline Funnel */}
+              <div className="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col">
+                <p className="text-sm font-semibold text-gray-900">SPV Pipeline Health</p>
+                <p className="text-xs text-gray-400 mt-0.5 mb-5">Stage-by-stage deal funnel</p>
+                <div className="flex-1 flex flex-col justify-center gap-2.5">
+                  {(() => {
+                    const max = spvPipeline[0].count
+                    const fills = ['#94a3b8', '#60a5fa', '#818cf8', '#a78bfa', '#10b981']
+                    return spvPipeline.map((s, i) => {
+                      const pct = Math.round(s.count / max * 100)
+                      return (
+                        <div key={s.stage}>
+                          <div className="flex items-center justify-between mb-1 gap-2">
+                            <span className="text-xs text-gray-500 truncate">{s.stage}</span>
+                            <span className="text-xs font-bold flex-shrink-0" style={{ color: fills[i] }}>{s.count}</span>
+                          </div>
+                          <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                            <div
+                              className="h-3 rounded-full transition-all"
+                              style={{ width: `${pct}%`, backgroundColor: fills[i] }}
+                            />
+                          </div>
+                        </div>
+                      )
+                    })
+                  })()}
+                </div>
+                <p className="text-xs text-gray-400 text-center mt-4">
+                  {spvPipeline.reduce((s, d) => s + d.count, 0)} total deals tracked
+                </p>
+              </div>
+
+              {/* Chart 3: Financial Flow — full width */}
+              <div className="lg:col-span-3 bg-white rounded-2xl border border-gray-200 p-5 flex flex-col">
+                <div className="flex items-start justify-between mb-1">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">Financial Flow — Rent vs. Platform Fees</p>
+                    <p className="text-xs text-gray-400 mt-0.5">Month-by-month rent collected and platform fee extraction</p>
+                  </div>
+                  <div className="flex items-center gap-4 flex-shrink-0">
+                    {[['#10b981', 'Rent Collected'], ['#3b82f6', 'Platform Fees']].map(([c, l]) => (
+                      <div key={l} className="flex items-center gap-1.5">
+                        <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: c }} />
+                        <span className="text-xs text-gray-500">{l}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ height: 180 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={financialFlow} barCategoryGap="28%" barGap={3} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                      <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+                      <YAxis
+                        tickFormatter={(v) => `$${(v / 1000).toFixed(0)}K`}
+                        tick={{ fontSize: 11, fill: '#9ca3af' }}
+                        axisLine={false}
+                        tickLine={false}
+                        width={52}
+                      />
+                      <Tooltip
+                        formatter={(v, key) => [`$${(v / 1000).toFixed(1)}K`, key === 'rent' ? 'Rent Collected' : 'Platform Fees']}
+                        contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e5e7eb', boxShadow: 'none' }}
+                      />
+                      <Bar dataKey="rent" fill="#10b981" radius={[3, 3, 0, 0]} />
+                      <Bar dataKey="fees" fill="#3b82f6" radius={[3, 3, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
             </div>
           </div>
 
-          {/* ── Right actions sidebar ── */}
-          <div className="w-56 flex-shrink-0">
+          {/* ── Actions Required sidebar (Zone 1 right column) ── */}
+          <div className="w-72 flex-shrink-0">
             <div className="sticky top-6 space-y-3">
               <div className="flex items-center justify-between mb-1">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions Required</p>
@@ -253,8 +269,122 @@ export function AdminDashboard() {
                   btnHover="hover:bg-green-50"
                 />
               )}
-
             </div>
+          </div>
+        </div>
+
+        {/* ══ Zone 2: Lists | Rent Distributions — same flex row so tops align ══ */}
+        <div className="flex gap-6 items-start">
+
+          {/* Live SPVs + Review Pipeline */}
+          <div className="flex-1 min-w-0 grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Live Tokenized SPVs</CardTitle>
+                    <p className="text-xs text-gray-400 mt-0.5">Fully operational — investors hold Bricks &amp; earn rent</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                {liveSpvs.map(spv => (
+                  <div key={spv.id} className="flex items-center gap-3 px-4 py-3 border-b border-gray-50 last:border-0">
+                    {spv.coverImage ? (
+                      <img src={spv.coverImage} alt="" className="w-12 h-9 rounded-lg object-cover flex-shrink-0" />
+                    ) : (
+                      <div className="w-12 h-9 rounded-lg bg-sky-50 flex items-center justify-center flex-shrink-0">
+                        <Building2 size={15} className="text-sky-400" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">{spv.propertyDisplayName}</p>
+                      <p className="text-xs text-gray-400">{spv.region} · {spv.propertyType}</p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <Badge variant="success" className="text-xs">Live</Badge>
+                      {spv.targetAPY > 0 && <p className="text-xs text-green-600 mt-0.5">{spv.targetAPY}% APY</p>}
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText size={15} className="text-amber-500" /> Review Pipeline
+                  </CardTitle>
+                  <p className="text-xs text-gray-400 mt-0.5">SPVs in the registry not yet live — part of the {spvs.length} total</p>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2 pt-1">
+                {reviewSpvs.length === 0 && (
+                  <p className="text-sm text-gray-400 py-2">No SPVs currently under review</p>
+                )}
+                {reviewSpvs.map(spv => {
+                  const statusMap = { pending: { label: 'Pending', variant: 'warning', bg: 'bg-gray-50' }, draft: { label: 'Draft', variant: 'default', bg: 'bg-gray-50' }, rejected: { label: 'Rejected', variant: 'destructive', bg: 'bg-gray-50' } }
+                  const s = statusMap[spv.status] || { label: spv.status, variant: 'default', bg: 'bg-gray-50' }
+                  return (
+                    <div key={spv.id} className={`flex items-center gap-3 p-3 rounded-xl ${s.bg}`}>
+                      {spv.coverImage
+                        ? <img src={spv.coverImage} alt="" className="w-10 h-8 rounded-lg object-cover flex-shrink-0" />
+                        : <Building2 size={16} className="text-gray-400 flex-shrink-0" />
+                      }
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">{spv.name}</p>
+                        <p className="text-xs text-gray-500">{spv.region} · {spv.propertyType}</p>
+                      </div>
+                      <Badge variant={s.variant}>{s.label}</Badge>
+                    </div>
+                  )
+                })}
+                <div className="pt-1">
+                  <Link to="/admin/spv" className="text-xs text-sky-600 hover:text-sky-800 font-medium flex items-center gap-1">
+                    Open SPV Registry <ArrowRight size={11} />
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Rent Distributions — same w-72 as Actions sidebar, tops aligned */}
+          <div className="w-72 flex-shrink-0">
+            <Card>
+              <CardHeader><CardTitle>Rent Distributions</CardTitle></CardHeader>
+              <CardContent className="p-0">
+                {pendingPayouts.map(p => {
+                  const spv = spvs.find(s => s.id === p.spvId)
+                  return (
+                    <div key={p.id} className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
+                      <Clock size={14} className="text-amber-500 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">{spv?.name}</p>
+                        <p className="text-xs text-gray-400">Due {p.date}</p>
+                      </div>
+                      <Badge variant="warning">Pending</Badge>
+                    </div>
+                  )
+                })}
+                {recentRent.slice(0, 5).map(rent => {
+                  const spv = spvs.find(s => s.id === rent.spvId)
+                  return (
+                    <div key={rent.id} className="flex items-center gap-3 px-4 py-3 border-b border-gray-50 last:border-0">
+                      <CheckCircle2 size={14} className="text-green-500 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">{spv?.name}</p>
+                        <p className="text-xs text-gray-400">{rent.date}</p>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <p className="text-sm font-semibold text-green-600">{fmt(rent.amount)}</p>
+                        <p className="text-xs text-gray-400">fee: {fmt(rent.fee || 0)}</p>
+                      </div>
+                    </div>
+                  )
+                })}
+              </CardContent>
+            </Card>
           </div>
 
         </div>

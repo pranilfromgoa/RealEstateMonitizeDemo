@@ -8,6 +8,7 @@ import {
   portfolioHoldings as defaultHoldings,
   transactions as defaultTransactions,
   marketListings as defaultListings,
+  prospects as defaultProspects,
 } from '@/data/mockData'
 
 const DataContext = createContext(null)
@@ -23,6 +24,8 @@ function getDefaults() {
     portfolioHoldings: defaultHoldings,
     transactions: defaultTransactions,
     marketListings: defaultListings,
+    prospects: defaultProspects,
+    savedScenarios: [],
   }
 }
 
@@ -42,6 +45,14 @@ export function DataProvider({ children }) {
           propertyType: TYPE_REMAP[s.propertyType] || s.propertyType || 'Residential',
           type:         TYPE_REMAP[s.type]         || s.type         || 'Residential',
         }))
+        // Backfill prospects: preserve saved status changes but ensure new fields exist
+        const defaultProspectMap = Object.fromEntries(defaultProspects.map(p => [p.id, p]))
+        parsed.prospects = (parsed.prospects || defaultProspects).map(p => ({
+          ...defaultProspectMap[p.id],
+          ...p,
+        }))
+        // Migrate old per-property format (object) to new per-simulation format (array)
+        parsed.savedScenarios = Array.isArray(parsed.savedScenarios) ? parsed.savedScenarios : []
         return parsed
       }
     } catch {}
@@ -82,6 +93,62 @@ export function DataProvider({ children }) {
 
   const addSpv = (spv) =>
     update('spvs', prev => [...prev, spv])
+
+  const updateProspect = (id, changes) =>
+    update('prospects', prev =>
+      prev.map(p => p.id === id ? { ...p, ...changes } : p)
+    )
+
+  // ── Saved simulations (persisted to localStorage) ──
+  // Each entry: { id, name, createdAt, propertyIds: [], scenarios: { [id]: softValues } }
+
+  const saveSimulation = (name, propertyIds, scenarios) => {
+    const entry = {
+      id: 'sim-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+      name: name.trim() || 'Unnamed Simulation',
+      createdAt: new Date().toISOString(),
+      propertyIds: [...propertyIds],
+      scenarios: Object.fromEntries(
+        Object.entries(scenarios).map(([k, v]) => [k, { ...v }])
+      ),
+    }
+    update('savedScenarios', prev => [...(Array.isArray(prev) ? prev : []), entry])
+  }
+
+  const deleteSimulation = (id) => {
+    update('savedScenarios', prev => (Array.isArray(prev) ? prev : []).filter(s => s.id !== id))
+  }
+
+  // Restore a saved simulation into in-memory state; caller navigates to /research/simulate
+  const loadSimulation = (id) => {
+    const sim = (store.savedScenarios || []).find(s => s.id === id)
+    if (!sim) return
+    setSimSelectedIds([...sim.propertyIds])
+    setSimScenarios(Object.fromEntries(
+      Object.entries(sim.scenarios).map(([k, v]) => [k, { ...v }])
+    ))
+  }
+
+  // ── Simulation selection + scenarios (in-memory only, not persisted) ──
+  const [simSelectedIds, setSimSelectedIds] = useState([])
+  const [simScenarios, setSimScenarios] = useState({})
+
+  const toggleSimSelection = (id) => {
+    setSimSelectedIds(prev => {
+      const isSelected = prev.includes(id)
+      if (!isSelected && prev.length >= 3) return prev
+      setSimScenarios({})  // reset all scenarios whenever the selection changes
+      return isSelected ? prev.filter(i => i !== id) : [...prev, id]
+    })
+  }
+
+  const initSimScenario = (id, defaults) => {
+    setSimScenarios(prev => prev[id] ? prev : { ...prev, [id]: defaults })
+  }
+
+  const updateSimScenario = (id, field, value) => {
+    setSimScenarios(prev => ({ ...prev, [id]: { ...prev[id], [field]: value } }))
+  }
 
   const processRentPayout = (id, amount) => {
     const fee = amount * 0.05
@@ -196,9 +263,15 @@ export function DataProvider({ children }) {
     })
   }
 
+  const clearSimState = () => {
+    setSimSelectedIds([])
+    setSimScenarios({})
+  }
+
   const resetData = () => {
     localStorage.removeItem(STORAGE_KEY)
     setStore(getDefaults())
+    clearSimState()
   }
 
   return (
@@ -210,6 +283,16 @@ export function DataProvider({ children }) {
       updateInvestor,
       updateSpv,
       addSpv,
+      updateProspect,
+      saveSimulation,
+      deleteSimulation,
+      loadSimulation,
+      simSelectedIds,
+      simScenarios,
+      clearSimState,
+      toggleSimSelection,
+      initSimScenario,
+      updateSimScenario,
       buyBricks,
       createListing,
       buyFromMarket,

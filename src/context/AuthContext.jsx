@@ -24,6 +24,13 @@ const userProfiles = {
     role: 'spv_manager',
     avatar: 'SC',
   },
+  research: {
+    id: 'research-001',
+    name: 'Emily Watson',
+    email: 'emily.w@brickchain.com',
+    role: 'research',
+    avatar: 'EW',
+  },
 }
 
 export function AuthProvider({ children }) {

@@ -35,7 +35,7 @@ export function SpvManagerMyProperties() {
   return (
     <Layout>
       <Header
-        title="My Properties"
+        title="SPVs Managed By Me"
         subtitle="Live SPVs under your management"
       />
       <div className="ds-page space-y-5">

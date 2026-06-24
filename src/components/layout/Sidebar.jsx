@@ -1,10 +1,12 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
+import { useData } from '@/context/DataContext'
 import { cn } from '@/lib/utils'
 import {
   LayoutDashboard, Building2, Briefcase, ShieldCheck,
   FileText, Vote, Bot, LogOut, TrendingUp, Settings,
-  Banknote, Cpu, Users, Layers, Landmark, UserCheck, Home
+  Banknote, Cpu, Users, Layers, Landmark, UserCheck, Home,
+  Search, SlidersHorizontal,
 } from 'lucide-react'
 
 const holderNav = [
@@ -30,8 +32,13 @@ const adminNav = [
 ]
 
 const spvManagerNav = [
-  { label: 'My Properties',  icon: Home,    to: '/spv_manager/properties', group: 'MANAGEMENT' },
+  { label: 'SPVs Managed By Me',  icon: Home,    to: '/spv_manager/properties', group: 'MANAGEMENT' },
   { label: 'SPV Registry',   icon: Landmark, to: '/spv_manager/spv',       group: 'MANAGEMENT' },
+]
+
+const researchNav = [
+  { label: 'Prospecting Board', icon: Search,            to: '/research/board',    group: 'RESEARCH' },
+  { label: 'Scenario Modeler',  icon: SlidersHorizontal, to: '/research/simulate', group: 'RESEARCH' },
 ]
 
 const roleConfig = {
@@ -62,17 +69,31 @@ const roleConfig = {
     activeClass:    'bg-sky-600 text-white shadow-sm',
     gradient:       'from-sky-500 to-sky-600',
   },
+  research: {
+    dot:            'bg-sky-500',
+    portalLabel:    'RESEARCH PORTAL',
+    accessLabel:    'INTERNAL RESEARCH ACCESS',
+    accessColor:    'text-sky-600',
+    description:    'Scout properties, run simulations & feed the SPV pipeline.',
+    activeClass:    'bg-sky-600 text-white shadow-sm',
+    gradient:       'from-sky-500 to-sky-600',
+  },
 }
 
 export function Sidebar() {
   const { user, logout } = useAuth()
+  const { clearSimState } = useData()
   const navigate = useNavigate()
 
-  const navItems = user?.role === 'holder' ? holderNav : user?.role === 'spv_manager' ? spvManagerNav : adminNav
+  const navItems = user?.role === 'holder' ? holderNav
+    : user?.role === 'spv_manager' ? spvManagerNav
+    : user?.role === 'research' ? researchNav
+    : adminNav
 
   const cfg = roleConfig[user?.role] || roleConfig.admin
 
   const handleLogout = () => {
+    clearSimState()
     logout()
     navigate('/')
   }
