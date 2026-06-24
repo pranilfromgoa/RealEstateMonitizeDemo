@@ -23,7 +23,14 @@ import { AdminFeeManagement } from '@/pages/admin/FeeManagement'
 import { AdminUsers } from '@/pages/admin/Users'
 import { AdminSPV } from '@/pages/admin/SPV'
 import { AdminHolders } from '@/pages/admin/Holders'
-import { SpvManagerMyProperties } from '@/pages/spv-manager/MyProperties'
+import { SpvManagerMyProperties }    from '@/pages/spv-manager/MyProperties'
+import { SpvManagerRentLogging }      from '@/pages/spv-manager/RentLogging'
+import { SpvManagerExpenseLogging }   from '@/pages/spv-manager/ExpenseLogging'
+import { SpvManagerAppraisalReport }  from '@/pages/spv-manager/AppraisalReport'
+import { SpvManagerComplianceVault }  from '@/pages/spv-manager/ComplianceVault'
+import { SpvManagerInvestorUpdates }  from '@/pages/spv-manager/InvestorUpdates'
+import { SpvManagerPropertyGallery }  from '@/pages/spv-manager/PropertyGallery'
+import { SpvManagerGovernanceProposals } from '@/pages/spv-manager/GovernanceProposals'
 
 // Research
 import { ResearchBoard } from '@/pages/research/ProspectingBoard'
@@ -67,6 +74,13 @@ function AppRoutes() {
       <Route path="/spv_manager/dashboard"   element={<Navigate to="/spv_manager/spv" replace />} />
       <Route path="/spv_manager/spv"         element={<ProtectedRoute role="spv_manager"><AdminSPV /></ProtectedRoute>} />
       <Route path="/spv_manager/properties"  element={<ProtectedRoute role="spv_manager"><SpvManagerMyProperties /></ProtectedRoute>} />
+      <Route path="/spv_manager/rent"        element={<ProtectedRoute role="spv_manager"><SpvManagerRentLogging /></ProtectedRoute>} />
+      <Route path="/spv_manager/expenses"    element={<ProtectedRoute role="spv_manager"><SpvManagerExpenseLogging /></ProtectedRoute>} />
+      <Route path="/spv_manager/appraisal"   element={<ProtectedRoute role="spv_manager"><SpvManagerAppraisalReport /></ProtectedRoute>} />
+      <Route path="/spv_manager/vault"       element={<ProtectedRoute role="spv_manager"><SpvManagerComplianceVault /></ProtectedRoute>} />
+      <Route path="/spv_manager/updates"     element={<ProtectedRoute role="spv_manager"><SpvManagerInvestorUpdates /></ProtectedRoute>} />
+      <Route path="/spv_manager/gallery"     element={<ProtectedRoute role="spv_manager"><SpvManagerPropertyGallery /></ProtectedRoute>} />
+      <Route path="/spv_manager/governance"  element={<ProtectedRoute role="spv_manager"><SpvManagerGovernanceProposals /></ProtectedRoute>} />
 
       {/* Research */}
       <Route path="/research/dashboard"  element={<Navigate to="/research/board" replace />} />

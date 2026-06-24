@@ -6,12 +6,13 @@ import {
   LayoutDashboard, Building2, Briefcase, ShieldCheck,
   FileText, Vote, Bot, LogOut, TrendingUp, Settings,
   Banknote, Cpu, Users, Layers, Landmark, UserCheck, Home,
-  Search, SlidersHorizontal,
+  Search, SlidersHorizontal, Receipt, ClipboardList, BarChart3,
+  Vault, Megaphone, Images, Scale,
 } from 'lucide-react'
 
 const holderNav = [
   { label: 'Dashboard',            icon: LayoutDashboard, to: '/holder/dashboard',  group: 'PLATFORM' },
-  { label: 'SPVs',                  icon: Building2,       to: '/holder/properties', group: 'PLATFORM' },
+  { label: 'SPV Marketplace',                  icon: Building2,       to: '/holder/properties', group: 'PLATFORM' },
   { label: 'My Portfolio',         icon: Briefcase,       to: '/holder/portfolio',  group: 'PLATFORM' },
   { label: 'KYC Verification',     icon: ShieldCheck,     to: '/holder/kyc',        group: 'PLATFORM' },
   { label: 'Trading Desk',         icon: TrendingUp,      to: '/holder/trading',    group: 'TRADING'  },
@@ -32,8 +33,15 @@ const adminNav = [
 ]
 
 const spvManagerNav = [
-  { label: 'SPVs Managed By Me',  icon: Home,    to: '/spv_manager/properties', group: 'MANAGEMENT' },
-  { label: 'SPV Registry',   icon: Landmark, to: '/spv_manager/spv',       group: 'MANAGEMENT' },
+  { label: 'SPVs Managed By Me',  icon: Home,          to: '/spv_manager/properties', group: 'MANAGEMENT'   },
+  { label: 'SPV Registry',        icon: Landmark,      to: '/spv_manager/spv',        group: 'MANAGEMENT'   },
+  { label: 'Log Rent Income',     icon: Receipt,       to: '/spv_manager/rent',       group: 'FINANCIALS'   },
+  { label: 'Expenses',            icon: ClipboardList, to: '/spv_manager/expenses',   group: 'FINANCIALS'   },
+  { label: 'Appraisal Report',    icon: BarChart3,     to: '/spv_manager/appraisal',  group: 'FINANCIALS'   },
+  { label: 'Compliance Vault',    icon: Vault,         to: '/spv_manager/vault',      group: 'FINANCIALS'   },
+  { label: 'Investor Updates',    icon: Megaphone,     to: '/spv_manager/updates',    group: 'INVESTOR REL' },
+  { label: 'Property Gallery',    icon: Images,        to: '/spv_manager/gallery',    group: 'INVESTOR REL' },
+  { label: 'Governance',          icon: Scale,         to: '/spv_manager/governance', group: 'GOVERNANCE'   },
 ]
 
 const researchNav = [

@@ -191,8 +191,8 @@ export function Login() {
                     {role.initials}
                   </div>
                   <div className="min-w-0">
-                    <p className="font-bold text-gray-900 text-sm leading-tight truncate">{role.label}</p>
-                    <p className="text-[11px] text-gray-400 mt-0.5 leading-snug truncate">{role.sublabel}</p>
+                    <p className="font-bold text-gray-900 text-sm leading-tight">{role.label}</p>
+                    <p className="text-[11px] text-gray-400 mt-0.5 leading-snug">{role.sublabel}</p>
                   </div>
                 </button>
               )

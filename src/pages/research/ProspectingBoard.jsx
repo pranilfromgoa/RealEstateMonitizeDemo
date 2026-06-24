@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Layout } from '@/components/layout/Layout'
 import { Header } from '@/components/layout/Header'
@@ -69,13 +69,23 @@ export function ResearchBoard() {
   const { prospects, updateProspect, simSelectedIds, toggleSimSelection } = useData()
   const [view, setView] = useState('cards')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [regionFilter, setRegionFilter] = useState('all')
 
-  const filtered = statusFilter === 'all'
-    ? prospects
-    : prospects.filter(p => p.status === statusFilter)
+  const REGIONS = ['US', 'Switzerland', 'Rest of Europe']
 
-  const countFor = (key) =>
-    key === 'all' ? prospects.length : prospects.filter(p => p.status === key).length
+  const filtered = prospects
+    .filter(p => statusFilter === 'all' || p.status === statusFilter)
+    .filter(p => regionFilter === 'all' || p.region === regionFilter)
+
+  const countForStatus = (key) =>
+    key === 'all'
+      ? prospects.filter(p => regionFilter === 'all' || p.region === regionFilter).length
+      : prospects.filter(p => p.status === key && (regionFilter === 'all' || p.region === regionFilter)).length
+
+  const countForRegion = (key) =>
+    key === 'all'
+      ? prospects.filter(p => statusFilter === 'all' || p.status === statusFilter).length
+      : prospects.filter(p => p.region === key && (statusFilter === 'all' || p.status === statusFilter)).length
 
   const moveStatus = (id, newStatus) => {
     updateProspect(id, { status: newStatus })
@@ -91,8 +101,12 @@ export function ResearchBoard() {
       <Header title="Prospecting Board" subtitle="Track and evaluate properties through the research pipeline" />
       <div className="ds-page space-y-4">
 
-        {/* ── Status filter pills ── */}
+        {/* ── Filters + toolbar ── */}
+        <div className="space-y-2">
+
+        {/* Row 1: Status filter pills */}
         <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest w-12 flex-shrink-0">Status</span>
           {[{ key: 'all', label: 'All', dot: null }, ...STATUSES].map(s => {
             const active = statusFilter === s.key
             return (
@@ -112,44 +126,62 @@ export function ResearchBoard() {
                 <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold tabular-nums ${
                   active ? 'bg-white/25 text-white' : 'bg-gray-100 text-gray-500'
                 }`}>
-                  {countFor(s.key)}
+                  {countForStatus(s.key)}
                 </span>
               </button>
             )
           })}
         </div>
 
-        {/* ── Toolbar ── */}
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
+        {/* Row 2: Region filter pills + view toggle + run simulation — all on one line */}
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest w-12 flex-shrink-0">Region</span>
+            {[{ key: 'all', label: 'All ' }, ...REGIONS.map(r => ({ key: r, label: r }))].map(r => {
+              const active = regionFilter === r.key
+              return (
+                <button
+                  key={r.key}
+                  onClick={() => setRegionFilter(r.key)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                    active
+                      ? 'bg-sky-600 text-white border-sky-600 shadow-sm'
+                      : 'bg-white text-gray-600 border-gray-200 hover:border-sky-300 hover:text-sky-700'
+                  }`}
+                >
+                  {r.label}
+                  <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold tabular-nums ${
+                    active ? 'bg-white/25 text-white' : 'bg-gray-100 text-gray-500'
+                  }`}>
+                    {countForRegion(r.key)}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+
+          <div className="flex items-center gap-3 flex-shrink-0">
             <div className="flex rounded-lg border border-gray-200 overflow-hidden">
               <button
                 onClick={() => setView('cards')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-colors ${
                   view === 'cards' ? 'bg-sky-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                <LayoutGrid size={14} /> Cards
+                <LayoutGrid size={13} /> Cards
               </button>
               <button
                 onClick={() => setView('list')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border-l border-gray-200 transition-colors ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold border-l border-gray-200 transition-colors ${
                   view === 'list' ? 'bg-sky-600 text-white border-sky-600' : 'bg-white text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                <LayoutList size={14} /> List
+                <LayoutList size={13} /> List
               </button>
             </div>
-            <span className="text-xs text-gray-400">
-              {filtered.length}{filtered.length !== prospects.length ? ` of ${prospects.length}` : ''} {filtered.length === 1 ? 'property' : 'properties'}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-3">
             {simSelectedIds.length > 0 && (
               <span className="text-xs text-gray-500 font-medium">{simSelectedIds.length}/3 selected</span>
             )}
-
             <button
               disabled={simSelectedIds.length < 2}
               onClick={runSimulation}
@@ -170,13 +202,11 @@ export function ResearchBoard() {
           </div>
         </div>
 
-        {simSelectedIds.length > 0 && (
-          <div className="text-xs text-sky-700 bg-sky-50 border border-sky-200 rounded-lg px-3 py-2">
-            {simSelectedIds.length === 1
-              ? 'Select 1 more property to enable the simulation (max 3).'
-              : `${simSelectedIds.length} properties selected — click "Run Simulation" to compare them side-by-side.`}
-          </div>
-        )}
+        </div>{/* end filters + toolbar wrapper */}
+
+        <div className="text-xs text-sky-700 bg-sky-50 border border-sky-200 rounded-lg px-3 py-2">
+          Select at least 2 properties to enable simulation (max 3)
+        </div>
 
         {view === 'cards'
           ? <CardsView prospects={filtered} selected={simSelectedIds} onToggleSelect={toggleSimSelection} onMoveStatus={moveStatus} onCardSelect={toggleSimSelection} />
@@ -192,7 +222,7 @@ export function ResearchBoard() {
 function CardsView({ prospects, selected, onToggleSelect, onMoveStatus, onCardSelect }) {
   if (prospects.length === 0) return <EmptyState />
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-start">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
       {prospects.map(p => (
         <ProspectCard
           key={p.id}
@@ -210,6 +240,7 @@ function CardsView({ prospects, selected, onToggleSelect, onMoveStatus, onCardSe
 
 function ProspectCard({ prospect: p, isSelected, canSelect, onToggle, onMove, onCardSelect }) {
   const [showMove, setShowMove] = useState(false)
+  const [pendingStatus, setPendingStatus] = useState(p.status)
   const status  = statusMap[p.status]
   const days    = daysInPipeline(p.addedDate)
   const yld     = grossYield(p)
@@ -228,26 +259,30 @@ function ProspectCard({ prospect: p, isSelected, canSelect, onToggle, onMove, on
       {/* No overflow-hidden here so the tooltip can escape; rounding applied directly to image/gradient */}
       <div className="relative flex-shrink-0 rounded-t-2xl">
         {p.coverImage
-          ? <img src={p.coverImage} alt="" className="w-full h-24 object-cover rounded-t-2xl" />
-          : <div className="w-full h-24 bg-sky-50 flex items-center justify-center rounded-t-2xl"><Building2 size={22} className="text-sky-200" /></div>
+          ? <img src={p.coverImage} alt="" className="w-full h-36 object-cover rounded-t-2xl" />
+          : <div className="w-full h-36 bg-sky-50 flex items-center justify-center rounded-t-2xl"><Building2 size={22} className="text-sky-200" /></div>
         }
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent rounded-t-2xl pointer-events-none" />
 
         {/* Condition + Type badges — top left */}
-        <div className="absolute top-2 left-2 flex items-center gap-1">
-          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md ${cMeta.bg} ${cMeta.text}`}>
-            {p.condition}
-          </span>
-          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md ${tMeta.bg} ${tMeta.text}`}>
-            {p.propertyType}{lexKoller ? ' ⚠' : ''}
-          </span>
+        <div className="absolute top-2 left-2 flex flex-col gap-1 items-start">
+          <div className="flex items-center gap-1">
+            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md ${cMeta.bg} ${cMeta.text}`}>
+              {p.condition}
+            </span>
+            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md ${tMeta.bg} ${tMeta.text}`}>
+              {p.propertyType}{lexKoller ? ' ⚠' : ''}
+            </span>
+          </div>
+          {p.region && (
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-white/80 text-gray-700">
+              {p.region}
+            </span>
+          )}
         </div>
 
         {/* Checkbox — top right */}
-        <div className="absolute top-2 right-2 flex items-center gap-1.5">
-          {isSelected && (
-            <span className="text-[9px] font-bold text-white bg-sky-600 px-1.5 py-0.5 rounded-full">✓</span>
-          )}
+        <div className="absolute top-2 right-2">
           <input
             type="checkbox"
             checked={isSelected}
@@ -303,7 +338,10 @@ function ProspectCard({ prospect: p, isSelected, canSelect, onToggle, onMove, on
 
       {/* ── MIDDLE: Name + broker ── */}
       <div className="px-3 pt-2 pb-0">
-        <p className="font-bold text-gray-900 text-xs leading-snug truncate">{p.name}</p>
+        <div className="flex items-start justify-between gap-1">
+          <p className="font-bold text-gray-900 text-xs leading-snug truncate">{p.name}</p>
+          <span className="text-[9px] text-gray-400 whitespace-nowrap flex-shrink-0">{p.units}u · {p.sqm}m²</span>
+        </div>
         <p className="text-[10px] text-gray-400 truncate">Broker: {p.broker}</p>
       </div>
 
@@ -330,18 +368,10 @@ function ProspectCard({ prospect: p, isSelected, canSelect, onToggle, onMove, on
       </div>
 
       {/* ── FOOTER: Status + actions ── */}
-      <div className="px-3 pb-3 mt-auto space-y-1.5">
-        {/* Status badge */}
-        <div className="flex items-center justify-between">
-          <span className={`inline-flex items-center gap-1 text-[9px] font-semibold px-2 py-0.5 rounded-full border ${status.pillBg} ${status.pillText} ${status.pillBorder}`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
-            {status.label}
-          </span>
-          <span className="text-[9px] text-gray-400">{p.units}u · {p.sqm}m²</span>
-        </div>
-
+      <div className="px-3 pb-3 mt-auto">
+        <div className="border-t border-gray-100 pt-3">
         {/* Actions row */}
-        <div className="flex gap-1">
+        <div className="flex gap-1.5">
           {/* Move stage dropdown */}
           <div className="relative flex-1">
             <button
@@ -349,18 +379,18 @@ function ProspectCard({ prospect: p, isSelected, canSelect, onToggle, onMove, on
               className="w-full flex items-center justify-between text-[11px] border border-gray-200 bg-white hover:bg-gray-50 rounded-lg px-2 py-1 transition-colors"
             >
               <span className="flex items-center gap-1.5 text-gray-600">
-                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${status.dot}`} />
-                {status.label}
+                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${statusMap[pendingStatus]?.dot}`} />
+                {statusMap[pendingStatus]?.label}
               </span>
               <ChevronDown size={10} className={`text-gray-400 flex-shrink-0 transition-transform ${showMove ? 'rotate-180' : ''}`} />
             </button>
             {showMove && (
               <div className="absolute z-30 top-full left-0 right-0 mt-1 bg-white rounded-xl border border-gray-200 shadow-xl overflow-hidden">
-                {STATUSES.filter(st => st.key !== p.status).map(st => (
+                {STATUSES.map(st => (
                   <button
                     key={st.key}
-                    onClick={() => { onMove(p.id, st.key); setShowMove(false) }}
-                    className="w-full text-left text-xs px-3 py-1.5 hover:bg-gray-50 flex items-center gap-2 transition-colors"
+                    onClick={() => { setPendingStatus(st.key); setShowMove(false) }}
+                    className={`w-full text-left text-xs px-3 py-1.5 flex items-center gap-2 transition-colors ${st.key === pendingStatus ? 'bg-sky-50 text-sky-700' : 'hover:bg-gray-50'}`}
                   >
                     <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${st.dot}`} />
                     {st.label}
@@ -369,24 +399,20 @@ function ProspectCard({ prospect: p, isSelected, canSelect, onToggle, onMove, on
               </div>
             )}
           </div>
-
-          {/* Selection toggle button */}
+          {/* Confirm move button — enabled only when pending differs from current */}
           <button
-            onClick={onCardSelect}
-            disabled={!canSelect && !isSelected}
-            title={isSelected ? 'Remove from simulation' : canSelect ? 'Add to simulation' : 'Max 3 properties selected'}
-            className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-bold transition-colors flex-shrink-0 ${
-              isSelected
-                ? 'bg-sky-100 text-sky-700 hover:bg-red-50 hover:text-red-600 border border-sky-200 hover:border-red-200'
-                : canSelect
-                  ? 'bg-sky-600 hover:bg-sky-700 text-white'
-                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            onClick={() => { onMove(p.id, pendingStatus) }}
+            disabled={pendingStatus === p.status}
+            className={`flex-shrink-0 text-[11px] font-semibold px-2.5 py-1 rounded-lg transition-colors ${
+              pendingStatus !== p.status
+                ? 'bg-sky-600 hover:bg-sky-700 text-white'
+                : 'bg-gray-100 text-gray-300 cursor-not-allowed'
             }`}
           >
-            {isSelected ? '✓ In Sim' : '+ Select'}
+            Move
           </button>
         </div>
-
+        </div>
       </div>
     </div>
   )
