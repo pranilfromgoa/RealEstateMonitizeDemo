@@ -86,7 +86,7 @@ export function SpvManagerGovernanceProposals() {
           <div className="bg-white border border-gray-200 rounded-2xl">
             <div className="px-5 py-4 border-b border-gray-200">
               <p className="font-bold text-gray-900 text-sm">Draft CapEx Proposal</p>
-              <p className="text-xs text-gray-400 mt-0.5">Propose a capital expenditure for holder approval</p>
+              <p className="text-xs text-gray-600 mt-0.5">Propose a capital expenditure for holder approval</p>
             </div>
             <div className="p-5 space-y-4">
 
@@ -134,7 +134,7 @@ export function SpvManagerGovernanceProposals() {
                 <button className="px-4 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold rounded-xl transition-colors">
                   Submit for Review
                 </button>
-                <p className="text-xs text-gray-400 mt-2">Requires Admin approval before being sent to holders</p>
+                <p className="text-xs text-gray-600 mt-2">Requires Admin approval before being sent to holders</p>
               </div>
             </div>
           </div>
@@ -143,7 +143,7 @@ export function SpvManagerGovernanceProposals() {
           <div className="bg-white border border-gray-200 rounded-2xl">
             <div className="px-5 py-4 border-b border-gray-200">
               <p className="font-bold text-gray-900 text-sm">Propose Asset Liquidation / Sale</p>
-              <p className="text-xs text-gray-400 mt-0.5">Initiate a sale vote for an SPV asset</p>
+              <p className="text-xs text-gray-600 mt-0.5">Initiate a sale vote for an SPV asset</p>
             </div>
             <div className="p-5 space-y-4">
 
@@ -207,19 +207,19 @@ export function SpvManagerGovernanceProposals() {
         <div className="bg-white border border-gray-200 rounded-2xl">
           <div className="px-5 py-4 border-b border-gray-200">
             <p className="font-bold text-gray-900 text-sm">Active &amp; Past Proposals</p>
-            <p className="text-xs text-gray-400 mt-0.5">All governance proposals across managed SPVs</p>
+            <p className="text-xs text-gray-600 mt-0.5">All governance proposals across managed SPVs</p>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/50">
-                  <th className="text-left px-5 py-3 text-gray-500 font-semibold">SPV</th>
-                  <th className="text-left px-3 py-3 text-gray-500 font-semibold">Type</th>
-                  <th className="text-left px-3 py-3 text-gray-500 font-semibold">Title</th>
-                  <th className="text-right px-3 py-3 text-gray-500 font-semibold">Amount</th>
-                  <th className="text-left px-3 py-3 text-gray-500 font-semibold">Deadline</th>
-                  <th className="text-left px-3 py-3 text-gray-500 font-semibold">Status</th>
-                  <th className="text-left px-3 py-3 text-gray-500 font-semibold">Votes</th>
+                  <th className="text-left px-5 py-3 text-gray-600 font-semibold">SPV</th>
+                  <th className="text-left px-3 py-3 text-gray-600 font-semibold">Type</th>
+                  <th className="text-left px-3 py-3 text-gray-600 font-semibold">Title</th>
+                  <th className="text-right px-3 py-3 text-gray-600 font-semibold">Amount</th>
+                  <th className="text-left px-3 py-3 text-gray-600 font-semibold">Deadline</th>
+                  <th className="text-left px-3 py-3 text-gray-600 font-semibold">Status</th>
+                  <th className="text-left px-3 py-3 text-gray-600 font-semibold">Votes</th>
                 </tr>
               </thead>
               <tbody>

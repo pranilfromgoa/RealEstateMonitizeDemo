@@ -42,9 +42,9 @@ export function SpvManagerDashboard() {
         {/* Welcome bar — matches SPV Registry filter bar */}
         <div className="bg-white rounded-2xl border border-gray-200 px-5 py-4 flex items-center justify-between gap-4 flex-wrap">
           <div>
-            <p className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold mb-0.5">Welcome back</p>
+            <p className="text-[10px] text-gray-600 uppercase tracking-widest font-semibold mb-0.5">Welcome back</p>
             <p className="font-bold text-gray-900">{user?.name}</p>
-            <p className="text-sm text-gray-400 mt-0.5">
+            <p className="text-sm text-gray-600 mt-0.5">
               {draftSpvs.length} draft{draftSpvs.length !== 1 ? 's' : ''} &middot; {pendingSpvs.length} pending approval
             </p>
           </div>
@@ -58,7 +58,7 @@ export function SpvManagerDashboard() {
         {/* Status filter pills — mirrors SPV Registry filter bar */}
         <div className="bg-white rounded-2xl border border-gray-200 px-5 py-4">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs font-semibold text-gray-400 w-14 flex-shrink-0">Status</span>
+            <span className="text-xs font-semibold text-gray-600 w-14 flex-shrink-0">Status</span>
             <div className="flex gap-1.5 flex-wrap">
               {[
                 { key: 'all',      label: 'All',      count: spvs.length,           activeCls: 'bg-sky-600 text-white'    },
@@ -70,9 +70,9 @@ export function SpvManagerDashboard() {
                 <button
                   key={p.key}
                   onClick={() => setStatusFilter(p.key)}
-                  className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${statusFilter === p.key ? p.activeCls : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${statusFilter === p.key ? p.activeCls : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                 >
-                  {p.label} <span className={statusFilter === p.key ? 'opacity-80' : 'text-gray-400'}>{p.count}</span>
+                  {p.label} <span className={statusFilter === p.key ? 'opacity-80' : 'text-gray-600'}>{p.count}</span>
                 </button>
               ))}
             </div>
@@ -88,9 +88,9 @@ export function SpvManagerDashboard() {
             <div>
               <p className="font-bold text-gray-900 text-sm">
                 {statusFilter === 'all' ? 'All SPVs' : `${statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)} SPVs`}
-                <span className="ml-2 text-xs font-normal text-gray-400">({filtered.length})</span>
+                <span className="ml-2 text-xs font-normal text-gray-600">({filtered.length})</span>
               </p>
-              <p className="text-xs text-gray-400 mt-0.5">Click Open Registry to view and edit any SPV</p>
+              <p className="text-xs text-gray-600 mt-0.5">Click Open Registry to view and edit any SPV</p>
             </div>
             <Link to="/spv_manager/spv" className="flex items-center gap-1.5 text-xs font-medium text-sky-600 border border-sky-200 px-3 py-1.5 rounded-xl hover:bg-sky-50 transition-colors">
               Open Registry <ArrowRight size={12} />
@@ -98,7 +98,7 @@ export function SpvManagerDashboard() {
           </div>
 
           {filtered.length === 0 ? (
-            <div className="text-center py-14 text-gray-400">
+            <div className="text-center py-14 text-gray-600">
               <Building2 size={36} className="mx-auto mb-3 opacity-30" />
               <p className="text-sm">{statusFilter === 'all' ? 'No SPVs yet. Create your first one.' : `No ${statusFilter} SPVs.`}</p>
             </div>
@@ -113,7 +113,7 @@ export function SpvManagerDashboard() {
                   }
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-gray-900 truncate">{spv.propertyDisplayName || spv.legalName}</p>
-                    <div className="flex items-center gap-1 text-xs text-gray-400 mt-0.5">
+                    <div className="flex items-center gap-1 text-xs text-gray-600 mt-0.5">
                       {spv.propertyAddress
                         ? <><MapPin size={10} /><span className="truncate">{spv.propertyAddress}</span></>
                         : <span>{spv.region} · {spv.propertyType}</span>
@@ -122,11 +122,11 @@ export function SpvManagerDashboard() {
                   </div>
                   <div className="hidden sm:flex items-center gap-2 flex-shrink-0">
                     <div className="w-28 bg-gray-50 rounded-lg px-2.5 py-1.5 text-center">
-                      <p className="text-[9px] text-gray-400">Valuation</p>
+                      <p className="text-[9px] text-gray-600">Valuation</p>
                       <p className="text-xs font-bold text-gray-800 tabular-nums truncate">{spv.totalValuation > 0 ? fmtCHF(spv.totalValuation) : '—'}</p>
                     </div>
                     <div className="w-14 bg-sky-50 rounded-lg px-2.5 py-1.5 text-center">
-                      <p className="text-[9px] text-gray-400">APY</p>
+                      <p className="text-[9px] text-gray-600">APY</p>
                       <p className="text-xs font-bold text-sky-700">{spv.targetAPY ? `${spv.targetAPY}%` : '—'}</p>
                     </div>
                     <span className="inline-flex items-center justify-center gap-1.5 w-[88px] text-xs font-medium py-1 rounded-full bg-white border border-gray-200 text-gray-600 flex-shrink-0">

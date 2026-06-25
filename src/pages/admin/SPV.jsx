@@ -277,7 +277,7 @@ function SpvCard({ spv, onView, viewOnly = false, onAssignManager = null }) {
     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
       {spv.coverImage ? (
         <div className="h-36 relative overflow-hidden">
-          <img src={spv.coverImage} alt="" className="w-full h-full object-cover" />
+          <img src={spv.coverImage} alt={`${spv.propertyDisplayName || spv.legalName} property`} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
           <div className="absolute bottom-3 left-3 flex gap-1.5">
             <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${regionColors[spv.region]}`}>{spv.region}</span>
@@ -294,9 +294,9 @@ function SpvCard({ spv, onView, viewOnly = false, onAssignManager = null }) {
       )}
       <div className="p-4">
         <p className="font-bold text-gray-900 text-sm leading-tight">{spv.propertyDisplayName}</p>
-        <p className="text-xs text-gray-400 mt-0.5">{spv.legalName}</p>
+        <p className="text-xs text-gray-600 mt-0.5">{spv.legalName}</p>
         {spv.propertyAddress && (
-          <div className="flex items-center gap-1 text-xs text-gray-400 mt-1">
+          <div className="flex items-center gap-1 text-xs text-gray-600 mt-1">
             <MapPin size={11} />
             <span className="truncate">{spv.propertyAddress}</span>
           </div>
@@ -305,7 +305,7 @@ function SpvCard({ spv, onView, viewOnly = false, onAssignManager = null }) {
         {/* Completion bar */}
         <div className="mt-3 mb-3">
           <div className="flex justify-between text-xs mb-1">
-            <span className="text-gray-400">Profile completion</span>
+            <span className="text-gray-600">Profile completion</span>
             <span className="font-semibold text-sky-600">{pct}%</span>
           </div>
           <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
@@ -373,12 +373,12 @@ function SpvRow({ spv, onView, viewOnly = false, onAssignManager = null, showMan
   return (
     <div className="flex items-center gap-4 px-5 py-3 border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors">
       {spv.coverImage
-        ? <img src={spv.coverImage} alt="" className="w-12 h-9 rounded-lg object-cover flex-shrink-0" />
+        ? <img src={spv.coverImage} alt={`${spv.propertyDisplayName || spv.legalName} property`} className="w-12 h-9 rounded-lg object-cover flex-shrink-0" />
         : <div className="w-12 h-9 rounded-lg bg-sky-50 flex items-center justify-center flex-shrink-0"><Building2 size={15} className="text-sky-400" /></div>
       }
       <div className="flex-1 min-w-0">
         <p className="text-sm font-bold text-gray-900 truncate">{spv.propertyDisplayName || spv.legalName}</p>
-        <div className="flex items-center gap-1 text-xs text-gray-400 mt-0.5">
+        <div className="flex items-center gap-1 text-xs text-gray-600 mt-0.5">
           {spv.propertyAddress
             ? <><MapPin size={10} /><span className="truncate">{spv.propertyAddress}</span></>
             : <span>{spv.region} · {spv.propertyType}</span>
@@ -715,7 +715,7 @@ export function AdminSPV() {
           {/* Cover image */}
           {editForm.coverImage && (
             <div className="h-52 rounded-2xl overflow-hidden relative">
-              <img src={editForm.coverImage} alt="" className="w-full h-full object-cover" />
+              <img src={editForm.coverImage} alt={`${editForm.propertyDisplayName || editForm.legalName} property photo`} className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
               <div className="absolute bottom-3 left-4">
                 <p className="text-white font-bold text-lg drop-shadow">{editForm.propertyDisplayName || editForm.legalName}</p>
@@ -1138,14 +1138,7 @@ export function AdminSPV() {
                         <div><Label info="Charged on monthly Rental Income collected from tenants.">Property Management Fee (%)</Label><Input type="number" value={editForm.managementFee} onChange={setField('managementFee')} placeholder="8.0" /></div>
                         <div>
                           <Label info="Annual Percentage Yield — the projected yearly return to Brick holders from rental income, expressed as a percentage of the Brick purchase price.">Target APY (%)</Label>
-                          <div className="flex items-center gap-3">
-                            <div className="w-36 flex-shrink-0">
-                              <Input type="number" value={editForm.targetAPY} onChange={setField('targetAPY')} placeholder="e.g. 4.2" />
-                            </div>
-                            <button type="button" onClick={() => setApyModal(true)} className="flex items-center gap-1 text-[10px] text-sky-700 bg-sky-50 border border-sky-200 rounded-full px-2 py-0.5 hover:bg-sky-100 transition-colors whitespace-nowrap">
-                              <BookOpen size={10} /> Underwriting Report
-                            </button>
-                          </div>
+                          <Input type="number" value={editForm.targetAPY} onChange={setField('targetAPY')} placeholder="e.g. 4.2" />
                         </div>
                       </div>
                       {editForm.totalValuation && editForm.totalBricks && (
@@ -1183,7 +1176,7 @@ export function AdminSPV() {
                       </div>
                       <div className="min-w-0">
                         <p className="font-semibold text-gray-900 text-sm truncate">{mgr.name}</p>
-                        <p className="text-xs text-gray-400 truncate">{mgr.region}</p>
+                        <p className="text-xs text-gray-600 truncate">{mgr.region}</p>
                       </div>
                       {editForm.assignedManagerId === mgr.id && <CheckCircle2 size={15} className="text-sky-500 ml-auto flex-shrink-0" />}
                     </button>
@@ -1194,8 +1187,15 @@ export function AdminSPV() {
           )}
 
           {/* Action bar */}
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-wrap">
             <Button variant="outline" onClick={() => setView('list')}>Back to List</Button>
+            <button
+              type="button"
+              onClick={() => setApyModal(true)}
+              className="flex items-center gap-1.5 text-xs text-sky-700 bg-sky-50 border border-sky-200 rounded-lg px-3 py-2 hover:bg-sky-100 transition-colors font-medium"
+            >
+              <BookOpen size={13} /> Underwriting Report
+            </button>
 
             {/* Draft: Save + Submit for Review — SPV Manager only */}
             {currentSpv.status === 'draft' && isSpvManager && <>

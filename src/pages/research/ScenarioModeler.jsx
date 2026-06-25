@@ -259,7 +259,7 @@ export function ScenarioModeler() {
 
                 {/* ── Property image ── */}
                 {prospect.coverImage ? (
-                  <img src={prospect.coverImage} alt="" className="w-full h-36 object-cover" />
+                  <img src={prospect.coverImage} alt={`${prospect.name} property`} className="w-full h-36 object-cover" />
                 ) : (
                   <div className="w-full h-36 bg-sky-50 flex items-center justify-center">
                     <Building2 size={32} className="text-sky-200" />

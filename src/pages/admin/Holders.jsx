@@ -405,12 +405,12 @@ export function AdminHolders() {
             </div>
             <div className="flex justify-center gap-6 mt-4">
               <div className="flex items-center gap-1.5">
-                <div className="w-2.5 h-2.5 rounded-full bg-sky-400 flex-shrink-0" />
-                <span className="text-xs text-gray-500">Swiss ({geoData[0].value})</span>
+                <div className="w-2.5 h-2.5 rounded-full bg-sky-400 flex-shrink-0" aria-hidden="true" />
+                <span className="text-xs text-gray-700">Swiss ({geoData[0].value})</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <div className="w-2.5 h-2.5 rounded-full bg-slate-200 flex-shrink-0" />
-                <span className="text-xs text-gray-500">International ({geoData[1].value})</span>
+                <div className="w-2.5 h-2.5 rounded-full bg-slate-200 flex-shrink-0" aria-hidden="true" />
+                <span className="text-xs text-gray-700">International ({geoData[1].value})</span>
               </div>
             </div>
           </div>
@@ -525,6 +525,7 @@ export function AdminHolders() {
                 <input
                   type="text"
                   placeholder="Search name or email…"
+                  aria-label="Search holders by name or email"
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   className="w-full border border-gray-200 rounded-lg pl-8 pr-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent"

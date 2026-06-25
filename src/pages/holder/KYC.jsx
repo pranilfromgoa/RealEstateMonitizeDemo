@@ -63,7 +63,7 @@ export function HolderKYC() {
                     }
                   </div>
                   <div className="flex-1">
-                    <p className={`font-medium text-sm ${step.status === 'completed' ? 'text-gray-900' : 'text-gray-400'}`}>{step.label}</p>
+                    <p className={`font-medium text-sm ${step.status === 'completed' ? 'text-gray-900' : 'text-gray-600'}`}>{step.label}</p>
                     {step.status === 'completed' && <p className="text-xs text-green-600">Completed</p>}
                   </div>
                   <Badge variant={step.status === 'completed' ? 'success' : 'secondary'}>
@@ -113,7 +113,7 @@ export function HolderKYC() {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-medium text-gray-900">{doc.name}</p>
-                    <p className="text-xs text-gray-400">{doc.type} · Uploaded {doc.uploaded}</p>
+                    <p className="text-xs text-gray-600">{doc.type} · Uploaded {doc.uploaded}</p>
                   </div>
                   <Badge variant="success">Verified</Badge>
                 </div>

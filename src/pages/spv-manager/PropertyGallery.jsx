@@ -71,11 +71,11 @@ export function SpvManagerPropertyGallery() {
                       Photo {idx + 1} of 6 — {label}
                     </p>
                     <div className="flex items-center gap-1 flex-shrink-0">
-                      <button className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors">
-                        <X size={13} />
+                      <button aria-label="Remove image" className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors">
+                        <X size={13} aria-hidden="true" />
                       </button>
-                      <button className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 cursor-grab transition-colors">
-                        <GripVertical size={13} />
+                      <button aria-label="Reorder image" className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 cursor-grab transition-colors">
+                        <GripVertical size={13} aria-hidden="true" />
                       </button>
                     </div>
                   </div>

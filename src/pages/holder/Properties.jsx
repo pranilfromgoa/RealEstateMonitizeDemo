@@ -140,12 +140,12 @@ export function HolderSpvs() {
                   <h3 className="ds-section-title text-base">{spv.name}</h3>
                   <div className="flex items-center gap-1 mt-1 text-gray-400 text-xs">
                     <MapPin size={12} />
-                    <span>{spv.city}</span>
+                    <span className="text-gray-600">{spv.city}</span>
                   </div>
 
                   <div className="mt-3 grid grid-cols-3 gap-2">
                     <div className="bg-gray-50 rounded-lg p-2">
-                      <p className="text-xs text-gray-400">Price / Brick</p>
+                      <p className="text-xs text-gray-600">Price / Brick</p>
                       <div className="flex items-center gap-1 mt-0.5">
                         <p className="font-bold text-gray-900">{fmt(spv.pricePerBrick)}</p>
                         <div className="relative group">
@@ -162,17 +162,17 @@ export function HolderSpvs() {
                       )}
                     </div>
                     <div className="bg-gray-50 rounded-lg p-2">
-                      <p className="text-xs text-gray-400">Total Value</p>
+                      <p className="text-xs text-gray-600">Total Value</p>
                       <p className="font-bold text-gray-900 mt-0.5">{fmt(spv.totalValue)}</p>
                     </div>
                     <div className="bg-green-50 rounded-lg p-2">
-                      <p className="text-xs text-gray-400">Expected Rent</p>
+                      <p className="text-xs text-gray-600">Expected Rent</p>
                       <p className="font-bold text-green-700 mt-0.5">{spv.monthlyRent ? fmt(spv.monthlyRent) + '/mo' : '—'}</p>
                     </div>
                   </div>
 
                   <div className="mt-3">
-                    <div className="flex justify-between text-xs text-gray-500 mb-1">
+                    <div className="flex justify-between text-xs text-gray-600 mb-1">
                       <span>{soldPct(spv)}% sold</span>
                       <span>{spv.availableBricks.toLocaleString()} Bricks left</span>
                     </div>
@@ -221,7 +221,7 @@ export function HolderSpvs() {
                 { label: 'Available',        value: detail.availableBricks.toLocaleString() },
               ].map(stat => (
                 <div key={stat.label} className="bg-gray-50 rounded-xl p-3">
-                  <p className="text-xs text-gray-400">{stat.label}</p>
+                  <p className="text-xs text-gray-600">{stat.label}</p>
                   <p className="font-bold text-gray-900 mt-0.5">{stat.value}</p>
                 </div>
               ))}
@@ -247,13 +247,13 @@ export function HolderSpvs() {
                       <div className="flex items-center justify-between mb-1.5">
                         <span className="text-xs font-medium text-gray-700">{f.label}</span>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs text-gray-500 tabular-nums">{f.score.toFixed(1)} / 5.0</span>
+                          <span className="text-xs text-gray-600 tabular-nums">{f.score.toFixed(1)} / 5.0</span>
                           {f.impact > 0 ? (
                             <span className="text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
                               +{f.impact}% premium
                             </span>
                           ) : (
-                            <span className="text-[10px] font-semibold text-gray-400 bg-gray-50 border border-gray-200 rounded-full px-2 py-0.5">
+                            <span className="text-[10px] font-semibold text-gray-600 bg-gray-50 border border-gray-200 rounded-full px-2 py-0.5">
                               +0.0%
                             </span>
                           )}
@@ -277,21 +277,21 @@ export function HolderSpvs() {
                   <p className="text-xs font-semibold text-gray-600 mb-3">Final Token Price Calculation</p>
                   <div className="flex items-center gap-2 flex-wrap">
                     <div className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-center min-w-[80px]">
-                      <p className="text-[10px] text-gray-400 mb-0.5">Base Price</p>
+                      <p className="text-[10px] text-gray-600 mb-0.5">Base Price</p>
                       <p className="font-bold text-gray-900 text-sm">{fmt(detailQual.basePrice)}</p>
                     </div>
-                    <span className="text-gray-400 font-bold text-xl select-none">×</span>
+                    <span className="text-gray-600 font-bold text-xl select-none">×</span>
                     <div className="bg-white border border-amber-200 rounded-lg px-3 py-2 text-center min-w-[100px]">
                       <p className="text-[10px] text-amber-600 mb-0.5">Multiplier</p>
                       <p className="font-bold text-amber-700 text-sm">(1 + {detailQual.premiumPct}%)</p>
                     </div>
-                    <span className="text-gray-400 font-bold text-xl select-none">=</span>
+                    <span className="text-gray-600 font-bold text-xl select-none">=</span>
                     <div className="bg-white border border-sky-300 rounded-lg px-3 py-2 text-center min-w-[90px] ring-2 ring-sky-100">
                       <p className="text-[10px] text-sky-600 mb-0.5">Price / Brick</p>
                       <p className="font-bold text-sky-700 text-sm">{fmt(detail.pricePerBrick)}</p>
                     </div>
                   </div>
-                  <p className="text-[10px] text-gray-400 mt-3 leading-relaxed">
+                  <p className="text-[10px] text-gray-600 mt-3 leading-relaxed">
                     A {detailQual.premiumPct}% premium is applied above the base property valuation, reflecting exceptional scores in location desirability, neighborhood stability, and regulatory safety — factors that materially reduce long-term investment risk.
                   </p>
                 </div>
@@ -345,7 +345,7 @@ export function HolderSpvs() {
                 </div>
                 <h3 className="text-xl font-bold text-gray-900">Purchase Successful!</h3>
                 <p className="text-gray-500 mt-2">You have purchased {buyQty} Bricks in {buyModal.name}</p>
-                <p className="text-sm text-gray-400 mt-1">Transaction is being processed on-chain</p>
+                <p className="text-sm text-gray-600 mt-1">Transaction is being processed on-chain</p>
               </div>
             ) : (
               <>
@@ -369,7 +369,7 @@ export function HolderSpvs() {
                     />
                     <button onClick={() => setBuyQty(Math.min(buyModal.availableBricks, buyQty + 1))} className="w-10 h-10 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 text-xl font-bold">+</button>
                   </div>
-                  <p className="text-xs text-gray-400 mt-1 text-center">Max available: {buyModal.availableBricks.toLocaleString()} Bricks</p>
+                  <p className="text-xs text-gray-600 mt-1 text-center">Max available: {buyModal.availableBricks.toLocaleString()} Bricks</p>
                 </div>
 
                 <div className="ds-inset space-y-2">

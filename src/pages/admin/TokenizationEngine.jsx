@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { useData } from '@/context/DataContext'
-import { Cpu, CheckCircle2, Zap, ArrowRight, Info, AlertCircle, Copy, ExternalLink, Activity, FileText } from 'lucide-react'
+import { Cpu, CheckCircle2, Zap, ArrowRight, Info, AlertCircle, Copy, ExternalLink, Activity, FileText, Clock } from 'lucide-react'
 
 const fmt    = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
 const fmtNum = (n) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(n)
@@ -76,6 +76,10 @@ export function AdminTokenizationEngine() {
   const [liqWallet, setLiqWallet]       = useState('')
   const [completedAt, setCompletedAt]   = useState('')
 
+  // Multi-sig approvals
+  const [complianceApproved, setComplianceApproved] = useState(false)
+  const [legalApproved,      setLegalApproved]      = useState(false)
+
   // ─── Derived ─────────────────────────────────────────────────────────────────
   const totalSupply   = Math.floor((parseFloat(form.totalValuation) || 0) / (parseFloat(form.pricePerBrick) || 1))
   const distTotal     = (parseInt(form.publicStorePct) || 0) + (parseInt(form.sponsorEquityPct) || 0) + (parseInt(form.liquidityPoolPct) || 0)
@@ -103,6 +107,8 @@ export function AdminTokenizationEngine() {
     setRunning(false)
     setRunStep(0)
     setShowResult(false)
+    setComplianceApproved(false)
+    setLegalApproved(false)
     setForm({
       spvLegalName:   spv.legalName || spv.propertyDisplayName || '',
       totalValuation: String(spv.totalValuation || ''),
@@ -123,6 +129,8 @@ export function AdminTokenizationEngine() {
     setResultPhase(0)
     setLedgerCount(0)
     setTxHash('')
+    setComplianceApproved(false)
+    setLegalApproved(false)
   }
 
   const handleRun = () => {
@@ -179,7 +187,8 @@ export function AdminTokenizationEngine() {
   }
 
   const typeBanner = selectedSpv ? propertyTypeBanners[selectedSpv.propertyType] : null
-  const canRun = form.spvLegalName && form.tokenSymbol && form.pricePerBrick && totalSupply > 0 && distTotal === 100
+  const sigCount = (complianceApproved ? 1 : 0) + (legalApproved ? 1 : 0)
+  const canRun   = form.spvLegalName && form.tokenSymbol && form.pricePerBrick && totalSupply > 0 && distTotal === 100 && complianceApproved && legalApproved
 
   // ─── Render ──────────────────────────────────────────────────────────────────
   return (
@@ -238,7 +247,7 @@ export function AdminTokenizationEngine() {
                       </div>
                       {!isSelected && (
                         <button className="mt-3 w-full flex items-center justify-center gap-1.5 text-xs font-semibold text-sky-600 hover:text-sky-800 transition-colors">
-                          <ArrowRight size={12} /> Select for Brick Maker
+                          <ArrowRight size={12} /> Select for Tokenization
                         </button>
                       )}
                     </div>
@@ -344,22 +353,97 @@ export function AdminTokenizationEngine() {
                         <div className="bg-emerald-500 transition-all duration-300" style={{ width: `${Math.min(form.liquidityPoolPct, 100)}%` }} />
                       </div>
                       <div className="flex items-center gap-4 text-[11px] text-gray-500">
-                        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-sky-500 inline-block" />Public</span>
-                        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-violet-500 inline-block" />Sponsor</span>
-                        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />Liquidity</span>
+                        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-sky-500 inline-block" aria-hidden="true" />Public</span>
+                        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-violet-500 inline-block" aria-hidden="true" />Sponsor</span>
+                        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" aria-hidden="true" />Liquidity</span>
                       </div>
                     </div>
 
-                    {/* Footer */}
-                    <div className="pt-1 space-y-3">
-                      <p className="text-[11px] text-gray-400 flex items-center gap-1.5">
-                        <Info size={11} className="flex-shrink-0" /> Will deploy ERC-1643 standard to Polygon network
+                    {/* 4. GOVERNANCE & MULTI-SIG APPROVAL FLOW */}
+                    <div className="space-y-3">
+                      <p className="text-[10px] font-semibold tracking-widest text-gray-400 uppercase">4. Governance &amp; Multi-Sig Approval Flow</p>
+
+                      {/* Three-node approval flow */}
+                      <div className={`flex items-stretch gap-1 ${!selectedSpv ? 'opacity-40 pointer-events-none' : ''}`}>
+
+                        {/* Lead Admin — shows approved only when SPV is selected */}
+                        <div className={`flex-1 border-2 rounded-xl p-3 ${selectedSpv ? 'border-green-500 bg-green-50' : 'border-gray-200 bg-gray-50'}`}>
+                          <p className="text-[11px] font-bold text-gray-800 leading-tight">Lead Admin (You)</p>
+                          <div className="flex items-center gap-1 mt-2">
+                            {selectedSpv
+                              ? <CheckCircle2 size={12} className="text-green-600 flex-shrink-0" />
+                              : <Clock size={12} className="text-gray-400 flex-shrink-0" />}
+                            <p className={`text-[9px] font-bold uppercase tracking-wide leading-tight ${selectedSpv ? 'text-green-700' : 'text-gray-400'}`}>
+                              {selectedSpv ? <>Approved &amp;<br/>Submitted</> : <>Pending<br/>Approval</>}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center flex-shrink-0 text-gray-300 px-0.5">
+                          <ArrowRight size={13} />
+                        </div>
+
+                        {/* Compliance Officer */}
+                        <button
+                          type="button"
+                          disabled={!selectedSpv}
+                          onClick={() => setComplianceApproved(v => !v)}
+                          className={`flex-1 rounded-xl p-3 border-2 text-left transition-all ${complianceApproved ? 'border-green-500 bg-green-50' : 'border-gray-200 bg-white hover:border-sky-300 hover:bg-sky-50'}`}
+                        >
+                          <p className="text-[11px] font-bold text-gray-800 leading-tight">Compliance Officer</p>
+                          <div className="flex items-center gap-1 mt-2">
+                            {complianceApproved
+                              ? <CheckCircle2 size={12} className="text-green-600 flex-shrink-0" />
+                              : <Clock size={12} className="text-gray-400 flex-shrink-0" />}
+                            <p className={`text-[9px] font-bold uppercase tracking-wide leading-tight ${complianceApproved ? 'text-green-700' : 'text-gray-400'}`}>
+                              {complianceApproved ? 'Approved' : <>Pending<br/>Approval</>}
+                            </p>
+                          </div>
+                        </button>
+
+                        <div className="flex items-center flex-shrink-0 text-gray-300 px-0.5">
+                          <ArrowRight size={13} />
+                        </div>
+
+                        {/* Legal Counsel */}
+                        <button
+                          type="button"
+                          disabled={!selectedSpv}
+                          onClick={() => setLegalApproved(v => !v)}
+                          className={`flex-1 rounded-xl p-3 border-2 text-left transition-all ${legalApproved ? 'border-green-500 bg-green-50' : 'border-gray-200 bg-white hover:border-sky-300 hover:bg-sky-50'}`}
+                        >
+                          <p className="text-[11px] font-bold text-gray-800 leading-tight">Legal Counsel</p>
+                          <div className="flex items-center gap-1 mt-2">
+                            {legalApproved
+                              ? <CheckCircle2 size={12} className="text-green-600 flex-shrink-0" />
+                              : <Clock size={12} className="text-gray-400 flex-shrink-0" />}
+                            <p className={`text-[9px] font-bold uppercase tracking-wide leading-tight ${legalApproved ? 'text-green-700' : 'text-gray-400'}`}>
+                              {legalApproved ? 'Approved' : <>Pending<br/>Approval</>}
+                            </p>
+                          </div>
+                        </button>
+
+                      </div>
+
+                      <p className="text-xs text-gray-600 font-medium">
+                        Approval Status: {sigCount} / 2 required signatures received.
                       </p>
+                      <p className="text-[11px] text-gray-400 flex items-start gap-1.5">
+                        <Info size={11} className="flex-shrink-0 mt-0.5" />
+                        This action will deploy an ERC-1643 standard to the Polygon network after final Multi-Sig approval.
+                      </p>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="pt-1 space-y-2">
                       <Button className="w-full" onClick={handleRun} disabled={!canRun}>
                         <Zap size={15} /> Run Tokenization Engine
                       </Button>
                       {distTotal !== 100 && (
                         <p className="text-xs text-red-500 text-center">Distribution must total 100% before minting</p>
+                      )}
+                      {distTotal === 100 && (!complianceApproved || !legalApproved) && (
+                        <p className="text-xs text-amber-600 text-center">Both Compliance Officer and Legal Counsel must approve before minting</p>
                       )}
                       {selectedSpv && (
                         <button onClick={handleClearSpv} className="w-full text-xs text-gray-400 hover:text-gray-600 transition-colors py-1">

@@ -95,8 +95,8 @@ export function SpvManagerInvestorUpdates() {
                 {mockThumbnails.map(t => (
                   <div key={t.id} className="relative w-20 h-16 bg-gray-100 rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center">
                     <p className="text-[9px] text-gray-400 text-center px-1">{t.label}</p>
-                    <button className="absolute top-1 right-1 w-4 h-4 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-sm hover:bg-red-50 hover:border-red-200 transition-colors">
-                      <X size={8} className="text-gray-500" />
+                    <button aria-label="Remove attachment" className="absolute top-1 right-1 w-4 h-4 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-sm hover:bg-red-50 hover:border-red-200 transition-colors">
+                      <X size={8} className="text-gray-500" aria-hidden="true" />
                     </button>
                   </div>
                 ))}

@@ -51,7 +51,7 @@ export function SpvManagerComplianceVault() {
         <div className="bg-white border border-gray-200 rounded-2xl">
           <div className="px-5 py-4 border-b border-gray-200">
             <p className="font-bold text-gray-900 text-sm">Upload Compliance Document</p>
-            <p className="text-xs text-gray-400 mt-0.5">Classify and securely store a new regulatory document</p>
+            <p className="text-xs text-gray-600 mt-0.5">Classify and securely store a new regulatory document</p>
           </div>
           <div className="p-5 space-y-4">
 
@@ -82,7 +82,7 @@ export function SpvManagerComplianceVault() {
             <div className="border-2 border-dashed border-gray-200 rounded-xl p-10 text-center hover:border-sky-300 hover:bg-sky-50/50 transition-colors cursor-pointer">
               <ShieldCheck size={28} className="mx-auto mb-3 text-gray-400" />
               <p className="text-sm font-semibold text-gray-600">Click to upload compliance document</p>
-              <p className="text-xs text-gray-400 mt-1">PDF · max 20MB · stored encrypted</p>
+              <p className="text-xs text-gray-600 mt-1">PDF · max 20MB · stored encrypted</p>
             </div>
 
             <div className="flex justify-start">
@@ -105,12 +105,12 @@ export function SpvManagerComplianceVault() {
             <table className="w-full text-xs">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/50">
-                  <th className="text-left px-5 py-3 text-gray-500 font-semibold">Document Type</th>
-                  <th className="text-left px-3 py-3 text-gray-500 font-semibold">Tax Year</th>
-                  <th className="text-left px-3 py-3 text-gray-500 font-semibold">Uploaded</th>
-                  <th className="text-left px-3 py-3 text-gray-500 font-semibold">File Size</th>
-                  <th className="text-left px-3 py-3 text-gray-500 font-semibold">Verified</th>
-                  <th className="text-left px-3 py-3 text-gray-500 font-semibold">Download</th>
+                  <th className="text-left px-5 py-3 text-gray-600 font-semibold">Document Type</th>
+                  <th className="text-left px-3 py-3 text-gray-600 font-semibold">Tax Year</th>
+                  <th className="text-left px-3 py-3 text-gray-600 font-semibold">Uploaded</th>
+                  <th className="text-left px-3 py-3 text-gray-600 font-semibold">File Size</th>
+                  <th className="text-left px-3 py-3 text-gray-600 font-semibold">Verified</th>
+                  <th className="text-left px-3 py-3 text-gray-600 font-semibold">Download</th>
                 </tr>
               </thead>
               <tbody>
@@ -126,7 +126,7 @@ export function SpvManagerComplianceVault() {
                         </td>
                         <td className="px-3 py-3 text-gray-600 whitespace-nowrap">{doc.year}</td>
                         <td className="px-3 py-3 text-gray-600 whitespace-nowrap">{doc.uploaded}</td>
-                        <td className="px-3 py-3 text-gray-500 whitespace-nowrap">{doc.size}</td>
+                        <td className="px-3 py-3 text-gray-600 whitespace-nowrap">{doc.size}</td>
                         <td className="px-3 py-3">
                           {doc.verified
                             ? <span className="inline-flex items-center gap-1 text-green-600 font-medium"><CheckCircle2 size={12} /> Verified</span>

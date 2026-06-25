@@ -34,7 +34,7 @@ export function SpvManagerRentLogging() {
           <div className="bg-white border border-gray-200 rounded-2xl">
             <div className="px-5 py-4 border-b border-gray-200">
               <p className="font-bold text-gray-900 text-sm">Log Rent Income</p>
-              <p className="text-xs text-gray-400 mt-0.5">Fill in the details for this month's rent</p>
+              <p className="text-xs text-gray-600 mt-0.5">Fill in the details for this month's rent</p>
             </div>
             <div className="p-5 space-y-4">
 
@@ -74,7 +74,7 @@ export function SpvManagerRentLogging() {
               </div>
 
               <div>
-                <p className={labelCls}>Bank Reference / Notes <span className="font-normal text-gray-400">(optional)</span></p>
+                <p className={labelCls}>Bank Reference / Notes <span className="font-normal text-gray-600">(optional)</span></p>
                 <input type="text" placeholder="e.g. UBS transfer ref #7823" className={inputCls} />
               </div>
 
@@ -82,8 +82,8 @@ export function SpvManagerRentLogging() {
                 <p className={labelCls}>Upload PDF Bank Receipt</p>
                 <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-sky-300 hover:bg-sky-50/50 transition-colors cursor-pointer">
                   <Upload size={20} className="mx-auto mb-2 text-gray-400" />
-                  <p className="text-xs font-medium text-gray-500">Click to upload bank receipt</p>
-                  <p className="text-xs text-gray-400 mt-0.5">PDF, max 10MB</p>
+                  <p className="text-xs font-medium text-gray-600">Click to upload bank receipt</p>
+                  <p className="text-xs text-gray-600 mt-0.5">PDF, max 10MB</p>
                 </div>
               </div>
 
@@ -97,17 +97,17 @@ export function SpvManagerRentLogging() {
           <div className="bg-white border border-gray-200 rounded-2xl">
             <div className="px-5 py-4 border-b border-gray-200">
               <p className="font-bold text-gray-900 text-sm">Recent Rent Entries</p>
-              <p className="text-xs text-gray-400 mt-0.5">Last 5 logged entries across all SPVs</p>
+              <p className="text-xs text-gray-600 mt-0.5">Last 5 logged entries across all SPVs</p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50/50">
-                    <th className="text-left px-5 py-3 text-gray-500 font-semibold">SPV</th>
-                    <th className="text-left px-3 py-3 text-gray-500 font-semibold">Month/Year</th>
-                    <th className="text-right px-3 py-3 text-gray-500 font-semibold">Amount</th>
-                    <th className="text-left px-3 py-3 text-gray-500 font-semibold">Date</th>
-                    <th className="text-left px-3 py-3 text-gray-500 font-semibold">Status</th>
+                    <th className="text-left px-5 py-3 text-gray-600 font-semibold">SPV</th>
+                    <th className="text-left px-3 py-3 text-gray-600 font-semibold">Month/Year</th>
+                    <th className="text-right px-3 py-3 text-gray-600 font-semibold">Amount</th>
+                    <th className="text-left px-3 py-3 text-gray-600 font-semibold">Date</th>
+                    <th className="text-left px-3 py-3 text-gray-600 font-semibold">Status</th>
                   </tr>
                 </thead>
                 <tbody>

@@ -81,7 +81,7 @@ export function HolderTradingDesk() {
           <div className="space-y-4">
             {myHoldings.length === 0 ? (
               <Card>
-                <CardContent className="py-12 text-center text-gray-400">
+                <CardContent className="py-12 text-center text-gray-600">
                   <Briefcase size={32} className="mx-auto mb-3 opacity-30" />
                   <p className="text-sm">You don't hold any Bricks yet. Go to <button className="text-blue-500 underline" onClick={() => setTab('buy')}>Buy Bricks</button> to get started.</p>
                 </CardContent>
@@ -110,7 +110,7 @@ export function HolderTradingDesk() {
                           <img src={spv.image} alt="" className="w-14 h-10 rounded-xl object-cover flex-shrink-0" />
                           <div className="flex-1">
                             <p className="font-semibold text-gray-900">{spv.name}</p>
-                            <p className="text-xs text-gray-400 mt-0.5">
+                            <p className="text-xs text-gray-600 mt-0.5">
                               <span className="font-medium text-gray-700">{h.bricks} Bricks</span>
                               {listed > 0 && <> · <span className="text-amber-600 font-medium">{listed} listed</span></>}
                               {' '}· <span className="text-green-700 font-medium">{available} available</span>
@@ -118,7 +118,7 @@ export function HolderTradingDesk() {
                           </div>
                           <div className="text-right flex-shrink-0">
                             <p className="text-sm font-bold text-gray-900">{fmt(currentValue)}</p>
-                            <p className="text-xs text-gray-400">current value</p>
+                            <p className="text-xs text-gray-600">current value</p>
                           </div>
                           <div className="ml-2 flex-shrink-0">
                             {isExpanded ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
@@ -128,13 +128,13 @@ export function HolderTradingDesk() {
                         {isExpanded && (
                           <div className="bg-gray-50 border-t border-gray-100">
                             {spvTx.length === 0 ? (
-                              <p className="text-xs text-gray-400 text-center py-4">No transactions recorded for this property.</p>
+                              <p className="text-xs text-gray-600 text-center py-4">No transactions recorded for this property.</p>
                             ) : (
                               <table className="w-full text-sm">
                                 <thead>
                                   <tr className="border-b border-gray-200">
                                     {['Date', 'Type', 'Bricks', 'Amount', 'Tx Hash'].map(h => (
-                                      <th key={h} className="text-left text-xs text-gray-400 font-medium px-5 py-2">{h}</th>
+                                      <th key={h} className="text-left text-xs text-gray-600 font-medium px-5 py-2">{h}</th>
                                     ))}
                                   </tr>
                                 </thead>
@@ -144,7 +144,7 @@ export function HolderTradingDesk() {
                                     if (!cfg) return null
                                     return (
                                       <tr key={tx.id} className="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
-                                        <td className="px-5 py-2.5 text-gray-500 text-xs">{tx.date}</td>
+                                        <td className="px-5 py-2.5 text-gray-600 text-xs">{tx.date}</td>
                                         <td className="px-5 py-2.5">
                                           <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${cfg.bg} ${cfg.text}`}>
                                             <cfg.icon size={10} /> {cfg.label}
@@ -180,13 +180,13 @@ export function HolderTradingDesk() {
             <CardHeader><CardTitle>Available on Secondary Market</CardTitle></CardHeader>
             <CardContent className="p-0">
               {otherListings.length === 0 ? (
-                <p className="text-sm text-gray-400 text-center py-10">No listings available on the secondary market right now.</p>
+                <p className="text-sm text-gray-600 text-center py-10">No listings available on the secondary market right now.</p>
               ) : (
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-gray-100">
                       {['SPV', 'Bricks', 'Ask Price', 'vs. Floor', 'Seller', 'Listed', ''].map(h => (
-                        <th key={h} className="text-left text-xs text-gray-500 font-medium px-5 py-3">{h}</th>
+                        <th key={h} className="text-left text-xs text-gray-600 font-medium px-5 py-3">{h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -202,7 +202,7 @@ export function HolderTradingDesk() {
                               <img src={spv.image} alt="" className="w-10 h-8 rounded-lg object-cover" />
                               <div>
                                 <p className="font-medium text-gray-900 text-sm">{spv.name}</p>
-                                <p className="text-xs text-gray-400">{spv.city}</p>
+                                <p className="text-xs text-gray-600">{spv.city}</p>
                               </div>
                             </div>
                           </td>
@@ -213,8 +213,8 @@ export function HolderTradingDesk() {
                               {parseFloat(premium) > 0 ? '+' : ''}{premium}%
                             </span>
                           </td>
-                          <td className="px-5 py-3 text-gray-500 text-xs">Anonymous</td>
-                          <td className="px-5 py-3 text-gray-400 text-xs">{listing.listedDate}</td>
+                          <td className="px-5 py-3 text-gray-600 text-xs">Anonymous</td>
+                          <td className="px-5 py-3 text-gray-600 text-xs">{listing.listedDate}</td>
                           <td className="px-5 py-3">
                             <Button size="sm" onClick={() => { setBuyModal(listing); setQty(listing.bricks); setDone(false) }}>
                               Buy
@@ -247,7 +247,7 @@ export function HolderTradingDesk() {
                         <img src={spv.image} alt="" className="w-14 h-10 rounded-xl object-cover" />
                         <div className="flex-1">
                           <p className="font-semibold text-gray-900">{spv.name}</p>
-                          <p className="text-sm text-gray-400">
+                          <p className="text-sm text-gray-600">
                             Owned: <span className="font-medium text-gray-700">{h.bricks}</span>
                             {listed > 0 && <> · Listed: <span className="font-medium text-amber-600">{listed}</span></>}
                             {' '}· Available to list: <span className="font-medium text-green-700">{available}</span>

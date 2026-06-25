@@ -28,7 +28,7 @@ function ActionCard({ icon: Icon, iconBg, iconColor, borderColor, title, countLa
           <p className={`text-xs font-medium ${countColor}`}>{countLabel}</p>
         </div>
       </div>
-      <p className="text-xs text-gray-400 mb-2.5 leading-relaxed">{description}</p>
+      <p className="text-xs text-gray-600 mb-2.5 leading-relaxed">{description}</p>
       <Link to={to}>
         <Button size="sm" variant="outline" className={`w-full text-xs justify-between ${btnBorder} ${btnText} ${btnHover}`}>
           Open <ArrowRight size={11} />
@@ -67,7 +67,7 @@ export function AdminDashboard() {
               <StatCard label="Total Value Locked" value={`$${(platformStats.totalValueLocked / 1000000).toFixed(1)}M`} icon={DollarSign} color="green" trend={15} />
               <StatCard label="Active Holders" value={investors.filter(i => i.kycStatus === 'verified').length.toLocaleString()} icon={Users} color="blue" trend={22} />
               <StatCard label="Active SPVs" value={liveSpvs.length} icon={Building2} color="purple" sub={`${spvs.length} total · ${reviewSpvs.length} in review`} />
-              <StatCard label="Platform Fees Earned" value={fmt(platformStats.platformFeeEarned)} icon={TrendingUp} color="amber" trend={11} />
+              <StatCard label="Platform Fees Earned (Total)" value={fmt(platformStats.platformFeeEarned)} icon={TrendingUp} color="amber" trend={11} />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -84,7 +84,7 @@ export function AdminDashboard() {
                 <div className="flex items-start justify-between mb-1">
                   <div>
                     <p className="text-sm font-semibold text-gray-900">AUM Growth Over Time</p>
-                    <p className="text-xs text-gray-400 mt-0.5">Total assets under management — last 12 months</p>
+                    <p className="text-xs text-gray-600 mt-0.5">Total assets under management — last 12 months</p>
                   </div>
                   <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
                     +{(((aumHistory.at(-1).aum - aumHistory[0].aum) / aumHistory[0].aum) * 100).toFixed(0)}% YTD
@@ -129,7 +129,7 @@ export function AdminDashboard() {
               {/* Chart 2: SPV Pipeline Funnel */}
               <div className="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col">
                 <p className="text-sm font-semibold text-gray-900">SPV Pipeline Health</p>
-                <p className="text-xs text-gray-400 mt-0.5 mb-5">Stage-by-stage deal funnel</p>
+                <p className="text-xs text-gray-600 mt-0.5 mb-5">Stage-by-stage deal funnel</p>
                 <div className="flex-1 flex flex-col justify-center gap-2.5">
                   {(() => {
                     const max = spvPipeline[0].count
@@ -153,7 +153,7 @@ export function AdminDashboard() {
                     })
                   })()}
                 </div>
-                <p className="text-xs text-gray-400 text-center mt-4">
+                <p className="text-xs text-gray-600 text-center mt-4">
                   {spvPipeline.reduce((s, d) => s + d.count, 0)} total deals tracked
                 </p>
               </div>
@@ -163,7 +163,7 @@ export function AdminDashboard() {
                 <div className="flex items-start justify-between mb-1">
                   <div>
                     <p className="text-sm font-semibold text-gray-900">Financial Flow — Rent vs. Platform Fees</p>
-                    <p className="text-xs text-gray-400 mt-0.5">Month-by-month rent collected and platform fee extraction</p>
+                    <p className="text-xs text-gray-600 mt-0.5">Month-by-month rent collected and platform fee extraction</p>
                   </div>
                   <div className="flex items-center gap-4 flex-shrink-0">
                     {[['#10b981', 'Rent Collected'], ['#3b82f6', 'Platform Fees']].map(([c, l]) => (
@@ -291,7 +291,7 @@ export function AdminDashboard() {
                 {liveSpvs.map(spv => (
                   <div key={spv.id} className="flex items-center gap-3 px-4 py-3 border-b border-gray-50 last:border-0">
                     {spv.coverImage ? (
-                      <img src={spv.coverImage} alt="" className="w-12 h-9 rounded-lg object-cover flex-shrink-0" />
+                      <img src={spv.coverImage} alt={`${spv.propertyDisplayName} property`} className="w-12 h-9 rounded-lg object-cover flex-shrink-0" />
                     ) : (
                       <div className="w-12 h-9 rounded-lg bg-sky-50 flex items-center justify-center flex-shrink-0">
                         <Building2 size={15} className="text-sky-400" />
@@ -299,7 +299,7 @@ export function AdminDashboard() {
                     )}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 truncate">{spv.propertyDisplayName}</p>
-                      <p className="text-xs text-gray-400">{spv.region} · {spv.propertyType}</p>
+                      <p className="text-xs text-gray-600">{spv.region} · {spv.propertyType}</p>
                     </div>
                     <div className="text-right flex-shrink-0">
                       <Badge variant="success" className="text-xs">Live</Badge>
@@ -316,7 +316,7 @@ export function AdminDashboard() {
                   <CardTitle className="flex items-center gap-2">
                     <FileText size={15} className="text-amber-500" /> Review Pipeline
                   </CardTitle>
-                  <p className="text-xs text-gray-400 mt-0.5">SPVs in the registry not yet live — part of the {spvs.length} total</p>
+                  <p className="text-xs text-gray-600 mt-0.5">SPVs in the registry not yet live — part of the {spvs.length} total</p>
                 </div>
               </CardHeader>
               <CardContent className="space-y-2 pt-1">
@@ -329,7 +329,7 @@ export function AdminDashboard() {
                   return (
                     <div key={spv.id} className={`flex items-center gap-3 p-3 rounded-xl ${s.bg}`}>
                       {spv.coverImage
-                        ? <img src={spv.coverImage} alt="" className="w-10 h-8 rounded-lg object-cover flex-shrink-0" />
+                        ? <img src={spv.coverImage} alt={`${spv.name} property`} className="w-10 h-8 rounded-lg object-cover flex-shrink-0" />
                         : <Building2 size={16} className="text-gray-400 flex-shrink-0" />
                       }
                       <div className="flex-1 min-w-0">
@@ -361,7 +361,7 @@ export function AdminDashboard() {
                       <Clock size={14} className="text-amber-500 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate">{spv?.name}</p>
-                        <p className="text-xs text-gray-400">Due {p.date}</p>
+                        <p className="text-xs text-gray-600">Due {p.date}</p>
                       </div>
                       <Badge variant="warning">Pending</Badge>
                     </div>
@@ -374,11 +374,11 @@ export function AdminDashboard() {
                       <CheckCircle2 size={14} className="text-green-500 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate">{spv?.name}</p>
-                        <p className="text-xs text-gray-400">{rent.date}</p>
+                        <p className="text-xs text-gray-600">{rent.date}</p>
                       </div>
                       <div className="text-right flex-shrink-0">
                         <p className="text-sm font-semibold text-green-600">{fmt(rent.amount)}</p>
-                        <p className="text-xs text-gray-400">fee: {fmt(rent.fee || 0)}</p>
+                        <p className="text-xs text-gray-600">fee: {fmt(rent.fee || 0)}</p>
                       </div>
                     </div>
                   )

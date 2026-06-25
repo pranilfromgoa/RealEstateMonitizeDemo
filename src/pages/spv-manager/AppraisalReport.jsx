@@ -28,7 +28,7 @@ export function SpvManagerAppraisalReport() {
         <div className="bg-white border border-gray-200 rounded-2xl">
           <div className="px-5 py-4 border-b border-gray-200">
             <p className="font-bold text-gray-900 text-sm">Submit Appraisal</p>
-            <p className="text-xs text-gray-400 mt-0.5">Enter the latest valuation for this property</p>
+            <p className="text-xs text-gray-600 mt-0.5">Enter the latest valuation for this property</p>
           </div>
           <div className="p-5 space-y-5">
 
@@ -66,7 +66,7 @@ export function SpvManagerAppraisalReport() {
               </div>
               <div>
                 <p className={labelCls}>Previous Assessed Value</p>
-                <div className="w-full border border-gray-200 rounded-xl px-3 py-2.5 bg-gray-50 text-sm font-semibold text-gray-500">
+                <div className="w-full border border-gray-200 rounded-xl px-3 py-2.5 bg-gray-50 text-sm font-semibold text-gray-600">
                   CHF 4,200,000
                 </div>
               </div>
@@ -83,8 +83,8 @@ export function SpvManagerAppraisalReport() {
               <p className={labelCls}>Upload PDF Appraisal Report</p>
               <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center hover:border-sky-300 hover:bg-sky-50/50 transition-colors cursor-pointer">
                 <Upload size={24} className="mx-auto mb-2 text-gray-400" />
-                <p className="text-sm font-medium text-gray-500">Click to upload appraisal report</p>
-                <p className="text-xs text-gray-400 mt-0.5">PDF, max 20MB</p>
+                <p className="text-sm font-medium text-gray-600">Click to upload appraisal report</p>
+                <p className="text-xs text-gray-600 mt-0.5">PDF, max 20MB</p>
               </div>
             </div>
 
@@ -93,7 +93,7 @@ export function SpvManagerAppraisalReport() {
               <button className="px-4 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold rounded-xl transition-colors">
                 Submit Appraisal Report
               </button>
-              <p className="text-xs text-gray-400">This will update the property valuation across the platform</p>
+              <p className="text-xs text-gray-600">This will update the property valuation across the platform</p>
             </div>
           </div>
         </div>
@@ -102,19 +102,19 @@ export function SpvManagerAppraisalReport() {
         <div className="bg-white border border-gray-200 rounded-2xl">
           <div className="px-5 py-4 border-b border-gray-200">
             <p className="font-bold text-gray-900 text-sm">Appraisal History</p>
-            <p className="text-xs text-gray-400 mt-0.5">Past valuations submitted for all properties</p>
+            <p className="text-xs text-gray-600 mt-0.5">Past valuations submitted for all properties</p>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/50">
-                  <th className="text-left px-5 py-3 text-gray-500 font-semibold">SPV</th>
-                  <th className="text-left px-3 py-3 text-gray-500 font-semibold">Date</th>
-                  <th className="text-left px-3 py-3 text-gray-500 font-semibold">Appraiser</th>
-                  <th className="text-right px-3 py-3 text-gray-500 font-semibold">Previous Value</th>
-                  <th className="text-right px-3 py-3 text-gray-500 font-semibold">New Value</th>
-                  <th className="text-right px-3 py-3 text-gray-500 font-semibold">Change</th>
-                  <th className="text-left px-3 py-3 text-gray-500 font-semibold">Report</th>
+                  <th className="text-left px-5 py-3 text-gray-600 font-semibold">SPV</th>
+                  <th className="text-left px-3 py-3 text-gray-600 font-semibold">Date</th>
+                  <th className="text-left px-3 py-3 text-gray-600 font-semibold">Appraiser</th>
+                  <th className="text-right px-3 py-3 text-gray-600 font-semibold">Previous Value</th>
+                  <th className="text-right px-3 py-3 text-gray-600 font-semibold">New Value</th>
+                  <th className="text-right px-3 py-3 text-gray-600 font-semibold">Change</th>
+                  <th className="text-left px-3 py-3 text-gray-600 font-semibold">Report</th>
                 </tr>
               </thead>
               <tbody>

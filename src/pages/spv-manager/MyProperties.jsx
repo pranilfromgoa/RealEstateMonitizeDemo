@@ -77,7 +77,7 @@ export function SpvManagerMyProperties() {
                     {/* Cover image */}
                     {spv.coverImage ? (
                       <div className="w-48 flex-shrink-0 relative hidden sm:block">
-                        <img src={spv.coverImage} alt="" className="w-full h-full object-cover" />
+                        <img src={spv.coverImage} alt={`${spv.propertyDisplayName || spv.name} property`} className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/10" />
                       </div>
                     ) : (

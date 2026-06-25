@@ -60,7 +60,7 @@ export function AdminPayouts() {
                 const spv = spvs.find(s => s.id === rent.spvId)
                 return (
                   <div key={rent.id} className="flex items-center gap-4 px-5 py-4 border-b border-gray-100 last:border-0 bg-amber-50/50">
-                    <img src={spv?.image} alt="" className="w-14 h-10 rounded-xl object-cover flex-shrink-0" />
+                    <img src={spv?.image} alt={`${spv?.name} property`} className="w-14 h-10 rounded-xl object-cover flex-shrink-0" />
                     <div className="flex-1">
                       <p className="font-semibold text-gray-900">{spv?.name}</p>
                       <p className="text-sm text-gray-400">Expected: {fmt(spv?.monthlyRent || 0)}/mo · Due: {rent.date}</p>
@@ -95,7 +95,7 @@ export function AdminPayouts() {
                     <tr key={rent.id} className="border-b border-gray-50 hover:bg-gray-50">
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-2">
-                          <img src={spv?.image} alt="" className="w-8 h-6 rounded object-cover" />
+                          <img src={spv?.image} alt={`${spv?.name} property`} className="w-8 h-6 rounded object-cover" />
                           <span className="text-gray-800 text-xs">{spv?.name}</span>
                         </div>
                       </td>

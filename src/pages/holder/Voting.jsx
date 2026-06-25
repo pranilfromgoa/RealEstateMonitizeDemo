@@ -37,7 +37,7 @@ export function HolderVoting() {
           ].map(s => (
             <div key={s.label} className="bg-white rounded-xl border border-gray-200 p-4 text-center">
               <p className="text-2xl font-bold text-gray-900">{s.value}</p>
-              <p className="text-xs text-gray-400 mt-1">{s.label}</p>
+              <p className="text-xs text-gray-600 mt-1">{s.label}</p>
             </div>
           ))}
         </div>
@@ -62,7 +62,7 @@ export function HolderVoting() {
                         <Badge variant={isActive ? 'default' : 'secondary'}>
                           {isActive ? 'Active' : 'Closed'}
                         </Badge>
-                        <span className="text-xs text-gray-400">{spv?.name}</span>
+                        <span className="text-xs text-gray-600">{spv?.name}</span>
                       </div>
                       <h3 className="ds-section-title text-base">{proposal.title}</h3>
                       <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{proposal.description}</p>
@@ -96,7 +96,7 @@ export function HolderVoting() {
                       </div>
                       <Progress value={parseInt(againstPct)} color="red" />
                     </div>
-                    <p className="text-xs text-gray-400 mt-1">{participationPct}% participation · {totalVotes.toLocaleString()} / {proposal.totalEligible.toLocaleString()} eligible Bricks voted</p>
+                    <p className="text-xs text-gray-600 mt-1">{participationPct}% participation · {totalVotes.toLocaleString()} / {proposal.totalEligible.toLocaleString()} eligible Bricks voted</p>
                   </div>
 
                   {/* Voting action */}

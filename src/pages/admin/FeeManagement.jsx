@@ -55,8 +55,8 @@ export function AdminFeeManagement() {
             <div className="flex items-center justify-between">
               <CardTitle>Fee Configuration</CardTitle>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                <span className="text-xs text-gray-500">Auto-collection active</span>
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" aria-hidden="true" />
+                <span className="text-xs text-gray-600">Auto-collection active</span>
               </div>
             </div>
           </CardHeader>
@@ -121,7 +121,7 @@ export function AdminFeeManagement() {
                     <tr key={spv.id} className="border-b border-gray-50 hover:bg-gray-50">
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-2">
-                          <img src={spv.image} alt="" className="w-8 h-6 rounded object-cover" />
+                          <img src={spv.image} alt={`${spv.name} property`} className="w-8 h-6 rounded object-cover" />
                           <span className="font-medium text-gray-900 text-xs">{spv.name}</span>
                         </div>
                       </td>

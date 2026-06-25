@@ -72,7 +72,7 @@ export function AdminApprovals() {
           <CardHeader><CardTitle>Identity Verification Queue</CardTitle></CardHeader>
           <CardContent className="p-0">
             {kyc.length === 0 && (
-              <p className="text-sm text-gray-400 px-6 py-8 text-center">No verification requests.</p>
+              <p className="text-sm text-gray-600 px-6 py-8 text-center">No verification requests.</p>
             )}
             {kyc.map(req => (
               <div key={req.id} className="flex flex-wrap items-center gap-4 px-5 py-4 border-b border-gray-100 last:border-0">
@@ -99,7 +99,7 @@ export function AdminApprovals() {
                       {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
                     </Badge>
                   </div>
-                  <div className="flex flex-wrap gap-4 mt-1 text-xs text-gray-500">
+                  <div className="flex flex-wrap gap-4 mt-1 text-xs text-gray-600">
                     <span>Submitted: {req.submittedDate}</span>
                     <span>Documents: {req.documents.join(', ')}</span>
                   </div>
@@ -141,14 +141,14 @@ export function AdminApprovals() {
           <div className="space-y-4">
             {/* Info */}
             <div className="grid grid-cols-2 gap-3 text-sm">
-              <div><p className="text-xs text-gray-400">Type</p><p className="font-medium">{detail.type}</p></div>
-              <div><p className="text-xs text-gray-400">Status</p>
+              <div><p className="text-xs text-gray-600">Type</p><p className="font-medium">{detail.type}</p></div>
+              <div><p className="text-xs text-gray-600">Status</p>
                 <Badge variant={detail.status === 'approved' ? 'success' : detail.status === 'rejected' ? 'destructive' : 'warning'} className="text-xs">
                   {detail.status.charAt(0).toUpperCase() + detail.status.slice(1)}
                 </Badge>
               </div>
-              <div><p className="text-xs text-gray-400">Submitted</p><p className="font-medium">{detail.submittedDate}</p></div>
-              <div className="col-span-2"><p className="text-xs text-gray-400 mb-1">Documents Submitted</p>
+              <div><p className="text-xs text-gray-600">Submitted</p><p className="font-medium">{detail.submittedDate}</p></div>
+              <div className="col-span-2"><p className="text-xs text-gray-600 mb-1">Documents Submitted</p>
                 <div className="flex flex-wrap gap-2">
                   {detail.documents.map(doc => (
                     <span key={doc} className="flex items-center gap-1 bg-sky-50 text-sky-700 text-xs px-2 py-1 rounded-lg">
@@ -176,7 +176,7 @@ export function AdminApprovals() {
                 <div>
                   <label className="block text-xs font-semibold text-gray-600 mb-1.5">
                     Rejection Reason <span className="text-red-500">*</span>
-                    <span className="text-gray-400 font-normal ml-1">(required only when rejecting)</span>
+                    <span className="text-gray-600 font-normal ml-1">(required only when rejecting)</span>
                   </label>
                   <textarea
                     value={rejectComment}

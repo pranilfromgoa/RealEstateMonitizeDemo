@@ -41,7 +41,7 @@ export function SpvManagerExpenseLogging() {
           <div className="bg-white border border-gray-200 rounded-2xl">
             <div className="px-5 py-4 border-b border-gray-200">
               <p className="font-bold text-gray-900 text-sm">Log Expense</p>
-              <p className="text-xs text-gray-400 mt-0.5">Record a new operational expense with invoice</p>
+              <p className="text-xs text-gray-600 mt-0.5">Record a new operational expense with invoice</p>
             </div>
             <div className="p-5 space-y-4">
 
@@ -89,8 +89,8 @@ export function SpvManagerExpenseLogging() {
                 <p className={labelCls}>Upload PDF Invoice</p>
                 <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-sky-300 hover:bg-sky-50/50 transition-colors cursor-pointer">
                   <Upload size={20} className="mx-auto mb-2 text-gray-400" />
-                  <p className="text-xs font-medium text-gray-500">Click to upload invoice</p>
-                  <p className="text-xs text-gray-400 mt-0.5">PDF, max 10MB</p>
+                  <p className="text-xs font-medium text-gray-600">Click to upload invoice</p>
+                  <p className="text-xs text-gray-600 mt-0.5">PDF, max 10MB</p>
                 </div>
               </div>
 
@@ -104,18 +104,18 @@ export function SpvManagerExpenseLogging() {
           <div className="bg-white border border-gray-200 rounded-2xl">
             <div className="px-5 py-4 border-b border-gray-200">
               <p className="font-bold text-gray-900 text-sm">Recent Expenses</p>
-              <p className="text-xs text-gray-400 mt-0.5">Last 5 logged expenses across all SPVs</p>
+              <p className="text-xs text-gray-600 mt-0.5">Last 5 logged expenses across all SPVs</p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50/50">
-                    <th className="text-left px-5 py-3 text-gray-500 font-semibold">SPV</th>
-                    <th className="text-left px-3 py-3 text-gray-500 font-semibold">Vendor</th>
-                    <th className="text-left px-3 py-3 text-gray-500 font-semibold">Category</th>
-                    <th className="text-right px-3 py-3 text-gray-500 font-semibold">Amount</th>
-                    <th className="text-left px-3 py-3 text-gray-500 font-semibold">Date</th>
-                    <th className="text-left px-3 py-3 text-gray-500 font-semibold">Invoice</th>
+                    <th className="text-left px-5 py-3 text-gray-600 font-semibold">SPV</th>
+                    <th className="text-left px-3 py-3 text-gray-600 font-semibold">Vendor</th>
+                    <th className="text-left px-3 py-3 text-gray-600 font-semibold">Category</th>
+                    <th className="text-right px-3 py-3 text-gray-600 font-semibold">Amount</th>
+                    <th className="text-left px-3 py-3 text-gray-600 font-semibold">Date</th>
+                    <th className="text-left px-3 py-3 text-gray-600 font-semibold">Invoice</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -125,7 +125,7 @@ export function SpvManagerExpenseLogging() {
                       <td className="px-3 py-3 text-gray-600 max-w-[120px]">
                         <p className="truncate">{e.vendor}</p>
                       </td>
-                      <td className="px-3 py-3 text-gray-500 max-w-[120px]">
+                      <td className="px-3 py-3 text-gray-600 max-w-[120px]">
                         <p className="truncate">{e.category}</p>
                       </td>
                       <td className="px-3 py-3 text-right font-semibold text-gray-900 tabular-nums whitespace-nowrap">{e.amount}</td>

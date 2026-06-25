@@ -73,7 +73,7 @@ export function HolderPortfolio() {
           {/* Chart 1: Income History */}
           <div className="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col">
             <p className="text-sm font-semibold text-gray-900">Income History</p>
-            <p className="text-xs text-gray-400 mt-0.5 mb-4">Monthly rent received across all SPVs</p>
+            <p className="text-xs text-gray-600 mt-0.5 mb-4">Monthly rent received across all SPVs</p>
             <div style={{ height: 180 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={incomeData} barSize={28} margin={{ top: 6, right: 8, left: -20, bottom: 0 }}>
@@ -98,7 +98,7 @@ export function HolderPortfolio() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <p className="text-xs text-gray-400 mt-3 text-center">
+            <p className="text-xs text-gray-600 mt-3 text-center">
               Total earned: <span className="font-semibold text-gray-700">{fmt(allTx.reduce((s, t) => s + t.amount, 0))}</span>
             </p>
           </div>
@@ -106,7 +106,7 @@ export function HolderPortfolio() {
           {/* Chart 2: Portfolio Allocation */}
           <div className="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col">
             <p className="text-sm font-semibold text-gray-900">Portfolio Allocation</p>
-            <p className="text-xs text-gray-400 mt-0.5 mb-4">Invested capital by SPV</p>
+            <p className="text-xs text-gray-600 mt-0.5 mb-4">Invested capital by SPV</p>
             <div className="flex gap-6 flex-1 items-center">
               <div style={{ width: 160, height: 160, flexShrink: 0 }}>
                 <ResponsiveContainer width="100%" height="100%">
@@ -182,45 +182,45 @@ export function HolderPortfolio() {
                       <div className="flex items-start justify-between gap-2">
                         <div>
                           <h4 className="font-semibold text-gray-900">{spv.name}</h4>
-                          <p className="text-sm text-gray-400">{spv.city} · {spv.type}</p>
+                          <p className="text-sm text-gray-600">{spv.city} · {spv.type}</p>
                         </div>
                         <Badge variant="success">{spv.annualYield}% yield</Badge>
                       </div>
                       <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
                         <div>
-                          <p className="text-xs text-gray-400">Bricks Owned</p>
+                          <p className="text-xs text-gray-600">Bricks Owned</p>
                           <p className="font-bold text-gray-900 text-lg">{h.bricks}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-400">Invested Amount</p>
+                          <p className="text-xs text-gray-600">Invested Amount</p>
                           <p className="font-bold text-gray-900">{fmtChf(h.bricks * h.purchasePrice)}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-400">Current Yield (APY)</p>
+                          <p className="text-xs text-gray-600">Current Yield (APY)</p>
                           <p className="font-bold text-sky-600">{spv.annualYield}%</p>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-400">Next Payout Date</p>
+                          <p className="text-xs text-gray-600">Next Payout Date</p>
                           <p className="font-bold text-gray-900">{nextPayoutDate}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-400">Current Value</p>
+                          <p className="text-xs text-gray-600">Current Value</p>
                           <p className="font-bold text-gray-900">{fmt(currentValue)}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-400">Rent Earned</p>
+                          <p className="text-xs text-gray-600">Rent Earned</p>
                           <p className="font-bold text-green-600">{fmt(h.earnedRent)}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-400">SPV Rent / mo</p>
+                          <p className="text-xs text-gray-600">SPV Rent / mo</p>
                           <p className="font-bold text-gray-700">{fmt(spv.monthlyRent)}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-400">My Rent Share / mo</p>
+                          <p className="text-xs text-gray-600">My Rent Share / mo</p>
                           <p className="font-bold text-green-600">{fmtSmall(monthlyIncome)}</p>
                         </div>
                       </div>
-                      <div className="mt-3 flex flex-wrap gap-3 text-xs text-gray-500">
+                      <div className="mt-3 flex flex-wrap gap-3 text-xs text-gray-600">
                         <span className="bg-gray-100 px-2 py-1 rounded">{ownershipPct}% ownership</span>
                         <span className="bg-gray-100 px-2 py-1 rounded">Purchased {h.purchaseDate}</span>
                         <span className={`px-2 py-1 rounded ${gain >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
@@ -240,20 +240,20 @@ export function HolderPortfolio() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>Rent Income History</CardTitle>
-              <button className="text-xs text-gray-500 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 flex items-center gap-1">
+              <button className="text-xs text-gray-600 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 flex items-center gap-1">
                 <Calendar size={12} /> Export CSV
               </button>
             </div>
           </CardHeader>
           <CardContent className="p-0">
             {allTx.length === 0 ? (
-              <p className="text-sm text-gray-400 text-center py-10">No rent payouts received yet. Rent distributions will appear here once processed by the platform.</p>
+              <p className="text-sm text-gray-600 text-center py-10">No rent payouts received yet. Rent distributions will appear here once processed by the platform.</p>
             ) : (
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100">
                     {['Date', 'SPV', 'Amount', 'Tx Hash'].map(h => (
-                      <th key={h} className="text-left text-xs text-gray-500 font-medium px-6 py-3">{h}</th>
+                      <th key={h} className="text-left text-xs text-gray-600 font-medium px-6 py-3">{h}</th>
                     ))}
                   </tr>
                 </thead>

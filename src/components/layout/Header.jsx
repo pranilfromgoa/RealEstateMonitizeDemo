@@ -63,6 +63,7 @@ export function Header({ title, subtitle }) {
             <input
               type="text"
               placeholder="Search..."
+              aria-label="Search"
               className="pl-9 pr-4 py-2 text-sm bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent w-56 placeholder:text-muted-foreground text-foreground"
             />
           </div>
@@ -71,10 +72,12 @@ export function Header({ title, subtitle }) {
           <div className="relative" ref={notifRef}>
             <button
               onClick={() => { setShowNotifications(!showNotifications); setShowUserMenu(false) }}
+              aria-label="View notifications"
               className="relative p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
             >
-              <Bell size={18} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
+              <Bell size={18} aria-hidden="true" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" aria-hidden="true" />
+              <span className="sr-only">Unread notifications</span>
             </button>
             {showNotifications && (
               <div className="absolute right-0 top-10 w-80 bg-popover text-popover-foreground rounded-xl shadow-xl border border-border z-20">

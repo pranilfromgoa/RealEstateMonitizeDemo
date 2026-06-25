@@ -27,7 +27,7 @@ export function HolderTaxDocuments() {
             { label: '2024 Platform Fees', value: fmt(myDocs.find(d => d.year === 2024)?.platformFees || 0) },
           ].map(s => (
             <div key={s.label} className="bg-white rounded-xl border border-gray-200 p-4">
-              <p className="text-xs text-gray-400">{s.label}</p>
+              <p className="text-xs text-gray-600">{s.label}</p>
               <p className="text-xl font-bold text-gray-900 mt-1">{s.value}</p>
             </div>
           ))}
@@ -44,7 +44,7 @@ export function HolderTaxDocuments() {
                 </div>
                 <div className="flex-1">
                   <p className="font-semibold text-gray-900">Form {doc.type} — Tax Year {doc.year}</p>
-                  <div className="flex flex-wrap gap-3 mt-1 text-xs text-gray-500">
+                  <div className="flex flex-wrap gap-3 mt-1 text-xs text-gray-600">
                     <span>Rental income: <span className="font-medium text-gray-700">{fmt(doc.rentIncome)}</span></span>
                     <span>Capital gains: <span className="font-medium text-gray-700">{fmt(doc.capitalGains)}</span></span>
                     <span>Fees paid: <span className="font-medium text-gray-700">{fmt(doc.platformFees)}</span></span>

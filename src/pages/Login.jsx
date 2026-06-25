@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { useData } from '@/context/DataContext'
+import { useFontSize } from '@/context/FontSizeContext'
 import { Layers, ArrowRight, RotateCcw, ShieldCheck, TrendingUp, Search } from 'lucide-react'
 
 const roles = [
@@ -71,6 +72,7 @@ export function Login() {
   const [cleared, setCleared] = useState(false)
   const { login } = useAuth()
   const { resetData } = useData()
+  const { fontSize, setFontSize } = useFontSize()
   const navigate = useNavigate()
 
   const handleClear = () => {
@@ -95,7 +97,7 @@ export function Login() {
 
       {/* ── LEFT PANEL ────────────────────────────────────────── */}
       <div
-        className="hidden lg:flex flex-col justify-between w-[32rem] p-10 select-none"
+        className="hidden lg:flex flex-col justify-between w-[42.24rem] p-10 select-none"
         style={{ background: '#0369a1' }}
       >
         {/* Logo */}
@@ -115,10 +117,14 @@ export function Login() {
         <div>
           <h1
             className="text-white font-black leading-[1.0] uppercase"
-            style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: '2.75rem', letterSpacing: '-0.02em' }}
+            style={{ fontFamily: '"Space Grotesk", sans-serif', fontSize: '2.25rem', letterSpacing: '-0.02em' }}
           >
-            FRACTIONAL<br />REAL ESTATE<br />ASSETS
+            {/* FRACTIONAL<br />REAL ESTATE<br />ASSETS */}
+            Fractional Ownership. <br />Exponential Growth.<br />
+
           </h1>
+
+
         </div>
 
         {/* Footer strip */}
@@ -129,7 +135,8 @@ export function Login() {
       </div>
 
       {/* ── RIGHT PANEL ───────────────────────────────────────── */}
-      <div className="flex-1 bg-white flex items-center justify-center p-10">
+      <div className="flex-1 bg-white flex flex-col p-10">
+        <div className="flex-1 flex items-center justify-center">
         <div className="w-full max-w-lg">
 
           {/* Mobile logo */}
@@ -145,7 +152,7 @@ export function Login() {
           {/* Heading */}
           <div className="mb-8">
             <h2
-              className="text-[1.6rem] font-bold text-slate-800 leading-tight"
+              className="text-2xl font-extrabold text-slate-900 font-display uppercase tracking-wider"
               style={{ fontFamily: '"Space Grotesk", sans-serif', letterSpacing: '-0.01em' }}
             >
               WELCOME TO BRICKCHAIN
@@ -167,7 +174,7 @@ export function Login() {
           </div>
 
           {/* Role cards */}
-          <div className="grid grid-cols-2 gap-3 mb-6">
+          <div className="grid grid-cols-2 gap-3 mb-6 justify-items-start">
             {roles.map(role => {
               const isSelected = selected === role.key
               return (
@@ -181,7 +188,7 @@ export function Login() {
                     else if (role.key === 'research') navigate('/research/board')
                     else navigate('/admin/dashboard')
                   }}
-                  className={`group text-left p-3 rounded-xl border transition-all duration-150 flex items-center gap-3 ${
+                  className={`group text-left px-3 py-2 rounded-xl border transition-all duration-150 flex items-center gap-2.5 ${
                     isSelected ? roleTheme[role.key].cardSelected : 'border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-white'
                   }`}
                 >
@@ -222,7 +229,7 @@ export function Login() {
           <button
             onClick={handleLogin}
             disabled={!selected}
-            className={`w-full py-3.5 rounded-xl font-bold text-white text-[13px] tracking-[0.15em] uppercase flex items-center justify-center gap-2 transition-all duration-150 ${
+            className={`w-full py-2.5 bg-[#0284c7] hover:bg-[#0369a1] text-white font-extrabold uppercase rounded-xl text-xs tracking-widest cursor-pointer shadow-sm transition hover:shadow-md flex items-center justify-center space-x-2  ${
               selected
                 ? 'cursor-pointer hover:opacity-90 active:scale-[0.99]'
                 : 'cursor-not-allowed opacity-40'
@@ -233,24 +240,37 @@ export function Login() {
             {selected && <ArrowRight size={15} />}
           </button>
 
-          {/* Footer */}
-          <div className="mt-5 flex items-start gap-2">
-            <span className="text-amber-500 text-xs flex-shrink-0 mt-0.5">⚠</span>
-            <div className="flex-1 flex items-center justify-between gap-4">
-              <p className="text-xs text-gray-400 leading-snug">
-                Sandbox mode active — all data is simulated for demonstration purposes.
-              </p>
+        </div>
+        </div>
+
+        {/* Footer — pinned to bottom of right panel */}
+        <div className="flex items-center gap-2">
+          <span className="text-amber-500 text-xs flex-shrink-0">⚠</span>
+          <div className="flex-1 flex items-center justify-between gap-4">
+            <p className="text-[12px] font-bold text-gray-400 leading-snug">
+              Sandbox mode — all data is simulated for demo purposes.
+            </p>
+            <div className="flex items-center gap-3 flex-shrink-0">
+              <select
+                value={fontSize}
+                onChange={e => setFontSize(e.target.value)}
+                className="text-[10px] border border-gray-200 rounded-lg px-2 py-1 text-gray-500 bg-white focus:outline-none focus:ring-2 focus:ring-sky-200 cursor-pointer"
+              >
+                <option value="default">Default size</option>
+                <option value="compact">Compact size</option>
+                <option value="mini">Mini size</option>
+              </select>
               <button
                 onClick={handleClear}
-                className="flex items-center gap-1 text-xs text-gray-400 hover:text-red-400 transition-colors whitespace-nowrap flex-shrink-0"
+                className="flex items-center gap-1 text-xs text-gray-400 hover:text-red-400 transition-colors whitespace-nowrap"
               >
                 <RotateCcw size={10} />
                 {cleared ? 'Cleared!' : 'Reset data'}
               </button>
             </div>
           </div>
-
         </div>
+
       </div>
     </div>
   )

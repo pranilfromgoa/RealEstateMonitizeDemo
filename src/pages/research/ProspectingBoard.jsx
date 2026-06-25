@@ -259,7 +259,7 @@ function ProspectCard({ prospect: p, isSelected, canSelect, onToggle, onMove, on
       {/* No overflow-hidden here so the tooltip can escape; rounding applied directly to image/gradient */}
       <div className="relative flex-shrink-0 rounded-t-2xl">
         {p.coverImage
-          ? <img src={p.coverImage} alt="" className="w-full h-36 object-cover rounded-t-2xl" />
+          ? <img src={p.coverImage} alt={`${p.name} property`} className="w-full h-36 object-cover rounded-t-2xl" />
           : <div className="w-full h-36 bg-sky-50 flex items-center justify-center rounded-t-2xl"><Building2 size={22} className="text-sky-200" /></div>
         }
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent rounded-t-2xl pointer-events-none" />
@@ -468,7 +468,7 @@ function RowsView({ prospects, selected, onToggleSelect, onMoveStatus }) {
                 {/* Thumbnail */}
                 <td className="px-2 py-3">
                   {p.coverImage
-                    ? <img src={p.coverImage} alt="" className="w-12 h-9 rounded-lg object-cover" />
+                    ? <img src={p.coverImage} alt={`${p.name} property`} className="w-12 h-9 rounded-lg object-cover" />
                     : <div className="w-12 h-9 rounded-lg bg-sky-50 flex items-center justify-center"><Building2 size={14} className="text-sky-300" /></div>
                   }
                 </td>

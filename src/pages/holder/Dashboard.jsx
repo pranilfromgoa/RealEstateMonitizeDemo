@@ -76,8 +76,8 @@ export function HolderDashboard() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-gray-800 font-medium capitalize">{tx.type === 'rent' ? 'Rent received' : `${tx.type} Bricks`}</p>
-                        <p className="text-xs text-gray-400 truncate">{spv?.name}</p>
-                        <p className="text-xs text-gray-400">{tx.date}</p>
+                        <p className="text-xs text-gray-600 truncate">{spv?.name}</p>
+                        <p className="text-xs text-gray-600">{tx.date}</p>
                       </div>
                       <p className={`text-sm font-semibold ${tx.type === 'sell' || tx.type === 'rent' ? 'text-green-600' : 'text-gray-900'}`}>
                         {tx.type === 'sell' || tx.type === 'rent' ? '+' : '-'}{fmt(tx.amount)}
@@ -100,7 +100,7 @@ export function HolderDashboard() {
                 </div>
                 <div>
                   <p className="font-semibold text-gray-900 text-sm">KYC Verified</p>
-                  <p className="text-xs text-gray-400">Identity verified on Feb 10, 2024</p>
+                  <p className="text-xs text-gray-600">Identity verified on Feb 10, 2024</p>
                 </div>
                 <Badge variant="success" className="ml-auto">Active</Badge>
               </CardContent>
@@ -128,7 +128,7 @@ export function HolderDashboard() {
                         <span className="text-gray-500">{myShare}% ownership</span>
                       </div>
                       <Progress value={soldPct} color="blue" />
-                      <div className="flex justify-between text-xs text-gray-400 mt-1">
+                      <div className="flex justify-between text-xs text-gray-600 mt-1">
                         <span>{soldPct.toFixed(0)}% sold</span>
                         <span>{spv.annualYield}% yield</span>
                       </div>

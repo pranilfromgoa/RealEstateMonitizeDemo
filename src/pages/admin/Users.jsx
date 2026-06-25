@@ -143,7 +143,7 @@ export function AdminUsers() {
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <p className={`text-xs font-semibold uppercase tracking-wide ${securityFlags > 0 ? 'text-red-700' : 'text-gray-500'}`}>
+                <p className={`text-xs font-semibold uppercase tracking-wide ${securityFlags > 0 ? 'text-red-700' : 'text-gray-600'}`}>
                   🌟 Security Flags
                 </p>
                 {securityFlags > 0 && (
@@ -152,7 +152,7 @@ export function AdminUsers() {
                   </span>
                 )}
               </div>
-              <p className={`text-4xl font-extrabold leading-none mt-1 ${securityFlags > 0 ? 'text-red-600' : 'text-gray-400'}`}>
+              <p className={`text-4xl font-extrabold leading-none mt-1 ${securityFlags > 0 ? 'text-red-600' : 'text-gray-600'}`}>
                 {securityFlags}
               </p>
               {securityFlags > 0 ? (
@@ -164,7 +164,7 @@ export function AdminUsers() {
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-gray-400 mt-1">No suspicious activity detected</p>
+                <p className="text-xs text-gray-600 mt-1">No suspicious activity detected</p>
               )}
             </div>
           </div>
@@ -176,7 +176,7 @@ export function AdminUsers() {
           {/* Chart 1: Role & Privilege Distribution */}
           <div className="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col">
             <p className="text-sm font-semibold text-gray-900">Role & Privilege Distribution</p>
-            <p className="text-xs text-gray-400 mt-0.5 mb-4">Permission tier breakdown across all staff</p>
+            <p className="text-xs text-gray-600 mt-0.5 mb-4">Permission tier breakdown across all staff</p>
             <div className="flex gap-5 flex-1 items-center">
               <div style={{ width: 160, height: 160, flexShrink: 0 }}>
                 <ResponsiveContainer width="100%" height="100%">
@@ -216,7 +216,7 @@ export function AdminUsers() {
           {/* Chart 2: Audit Trail / System Action Volume */}
           <div className="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col">
             <p className="text-sm font-semibold text-gray-900">System Action Volume</p>
-            <p className="text-xs text-gray-400 mt-0.5 mb-4">Audit trail — admin actions over the last 7 days</p>
+            <p className="text-xs text-gray-600 mt-0.5 mb-4">Audit trail — admin actions over the last 7 days</p>
             <div style={{ height: 160 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={auditActions} margin={{ top: 4, right: 8, left: -24, bottom: 0 }}>
@@ -235,7 +235,7 @@ export function AdminUsers() {
               {[['#10b981','KYC Approvals'],['#0ea5e9','Property Edits'],['#f59e0b','Resets']].map(([c,l]) => (
                 <div key={l} className="flex items-center gap-1.5">
                   <div className="w-3 h-0.5 rounded-full" style={{ backgroundColor: c }} />
-                  <span className="text-xs text-gray-500">{l}</span>
+                  <span className="text-xs text-gray-600">{l}</span>
                 </div>
               ))}
             </div>
@@ -254,11 +254,11 @@ export function AdminUsers() {
                 className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   regionFilter === r
                     ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-500 hover:text-gray-700'
+                    : 'text-gray-600 hover:text-gray-700'
                 }`}
               >
                 {r}
-                <span className="ml-1.5 text-xs text-gray-400">
+                <span className="ml-1.5 text-xs text-gray-600">
                   ({r === 'All' ? users.length : users.filter(u => u.region === r).length})
                 </span>
               </button>
@@ -274,7 +274,7 @@ export function AdminUsers() {
           <CardHeader>
             <CardTitle>
               {regionFilter === 'All' ? 'All Users' : `Users — ${regionFilter}`}
-              <span className="ml-2 text-sm font-normal text-gray-400">({filtered.length})</span>
+              <span className="ml-2 text-sm font-normal text-gray-600">({filtered.length})</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
@@ -282,7 +282,7 @@ export function AdminUsers() {
               <thead>
                 <tr className="border-b border-gray-100">
                   {['User', 'Permission Tier', 'Region', 'Session', 'Status', 'Last Login', 'Actions'].map(h => (
-                    <th key={h} className="text-left text-xs text-gray-500 font-medium px-5 py-3">{h}</th>
+                    <th key={h} className="text-left text-xs text-gray-600 font-medium px-5 py-3">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -306,7 +306,7 @@ export function AdminUsers() {
                               <ShieldAlert size={13} className="text-red-500 flex-shrink-0" title={user.securityFlagReason} />
                             )}
                           </div>
-                          <p className="text-xs text-gray-400">{user.email}</p>
+                          <p className="text-xs text-gray-600">{user.email}</p>
                         </div>
                       </div>
                     </td>
@@ -326,7 +326,7 @@ export function AdminUsers() {
                     <td className="px-5 py-3">
                       {user.sessionActive
                         ? <span className="flex items-center gap-1.5 text-xs text-emerald-700 font-medium"><span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />Live</span>
-                        : <span className="text-xs text-gray-400">Offline</span>
+                        : <span className="text-xs text-gray-600">Offline</span>
                       }
                     </td>
                     <td className="px-5 py-3">
@@ -334,7 +334,7 @@ export function AdminUsers() {
                         {user.status}
                       </Badge>
                     </td>
-                    <td className="px-5 py-3 text-gray-400 text-xs">{user.lastLogin || user.joinDate}</td>
+                    <td className="px-5 py-3 text-gray-600 text-xs">{user.lastLogin || user.joinDate}</td>
                     <td className="px-5 py-3">
                       <button
                         onClick={() => toggleStatus(user.id)}
@@ -354,7 +354,7 @@ export function AdminUsers() {
                 ))}
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="px-5 py-10 text-center text-sm text-gray-400">No users found for this region.</td>
+                    <td colSpan={7} className="px-5 py-10 text-center text-sm text-gray-600">No users found for this region.</td>
                   </tr>
                 )}
               </tbody>

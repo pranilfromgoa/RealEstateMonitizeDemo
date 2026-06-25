@@ -89,7 +89,7 @@ export function HolderAIReader() {
                   onClick={() => handleSpvChange(s)}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors text-sm ${firstProp?.id === s.id ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50 text-gray-700'}`}
                 >
-                  <img src={s.image} alt="" className="w-10 h-8 rounded-lg object-cover flex-shrink-0" />
+                  <img src={s.image} alt={`${s.name} property`} className="w-10 h-8 rounded-lg object-cover flex-shrink-0" />
                   <span className="leading-tight">{s.name}</span>
                 </button>
               ))}
