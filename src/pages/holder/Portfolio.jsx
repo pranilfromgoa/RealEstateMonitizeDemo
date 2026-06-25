@@ -253,7 +253,7 @@ export function HolderPortfolio() {
                 <thead>
                   <tr className="border-b border-gray-100">
                     {['Date', 'SPV', 'Amount', 'Tx Hash'].map(h => (
-                      <th key={h} className="text-left text-xs text-gray-600 font-medium px-6 py-3">{h}</th>
+                      <th key={h} className={`text-xs text-gray-600 font-medium px-6 py-3 ${['Date', 'Amount'].includes(h) ? 'text-right' : 'text-left'}`}>{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -262,9 +262,9 @@ export function HolderPortfolio() {
                     const spv = spvs.find(s => s.id === tx.spvId)
                     return (
                       <tr key={tx.id} className="border-b border-gray-50 hover:bg-gray-50">
-                        <td className="px-6 py-3 text-gray-600">{tx.date}</td>
+                        <td className="px-6 py-3 text-gray-600 text-right">{tx.date}</td>
                         <td className="px-6 py-3 text-gray-700">{spv?.name}</td>
-                        <td className="px-6 py-3 font-medium text-green-600">+{fmt(tx.amount)}</td>
+                        <td className="px-6 py-3 font-medium text-green-600 text-right">+{fmt(tx.amount)}</td>
                         <td className="px-6 py-3">
                           <a href="#" className="text-xs text-blue-500 font-mono hover:underline">{tx.txHash.slice(0, 10)}…</a>
                         </td>

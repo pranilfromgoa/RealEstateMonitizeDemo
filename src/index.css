@@ -282,6 +282,13 @@
     border-color: hsl(var(--border));
   }
 
+  /* Recharts SVG elements should never show a browser focus ring */
+  .recharts-wrapper,
+  .recharts-wrapper svg,
+  .recharts-surface {
+    outline: none !important;
+  }
+
   body {
     font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
     font-size: var(--prim-text-sm);   /* 15px after scale bump */
@@ -450,6 +457,7 @@
   .ds-data-value {
     font-weight: var(--prim-weight-medium);
     color: hsl(var(--foreground));
+    text-align: right;
   }
 
 
@@ -485,6 +493,11 @@
   .ds-input::placeholder,
   .ds-textarea::placeholder {
     color: hsl(var(--muted-foreground));
+  }
+
+  /* Right-align all numeric inputs so digits stack on the decimal point */
+  input[type="number"] {
+    text-align: right;
   }
 
   .ds-input:focus,

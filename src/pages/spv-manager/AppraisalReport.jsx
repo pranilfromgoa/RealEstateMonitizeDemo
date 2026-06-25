@@ -109,7 +109,7 @@ export function SpvManagerAppraisalReport() {
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/50">
                   <th className="text-left px-5 py-3 text-gray-600 font-semibold">SPV</th>
-                  <th className="text-left px-3 py-3 text-gray-600 font-semibold">Date</th>
+                  <th className="text-right px-3 py-3 text-gray-600 font-semibold">Date</th>
                   <th className="text-left px-3 py-3 text-gray-600 font-semibold">Appraiser</th>
                   <th className="text-right px-3 py-3 text-gray-600 font-semibold">Previous Value</th>
                   <th className="text-right px-3 py-3 text-gray-600 font-semibold">New Value</th>
@@ -123,7 +123,7 @@ export function SpvManagerAppraisalReport() {
                     <td className="px-5 py-3 font-medium text-gray-800 max-w-[160px]">
                       <p className="truncate">{a.spv}</p>
                     </td>
-                    <td className="px-3 py-3 text-gray-600 whitespace-nowrap">{a.date}</td>
+                    <td className="px-3 py-3 text-gray-600 whitespace-nowrap text-right">{a.date}</td>
                     <td className="px-3 py-3 text-gray-600 whitespace-nowrap">{a.appraiser}</td>
                     <td className="px-3 py-3 text-right text-gray-600 tabular-nums whitespace-nowrap">{a.prev}</td>
                     <td className="px-3 py-3 text-right font-semibold text-gray-900 tabular-nums whitespace-nowrap">{a.next}</td>

@@ -106,9 +106,9 @@ export function SpvManagerComplianceVault() {
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/50">
                   <th className="text-left px-5 py-3 text-gray-600 font-semibold">Document Type</th>
-                  <th className="text-left px-3 py-3 text-gray-600 font-semibold">Tax Year</th>
-                  <th className="text-left px-3 py-3 text-gray-600 font-semibold">Uploaded</th>
-                  <th className="text-left px-3 py-3 text-gray-600 font-semibold">File Size</th>
+                  <th className="text-right px-3 py-3 text-gray-600 font-semibold">Tax Year</th>
+                  <th className="text-right px-3 py-3 text-gray-600 font-semibold">Uploaded</th>
+                  <th className="text-right px-3 py-3 text-gray-600 font-semibold">File Size</th>
                   <th className="text-left px-3 py-3 text-gray-600 font-semibold">Verified</th>
                   <th className="text-left px-3 py-3 text-gray-600 font-semibold">Download</th>
                 </tr>
@@ -124,9 +124,9 @@ export function SpvManagerComplianceVault() {
                         <td className="px-5 py-3 text-gray-800 font-medium max-w-[220px]">
                           <p className="truncate">{doc.type}</p>
                         </td>
-                        <td className="px-3 py-3 text-gray-600 whitespace-nowrap">{doc.year}</td>
-                        <td className="px-3 py-3 text-gray-600 whitespace-nowrap">{doc.uploaded}</td>
-                        <td className="px-3 py-3 text-gray-600 whitespace-nowrap">{doc.size}</td>
+                        <td className="px-3 py-3 text-gray-600 whitespace-nowrap text-right">{doc.year}</td>
+                        <td className="px-3 py-3 text-gray-600 whitespace-nowrap text-right">{doc.uploaded}</td>
+                        <td className="px-3 py-3 text-gray-600 whitespace-nowrap text-right">{doc.size}</td>
                         <td className="px-3 py-3">
                           {doc.verified
                             ? <span className="inline-flex items-center gap-1 text-green-600 font-medium"><CheckCircle2 size={12} /> Verified</span>

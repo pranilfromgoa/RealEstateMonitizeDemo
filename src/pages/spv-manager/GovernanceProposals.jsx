@@ -217,9 +217,9 @@ export function SpvManagerGovernanceProposals() {
                   <th className="text-left px-3 py-3 text-gray-600 font-semibold">Type</th>
                   <th className="text-left px-3 py-3 text-gray-600 font-semibold">Title</th>
                   <th className="text-right px-3 py-3 text-gray-600 font-semibold">Amount</th>
-                  <th className="text-left px-3 py-3 text-gray-600 font-semibold">Deadline</th>
+                  <th className="text-right px-3 py-3 text-gray-600 font-semibold">Deadline</th>
                   <th className="text-left px-3 py-3 text-gray-600 font-semibold">Status</th>
-                  <th className="text-left px-3 py-3 text-gray-600 font-semibold">Votes</th>
+                  <th className="text-right px-3 py-3 text-gray-600 font-semibold">Votes</th>
                 </tr>
               </thead>
               <tbody>
@@ -241,14 +241,14 @@ export function SpvManagerGovernanceProposals() {
                         <p className="truncate">{p.title}</p>
                       </td>
                       <td className="px-3 py-3 text-right font-semibold text-gray-900 tabular-nums whitespace-nowrap">{p.amount}</td>
-                      <td className="px-3 py-3 text-gray-600 whitespace-nowrap">{p.deadline}</td>
+                      <td className="px-3 py-3 text-gray-600 whitespace-nowrap text-right">{p.deadline}</td>
                       <td className="px-3 py-3">
                         <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full font-medium ${s.bg} ${s.text}`}>
                           <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${s.dot}`} />
                           {p.status}
                         </span>
                       </td>
-                      <td className="px-3 py-3 text-gray-600 tabular-nums whitespace-nowrap">{p.votes}</td>
+                      <td className="px-3 py-3 text-gray-600 tabular-nums whitespace-nowrap text-right">{p.votes}</td>
                     </tr>
                   )
                 })}

@@ -10,7 +10,7 @@ import { regions, researchUsers } from '@/data/mockData'
 import { useData } from '@/context/DataContext'
 import {
   Building2, Plus, ArrowLeft, ArrowRight, AlertTriangle, CheckCircle2, XCircle,
-  FileText, Globe, Landmark, BarChart3, Users,
+  FileText, Globe, Landmark, BarChart3, Users, Lock,
   ChevronDown, MapPin, Save, Send, Info, BookOpen,
   LayoutGrid, LayoutList,
 } from 'lucide-react'
@@ -306,7 +306,7 @@ function SpvCard({ spv, onView, viewOnly = false, onAssignManager = null }) {
         <div className="mt-3 mb-3">
           <div className="flex justify-between text-xs mb-1">
             <span className="text-gray-600">Profile completion</span>
-            <span className="font-semibold text-sky-600">{pct}%</span>
+            <span className="font-semibold text-sky-600 text-right">{pct}%</span>
           </div>
           <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
             <div
@@ -647,6 +647,13 @@ export function AdminSPV() {
     }
   }
 
+  const handleTabChange = (tabId) => {
+    const updated = buildUpdated(editForm)
+    updateSpv(updated.id, updated)
+    setCurrentSpv(updated)
+    setActiveTab(tabId)
+  }
+
   const handleSubmitForReview = () => {
     const updated = buildUpdated(editForm, { status: 'pending' })
     updateSpv(updated.id, updated)
@@ -739,7 +746,7 @@ export function AdminSPV() {
           {currentSpv.status !== 'draft' && <div className="bg-white rounded-2xl border border-gray-200 p-4">
             <div className="flex items-center justify-between mb-2">
               <p className="text-sm font-semibold text-gray-700">Profile Completion</p>
-              <p className="text-sm font-bold text-sky-600">{pct}%</p>
+              <p className="text-sm font-bold text-sky-600 text-right">{pct}%</p>
             </div>
             <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-3">
               <div
@@ -748,19 +755,23 @@ export function AdminSPV() {
               />
             </div>
             <div className="flex justify-around">
-              {['A','B','C','D','E'].map(s => {
-                const c    = comp[s]
+              {[
+                { key: 'A', roman: 'I'   },
+                { key: 'B', roman: 'II'  },
+                { key: 'C', roman: 'III' },
+                { key: 'D', roman: 'IV'  },
+                { key: 'E', roman: 'V'   },
+              ].map(({ key, roman }) => {
+                const c    = comp[key]
                 const done = c.filled === c.total
                 const part = c.filled > 0 && !done
                 return (
                   <button
-                    key={s}
-                    onClick={() => { setExpanded(prev => { const n = new Set(prev); n.add(s); return n }) }}
-                    className="flex flex-col items-center gap-1 group"
+                    key={key}
+                    onClick={() => { setExpanded(prev => { const n = new Set(prev); n.add(key); return n }) }}
+                    className="flex flex-col items-center gap-0.5 group"
                   >
-                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors group-hover:ring-2 group-hover:ring-sky-200 ${
-                      done ? 'bg-sky-100 text-sky-700' : part ? 'bg-sky-50 text-sky-500' : 'bg-gray-100 text-gray-400'
-                    }`}>{s}</div>
+                    <span className={`text-[10px] font-semibold ${done ? 'text-sky-600' : part ? 'text-sky-400' : 'text-gray-400'}`}>Section {roman}</span>
                     <span className="text-[10px] text-gray-400">{c.filled}/{c.total}</span>
                   </button>
                 )
@@ -796,7 +807,7 @@ export function AdminSPV() {
                   return (
                     <button
                       key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
+                      onClick={() => handleTabChange(tab.id)}
                       className={`flex-1 flex flex-col items-center gap-1 py-3 px-2 border-b-2 text-xs font-semibold transition-colors ${
                         active ? 'border-sky-600 text-sky-700 bg-sky-50' : 'border-transparent text-gray-500 hover:bg-gray-50 hover:text-gray-700'
                       } ${i > 0 ? 'border-l border-l-gray-100' : ''}`}
@@ -947,19 +958,34 @@ export function AdminSPV() {
                           <Input type="number" value={publicPct.toFixed(1)} onChange={() => {}} disabled />
                         </div>
                         {totalBricks > 0 && (
-                          <div className="sm:col-span-2 flex gap-3">
-                            <div className="flex-1 bg-sky-50 border border-sky-100 rounded-lg px-3 py-2 flex items-center justify-between">
-                              <span className="text-xs text-sky-400 font-semibold uppercase tracking-wider">Retained Bricks</span>
-                              <div className="text-right">
-                                <span className="text-sm font-bold text-sky-700">{retainedBricks.toLocaleString()}</span>
-                                <span className="text-[10px] text-sky-400 ml-1.5"> Units @ {sponsorPct}%</span>
+                          <div className="sm:col-span-2 bg-sky-50 border border-sky-100 rounded-xl px-4 py-3.5">
+                            <p className="text-[10px] font-bold text-sky-500 uppercase tracking-widest mb-3">Structure Summary</p>
+                            <div className="grid grid-cols-3 gap-x-4 gap-y-3.5">
+                              <div>
+                                <p className="text-[10px] text-gray-500 mb-0.5">Retained Bricks</p>
+                                <p className="text-sm font-bold text-sky-700">{retainedBricks.toLocaleString()}</p>
+                                <p className="text-[10px] text-sky-400">{sponsorPct}% sponsor</p>
                               </div>
-                            </div>
-                            <div className="flex-1 bg-sky-50 border border-sky-100 rounded-lg px-3 py-2 flex items-center justify-between">
-                              <span className="text-xs text-sky-400 font-semibold uppercase tracking-wider">Offered Bricks</span>
-                              <div className="text-right">
-                                <span className="text-sm font-bold text-sky-700">{publicBricks.toLocaleString()}</span>
-                                <span className="text-[10px] text-sky-400 ml-1.5"> Units @ {publicPct.toFixed(1)}%</span>
+                              <div>
+                                <p className="text-[10px] text-gray-500 mb-0.5">Offered Bricks</p>
+                                <p className="text-sm font-bold text-sky-700">{publicBricks.toLocaleString()}</p>
+                                <p className="text-[10px] text-sky-400">{publicPct.toFixed(1)}% public</p>
+                              </div>
+                              <div>
+                                <p className="text-[10px] text-gray-500 mb-0.5">Net Equity</p>
+                                <p className="text-sm font-bold text-sky-700">{fmtCHF(parseFloat(editForm.totalValuation) - (parseFloat(editForm.outstandingDebt) || 0))}</p>
+                              </div>
+                              <div>
+                                <p className="text-[10px] text-gray-500 mb-0.5">Price / Brick</p>
+                                <p className="text-sm font-bold text-sky-700">{fmtCHF(pricePB)}</p>
+                              </div>
+                              <div>
+                                <p className="text-[10px] text-gray-500 mb-0.5">Total Mint Value</p>
+                                <p className="text-sm font-bold text-sky-700">{fmtCHF(totalMintValue)}</p>
+                              </div>
+                              <div>
+                                <p className="text-[10px] text-gray-500 mb-0.5">Public Raise</p>
+                                <p className="text-sm font-bold text-sky-700">{fmtCHF(publicRaise)}</p>
                               </div>
                             </div>
                           </div>
@@ -976,24 +1002,22 @@ export function AdminSPV() {
                         </div>
                         <div className="sm:col-span-2">
                           <Label info="Annual Percentage Yield — the projected yearly return to Brick holders from rental income, expressed as a percentage of the Brick purchase price.">Target APY (%)</Label>
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-3 mt-1">
                             <div className="w-36 flex-shrink-0">
                               <Input type="number" value={editForm.targetAPY} onChange={setField('targetAPY')} placeholder="e.g. 4.2" />
                             </div>
-                            <button type="button" onClick={() => setApyModal(true)} className="flex items-center gap-1 text-[10px] text-sky-700 bg-sky-50 border border-sky-200 rounded-full px-2 py-0.5 hover:bg-sky-100 transition-colors whitespace-nowrap">
-                              <BookOpen size={10} /> Underwriting Report
+                            <button
+                              type="button"
+                              onClick={() => setApyModal(true)}
+                              className="flex items-center gap-2 px-3 py-2 bg-sky-50 border border-sky-200 rounded-lg hover:bg-sky-100 hover:border-sky-400 transition-all group text-left whitespace-nowrap"
+                            >
+                              <BookOpen size={13} className="text-sky-600 flex-shrink-0" />
+                              <span className="text-xs font-semibold text-sky-700">Yield Validator</span>
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 bg-amber-100 text-amber-700 border border-amber-200 rounded-full">Review</span>
                             </button>
                           </div>
                         </div>
                       </div>
-                      {editForm.totalValuation && editForm.totalBricks && (
-                        <div className="bg-sky-50 border border-sky-100 rounded-xl px-4 py-3 grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-                          <div><p className="text-[10px] text-gray-400">Net Equity</p><p className="font-bold text-sky-700">{fmtCHF(parseFloat(editForm.totalValuation) - (parseFloat(editForm.outstandingDebt) || 0))}</p></div>
-                          <div><p className="text-[10px] text-gray-400">Price / Brick</p><p className="font-bold text-sky-700">{fmtCHF(pricePB)}</p></div>
-                          <div><p className="text-[10px] text-gray-400">Total Mint Value</p><p className="font-bold text-sky-700">{fmtCHF(totalMintValue)}</p></div>
-                          <div><p className="text-[10px] text-gray-400">Public Raise</p><p className="font-bold text-sky-700">{fmtCHF(publicRaise)}</p></div>
-                        </div>
-                      )}
                     </div>
                   )
                 })()}
@@ -1014,26 +1038,55 @@ export function AdminSPV() {
                 )}
 
                 {activeTab === 'E' && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {SPV_MANAGERS.map(mgr => (
-                      <button
-                        key={mgr.id}
-                        type="button"
-                        onClick={() => setField('assignedManagerId')(mgr.id)}
-                        className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-colors ${
-                          editForm.assignedManagerId === mgr.id ? 'border-sky-500 bg-sky-50' : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                      >
-                        <div className="w-9 h-9 rounded-full bg-sky-100 flex items-center justify-center text-xs font-bold text-sky-600 flex-shrink-0">
-                          {mgr.name.split(' ').map(n => n[0]).join('')}
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3 bg-sky-50 border border-sky-1000 rounded-xl px-4 py-3.5">
+                      <Users size={16} className="text-sky-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-semibold text-sky-900">Assign an SPV Manager</p>
+                        <p className="text-xs text-sky-700 mt-1 leading-relaxed">
+                          The assigned manager takes operational ownership of this SPV — handling rent collection, expense logging, appraisal submissions, compliance documents, and investor updates. Only one manager can be assigned at a time.
+                        </p>
+                        {currentSpv.status === 'live'
+                          ? editForm.assignedManagerId
+                            ? <p className="text-xs text-emerald-600 font-semibold mt-2">✓ Manager assigned — you can reassign at any time.</p>
+                            : <p className="text-xs text-amber-600 font-semibold mt-2">⚠ No manager assigned yet — select one below.</p>
+                            : <p />
+                        }
+                      </div>
+                    </div>
+                    {currentSpv.status === 'live' ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {SPV_MANAGERS.map(mgr => (
+                          <button
+                            key={mgr.id}
+                            type="button"
+                            onClick={() => setField('assignedManagerId')(mgr.id)}
+                            className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-colors ${
+                              editForm.assignedManagerId === mgr.id ? 'border-sky-500 bg-sky-50' : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                          >
+                            <div className="w-9 h-9 rounded-full bg-sky-100 flex items-center justify-center text-xs font-bold text-sky-600 flex-shrink-0">
+                              {mgr.name.split(' ').map(n => n[0]).join('')}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-semibold text-gray-900 text-sm truncate">{mgr.name}</p>
+                              <p className="text-xs text-gray-400 truncate">{mgr.region}</p>
+                            </div>
+                            {editForm.assignedManagerId === mgr.id && <CheckCircle2 size={15} className="text-sky-500 ml-auto flex-shrink-0" />}
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center gap-3 py-10 px-6 bg-gray-50 border border-dashed border-gray-200 rounded-xl text-center">
+                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                          <Lock size={18} className="text-gray-400" />
                         </div>
-                        <div className="min-w-0">
-                          <p className="font-semibold text-gray-900 text-sm truncate">{mgr.name}</p>
-                          <p className="text-xs text-gray-400 truncate">{mgr.region}</p>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-600">Assignment Locked</p>
+                          <p className="text-xs text-amber-700 font-semibold mt-2">⚠ Manager assignment is only available after the SPV has been tokenized and is live.</p>
                         </div>
-                        {editForm.assignedManagerId === mgr.id && <CheckCircle2 size={15} className="text-sky-500 ml-auto flex-shrink-0" />}
-                      </button>
-                    ))}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -1050,7 +1103,7 @@ export function AdminSPV() {
                     : 'View only — SPV content is managed by the assigned SPV Manager'}
                 </div>
               )}
-              <CollapsibleSection icon={Landmark} color="sky" title="SPV Legal Details" subtitle="Company registration, UID, IBAN and address" completion={comp.A} expanded={expandedSections.has('A')} onToggle={() => toggleSection('A')} readOnly={isReadOnly}>
+              <CollapsibleSection icon={Landmark} color="sky" title="Section I - SPV Legal Details" subtitle="Company registration, UID, IBAN and address" completion={comp.A} expanded={expandedSections.has('A')} onToggle={() => toggleSection('A')} readOnly={isReadOnly}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2">
                     <Label required>Legal Name</Label>
@@ -1088,7 +1141,7 @@ export function AdminSPV() {
                 </div>
               </CollapsibleSection>
 
-              <CollapsibleSection icon={Building2} color="violet" title="Property Details" subtitle="Physical asset type, dimensions and address" completion={comp.B} expanded={expandedSections.has('B')} onToggle={() => toggleSection('B')} readOnly={isReadOnly}>
+              <CollapsibleSection icon={Building2} color="violet" title="Section II - Property Details" subtitle="Physical asset type, dimensions and address" completion={comp.B} expanded={expandedSections.has('B')} onToggle={() => toggleSection('B')} readOnly={isReadOnly}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2">
                     <Label required>Property Display Name</Label>
@@ -1115,7 +1168,7 @@ export function AdminSPV() {
                 </div>
               </CollapsibleSection>
 
-              <CollapsibleSection icon={BarChart3} color="green" title="Financial &amp; Tokenization" subtitle="Valuation, Brick structure and yield" completion={comp.C} expanded={expandedSections.has('C')} onToggle={() => toggleSection('C')} readOnly={isReadOnly}>
+              <CollapsibleSection icon={BarChart3} color="green" title="Section III - Financial &amp; Tokenization" subtitle="Valuation, Brick structure and yield" completion={comp.C} expanded={expandedSections.has('C')} onToggle={() => toggleSection('C')} readOnly={isReadOnly}>
                 {(() => {
                   const sponsorPct = Math.min(100, Math.max(0, parseFloat(editForm.sponsorEquityPct) || 0))
                   const liquidityPct = Math.min(100 - sponsorPct, Math.max(0, parseFloat(editForm.liquidityPoolPct) || 0))
@@ -1143,10 +1196,10 @@ export function AdminSPV() {
                       </div>
                       {editForm.totalValuation && editForm.totalBricks && (
                         <div className="bg-sky-50 border border-sky-100 rounded-xl px-4 py-3 grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-                          <div><p className="text-[10px] text-gray-400">Net Equity</p><p className="font-bold text-sky-700">{fmtCHF(parseFloat(editForm.totalValuation) - (parseFloat(editForm.outstandingDebt) || 0))}</p></div>
-                          <div><p className="text-[10px] text-gray-400">Price / Brick</p><p className="font-bold text-sky-700">{fmtCHF(pricePB)}</p></div>
-                          <div><p className="text-[10px] text-gray-400">Total Mint Value</p><p className="font-bold text-sky-700">{fmtCHF(totalBricks * pricePB)}</p></div>
-                          <div><p className="text-[10px] text-gray-400">Public Raise</p><p className="font-bold text-sky-700">{fmtCHF(publicBricks * pricePB)}</p></div>
+                          <div><p className="text-[10px] text-gray-400">Net Equity</p><p className="font-bold text-sky-700 text-right">{fmtCHF(parseFloat(editForm.totalValuation) - (parseFloat(editForm.outstandingDebt) || 0))}</p></div>
+                          <div><p className="text-[10px] text-gray-400">Price / Brick</p><p className="font-bold text-sky-700 text-right">{fmtCHF(pricePB)}</p></div>
+                          <div><p className="text-[10px] text-gray-400">Total Mint Value</p><p className="font-bold text-sky-700 text-right">{fmtCHF(totalBricks * pricePB)}</p></div>
+                          <div><p className="text-[10px] text-gray-400">Public Raise</p><p className="font-bold text-sky-700 text-right">{fmtCHF(publicBricks * pricePB)}</p></div>
                         </div>
                       )}
                     </div>
@@ -1154,7 +1207,7 @@ export function AdminSPV() {
                 })()}
               </CollapsibleSection>
 
-              <CollapsibleSection icon={FileText} color="amber" title="Media &amp; Documents" subtitle="Cover image and three required legal PDFs" completion={comp.D} expanded={expandedSections.has('D')} onToggle={() => toggleSection('D')} readOnly={isReadOnly}>
+              <CollapsibleSection icon={FileText} color="amber" title="Section IV - Media &amp; Documents" subtitle="Cover image and three required legal PDFs" completion={comp.D} expanded={expandedSections.has('D')} onToggle={() => toggleSection('D')} readOnly={isReadOnly}>
                 <div className="space-y-4">
                   <div><Label>Cover Image URL</Label><Input value={editForm.coverImage} onChange={setField('coverImage')} placeholder="https://..." /></div>
                   <div className="space-y-2">
@@ -1166,21 +1219,52 @@ export function AdminSPV() {
                 </div>
               </CollapsibleSection>
 
-              <CollapsibleSection icon={Users} color="gray" title="Management" subtitle="Assign an SPV Manager who will operate this property" completion={comp.E} expanded={expandedSections.has('E')} onToggle={() => toggleSection('E')} readOnly={isReadOnly}>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {SPV_MANAGERS.map(mgr => (
-                    <button key={mgr.id} type="button" onClick={() => setField('assignedManagerId')(mgr.id)}
-                      className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-colors ${editForm.assignedManagerId === mgr.id ? 'border-sky-500 bg-sky-50' : 'border-gray-200 hover:border-gray-300'}`}>
-                      <div className="w-9 h-9 rounded-full bg-sky-100 flex items-center justify-center text-xs font-bold text-sky-600 flex-shrink-0">
-                        {mgr.name.split(' ').map(n => n[0]).join('')}
+              <CollapsibleSection icon={Users} color="gray" title="Section V - Management" subtitle="Assign an SPV Manager who will operate this property" completion={comp.E} expanded={expandedSections.has('E')} onToggle={() => toggleSection('E')} readOnly={false}>
+                <div className="space-y-4">
+
+
+                  <div className="flex items-start gap-3 bg-sky-50 border border-sky-100 rounded-xl px-4 py-3.5">
+                    <Users size={16} className="text-sky-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-semibold text-sky-900">Assign an SPV Manager</p>
+                      <p className="text-xs text-sky-700 mt-1 leading-relaxed">
+                        The assigned manager takes operational ownership of this SPV — handling rent collection, expense logging, appraisal submissions, compliance documents, and investor updates. Only one manager can be assigned at a time.
+                      </p>
+                      {currentSpv.status === 'live'
+                        ? editForm.assignedManagerId
+                          ? <p className="text-xs text-emerald-600 font-semibold mt-2">✓ Manager assigned — you can reassign at any time.</p>
+                          : <p className="text-xs text-amber-600 font-semibold mt-2">⚠ No manager assigned yet — select one below.</p>
+                          : <p />
+                      }
+                    </div>
+                  </div>
+                  {currentSpv.status === 'live' ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {SPV_MANAGERS.map(mgr => (
+                        <button key={mgr.id} type="button" onClick={() => setField('assignedManagerId')(mgr.id)}
+                          className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-colors ${editForm.assignedManagerId === mgr.id ? 'border-sky-500 bg-sky-50' : 'border-gray-200 hover:border-gray-300'}`}>
+                          <div className="w-9 h-9 rounded-full bg-sky-100 flex items-center justify-center text-xs font-bold text-sky-600 flex-shrink-0">
+                            {mgr.name.split(' ').map(n => n[0]).join('')}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-semibold text-gray-900 text-sm truncate">{mgr.name}</p>
+                            <p className="text-xs text-gray-400 truncate">{mgr.region}</p>
+                          </div>
+                          {editForm.assignedManagerId === mgr.id && <CheckCircle2 size={15} className="text-sky-500 ml-auto flex-shrink-0" />}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center gap-3 py-10 px-6 bg-gray-50 border border-dashed border-gray-200 rounded-xl text-center">
+                      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                        <Lock size={18} className="text-gray-400" />
                       </div>
-                      <div className="min-w-0">
-                        <p className="font-semibold text-gray-900 text-sm truncate">{mgr.name}</p>
-                        <p className="text-xs text-gray-600 truncate">{mgr.region}</p>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-600">Assignment Locked</p>
+                        <p className="text-xs text-amber-700 font-semibold mt-2">⚠ Manager assignment is only available after the SPV has been tokenized and is live.</p>
                       </div>
-                      {editForm.assignedManagerId === mgr.id && <CheckCircle2 size={15} className="text-sky-500 ml-auto flex-shrink-0" />}
-                    </button>
-                  ))}
+                    </div>
+                  )}
                 </div>
               </CollapsibleSection>
             </>
@@ -1188,15 +1272,13 @@ export function AdminSPV() {
 
           {/* Action bar */}
           <div className="flex gap-3 flex-wrap">
-            <Button variant="outline" onClick={() => setView('list')}>Back to List</Button>
-            <button
-              type="button"
-              onClick={() => setApyModal(true)}
-              className="flex items-center gap-1.5 text-xs text-sky-700 bg-sky-50 border border-sky-200 rounded-lg px-3 py-2 hover:bg-sky-100 transition-colors font-medium"
-            >
-              <BookOpen size={13} /> Underwriting Report
-            </button>
-
+            <Button variant="outline" onClick={() => {
+              if (currentSpv.status === 'draft') {
+                const updated = buildUpdated(editForm)
+                updateSpv(updated.id, updated)
+              }
+              setView('list')
+            }}>Back to List</Button>
             {/* Draft: Save + Submit for Review — SPV Manager only */}
             {currentSpv.status === 'draft' && isSpvManager && <>
               <Button
@@ -1247,8 +1329,8 @@ export function AdminSPV() {
             )}
           </div>
 
-          {/* APY Underwriting Report Modal */}
-          <Modal open={apyModal} onClose={() => setApyModal(false)} title="APY Underwriting Report">
+          {/* Yield Validator Modal */}
+          <Modal open={apyModal} onClose={() => setApyModal(false)} title="Yield Validator">
             {(() => {
               const tv  = parseFloat(editForm?.totalValuation)  || 0
               const od  = parseFloat(editForm?.outstandingDebt) || 0
@@ -1322,7 +1404,7 @@ export function AdminSPV() {
                         return (
                           <div key={type} className={`flex justify-between text-xs py-1.5 border-b border-gray-100 ${active ? 'font-semibold' : ''}`}>
                             <span className={active ? 'text-sky-700' : 'text-gray-500'}>{type}{active ? ' ←' : ''}</span>
-                            <span className={active ? 'text-sky-700' : 'text-gray-600'}>{range}</span>
+                            <span className={`text-right ${active ? 'text-sky-700' : 'text-gray-600'}`}>{range}</span>
                           </div>
                         )
                       })}
@@ -1332,7 +1414,7 @@ export function AdminSPV() {
                         <div className="flex justify-between text-[10px] text-gray-400 mb-1">
                           <span>{scaleMin}%</span>
                           <span style={{ color: apyStatus.color }} className="font-semibold">{apy}% — {apyStatus.label}</span>
-                          <span>{scaleMax}%</span>
+                          <span className="text-right">{scaleMax}%</span>
                         </div>
                         <div className="relative h-3 bg-gray-100 rounded-full">
                           <div className="absolute h-full bg-sky-200 rounded-full" style={{ left: `${toPos(bm.min)}%`, width: `${toPos(bm.max) - toPos(bm.min)}%` }} />
@@ -1351,11 +1433,11 @@ export function AdminSPV() {
                     <div className="divide-y divide-gray-100">
                       <div className="flex justify-between items-center py-2">
                         <div><p className="text-xs font-medium text-gray-700">Platform Fee</p><p className="text-[10px] text-gray-400">Basis: Net Equity · charged annually</p></div>
-                        <span className="text-sm font-bold text-gray-800">{pf}%</span>
+                        <span className="text-sm font-bold text-gray-800 text-right">{pf}%</span>
                       </div>
                       <div className="flex justify-between items-center py-2">
                         <div><p className="text-xs font-medium text-gray-700">Property Management Fee</p><p className="text-[10px] text-gray-400">Basis: Gross Rental Income</p></div>
-                        <span className="text-sm font-bold text-gray-800">{mf}%</span>
+                        <span className="text-sm font-bold text-gray-800 text-right">{mf}%</span>
                       </div>
                     </div>
                   </div>

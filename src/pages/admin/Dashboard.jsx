@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { platformStats, aumHistory, spvPipeline, financialFlow } from '@/data/mockData'
 import { useData } from '@/context/DataContext'
-import { Building2, DollarSign, Users, TrendingUp, Clock, CheckCircle2, AlertCircle, ArrowRight, FileText, ShieldCheck } from 'lucide-react'
+import { Building2, DollarSign, Users, TrendingUp, Clock, CheckCircle2, AlertCircle, ArrowRight, FileText, ShieldCheck, Zap } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip,
@@ -43,9 +43,10 @@ export function AdminDashboard() {
   const pendingPayouts = rentHistory.filter(r => r.status === 'pending')
   const recentRent = rentHistory.filter(r => r.status === 'distributed').slice(0, 5)
   const liveSpvs = spvs.filter(s => s.status === 'live')
-  const reviewSpvs = spvs.filter(s => s.status === 'pending')
+  const reviewSpvs  = spvs.filter(s => s.status === 'pending')
+  const approvedSpvs = spvs.filter(s => s.status === 'approved')
   const pendingKyc = kycRequests.filter(k => k.status === 'pending').length
-  const hasActions = pendingKyc > 0 || reviewSpvs.length > 0 || pendingPayouts.length > 0
+  const hasActions = pendingKyc > 0 || reviewSpvs.length > 0 || approvedSpvs.length > 0 || pendingPayouts.length > 0
 
   const totalCapitalRaised = spvs.reduce((sum, spv) => {
     const sold = (spv.totalBricks || 0) - (spv.availableBricks || 0)
@@ -207,7 +208,7 @@ export function AdminDashboard() {
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions Required</p>
                 {hasActions && (
                   <span className="w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
-                    {[pendingKyc > 0, reviewSpvs.length > 0, pendingPayouts.length > 0].filter(Boolean).length}
+                    {[pendingKyc > 0, reviewSpvs.length > 0, approvedSpvs.length > 0, pendingPayouts.length > 0].filter(Boolean).length}
                   </span>
                 )}
               </div>
@@ -245,11 +246,28 @@ export function AdminDashboard() {
                   title="SPV Registry"
                   countLabel={`${reviewSpvs.length} SPV${reviewSpvs.length > 1 ? 's' : ''} in review`}
                   countColor="text-amber-600"
-                  description="Review and activate SPVs before investors can buy Bricks."
+                  description="Review and approve SPVs submitted by SPV Managers."
                   to="/admin/spv"
                   btnBorder="border-amber-200"
                   btnText="text-amber-700"
                   btnHover="hover:bg-amber-50"
+                />
+              )}
+
+              {approvedSpvs.length > 0 && (
+                <ActionCard
+                  icon={Zap}
+                  iconBg="bg-purple-50"
+                  iconColor="text-purple-600"
+                  borderColor="border-purple-200"
+                  title="Tokenization Queue"
+                  countLabel={`${approvedSpvs.length} SPV${approvedSpvs.length > 1 ? 's' : ''} awaiting tokenization`}
+                  countColor="text-purple-600"
+                  description="Approved SPVs ready to be tokenized and made live for investors."
+                  to="/admin/tokenization"
+                  btnBorder="border-purple-200"
+                  btnText="text-purple-700"
+                  btnHover="hover:bg-purple-50"
                 />
               )}
 
@@ -320,11 +338,16 @@ export function AdminDashboard() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-2 pt-1">
-                {reviewSpvs.length === 0 && (
+                {reviewSpvs.length === 0 && approvedSpvs.length === 0 && (
                   <p className="text-sm text-gray-400 py-2">No SPVs currently under review</p>
                 )}
-                {reviewSpvs.map(spv => {
-                  const statusMap = { pending: { label: 'Pending', variant: 'warning', bg: 'bg-gray-50' }, draft: { label: 'Draft', variant: 'default', bg: 'bg-gray-50' }, rejected: { label: 'Rejected', variant: 'destructive', bg: 'bg-gray-50' } }
+                {[...reviewSpvs, ...approvedSpvs].map(spv => {
+                  const statusMap = {
+                    pending:  { label: 'In Review',  variant: 'warning',  bg: 'bg-gray-50' },
+                    approved: { label: 'Approved',   variant: 'default',  bg: 'bg-purple-50' },
+                    draft:    { label: 'Draft',      variant: 'secondary', bg: 'bg-gray-50' },
+                    rejected: { label: 'Rejected',   variant: 'destructive', bg: 'bg-gray-50' },
+                  }
                   const s = statusMap[spv.status] || { label: spv.status, variant: 'default', bg: 'bg-gray-50' }
                   return (
                     <div key={spv.id} className={`flex items-center gap-3 p-3 rounded-xl ${s.bg}`}>

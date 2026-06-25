@@ -107,9 +107,11 @@ export function AdminFeeManagement() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100">
-                  {['SPV', 'Total Rent Distributed', 'Fees Collected', 'Fee Rate', 'Distributions'].map(h => (
-                    <th key={h} className="text-left text-xs text-gray-500 font-medium px-5 py-3">{h}</th>
-                  ))}
+                  <th className="text-left text-xs text-gray-500 font-medium px-5 py-3">SPV</th>
+                  <th className="text-right text-xs text-gray-500 font-medium px-5 py-3">Total Rent Distributed</th>
+                  <th className="text-right text-xs text-gray-500 font-medium px-5 py-3">Fees Collected</th>
+                  <th className="text-right text-xs text-gray-500 font-medium px-5 py-3">Fee Rate</th>
+                  <th className="text-right text-xs text-gray-500 font-medium px-5 py-3">Distributions</th>
                 </tr>
               </thead>
               <tbody>
@@ -125,12 +127,12 @@ export function AdminFeeManagement() {
                           <span className="font-medium text-gray-900 text-xs">{spv.name}</span>
                         </div>
                       </td>
-                      <td className="px-5 py-3 text-gray-700">{fmt(totalRent)}</td>
-                      <td className="px-5 py-3 text-amber-600 font-semibold">{fmt(totalFee)}</td>
-                      <td className="px-5 py-3">
+                      <td className="px-5 py-3 text-right text-gray-700">{fmt(totalRent)}</td>
+                      <td className="px-5 py-3 text-right text-amber-600 font-semibold">{fmt(totalFee)}</td>
+                      <td className="px-5 py-3 text-right">
                         {totalRent > 0 ? <span className="text-gray-600">{(totalFee / totalRent * 100).toFixed(1)}%</span> : '—'}
                       </td>
-                      <td className="px-5 py-3 text-gray-500">{spvRents.length}</td>
+                      <td className="px-5 py-3 text-right text-gray-500">{spvRents.length}</td>
                     </tr>
                   )
                 })}

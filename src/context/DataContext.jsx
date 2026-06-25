@@ -12,7 +12,7 @@ import {
 } from '@/data/mockData'
 
 const DataContext = createContext(null)
-const STORAGE_KEY = 'brickchain_demo_v5'
+const STORAGE_KEY = 'brickchain_demo_v7'
 
 function getDefaults() {
   return {

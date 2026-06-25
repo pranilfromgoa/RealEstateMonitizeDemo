@@ -134,7 +134,7 @@ export function HolderTradingDesk() {
                                 <thead>
                                   <tr className="border-b border-gray-200">
                                     {['Date', 'Type', 'Bricks', 'Amount', 'Tx Hash'].map(h => (
-                                      <th key={h} className="text-left text-xs text-gray-600 font-medium px-5 py-2">{h}</th>
+                                      <th key={h} className={`text-xs text-gray-600 font-medium px-5 py-2 ${['Date', 'Bricks', 'Amount'].includes(h) ? 'text-right' : 'text-left'}`}>{h}</th>
                                     ))}
                                   </tr>
                                 </thead>
@@ -144,14 +144,14 @@ export function HolderTradingDesk() {
                                     if (!cfg) return null
                                     return (
                                       <tr key={tx.id} className="border-b border-gray-100 last:border-0 hover:bg-white transition-colors">
-                                        <td className="px-5 py-2.5 text-gray-600 text-xs">{tx.date}</td>
+                                        <td className="px-5 py-2.5 text-gray-600 text-xs text-right">{tx.date}</td>
                                         <td className="px-5 py-2.5">
                                           <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${cfg.bg} ${cfg.text}`}>
                                             <cfg.icon size={10} /> {cfg.label}
                                           </span>
                                         </td>
-                                        <td className="px-5 py-2.5 text-gray-700 font-medium">{tx.bricks}</td>
-                                        <td className={`px-5 py-2.5 font-medium text-xs ${cfg.amountColor}`}>
+                                        <td className="px-5 py-2.5 text-gray-700 font-medium text-right">{tx.bricks}</td>
+                                        <td className={`px-5 py-2.5 font-medium text-xs text-right ${cfg.amountColor}`}>
                                           {cfg.sign}{fmt(tx.amount)}
                                         </td>
                                         <td className="px-5 py-2.5">
@@ -186,7 +186,7 @@ export function HolderTradingDesk() {
                   <thead>
                     <tr className="border-b border-gray-100">
                       {['SPV', 'Bricks', 'Ask Price', 'vs. Floor', 'Seller', 'Listed', ''].map(h => (
-                        <th key={h} className="text-left text-xs text-gray-600 font-medium px-5 py-3">{h}</th>
+                        <th key={h} className={`text-xs text-gray-600 font-medium px-5 py-3 ${['Bricks', 'Ask Price', 'vs. Floor', 'Listed'].includes(h) ? 'text-right' : 'text-left'}`}>{h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -206,15 +206,15 @@ export function HolderTradingDesk() {
                               </div>
                             </div>
                           </td>
-                          <td className="px-5 py-3 font-medium text-gray-900">{listing.bricks}</td>
-                          <td className="px-5 py-3 font-semibold text-gray-900">${listing.askPrice}</td>
-                          <td className="px-5 py-3">
+                          <td className="px-5 py-3 font-medium text-gray-900 text-right">{listing.bricks}</td>
+                          <td className="px-5 py-3 font-semibold text-gray-900 text-right">${listing.askPrice}</td>
+                          <td className="px-5 py-3 text-right">
                             <span className={`text-xs font-medium px-2 py-1 rounded-full ${parseFloat(premium) > 0 ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'}`}>
                               {parseFloat(premium) > 0 ? '+' : ''}{premium}%
                             </span>
                           </td>
                           <td className="px-5 py-3 text-gray-600 text-xs">Anonymous</td>
-                          <td className="px-5 py-3 text-gray-600 text-xs">{listing.listedDate}</td>
+                          <td className="px-5 py-3 text-gray-600 text-xs text-right">{listing.listedDate}</td>
                           <td className="px-5 py-3">
                             <Button size="sm" onClick={() => { setBuyModal(listing); setQty(listing.bricks); setDone(false) }}>
                               Buy

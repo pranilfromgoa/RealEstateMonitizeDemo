@@ -83,9 +83,13 @@ export function AdminPayouts() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100">
-                  {['SPV', 'Gross Rent', 'Platform Fee (5%)', 'Net Distributed', 'Date', 'Status', 'Tx Hash'].map(h => (
-                    <th key={h} className="text-left text-xs text-gray-500 font-medium px-5 py-3">{h}</th>
-                  ))}
+                  <th className="text-left text-xs text-gray-500 font-medium px-5 py-3">SPV</th>
+                  <th className="text-right text-xs text-gray-500 font-medium px-5 py-3">Gross Rent</th>
+                  <th className="text-right text-xs text-gray-500 font-medium px-5 py-3">Platform Fee (5%)</th>
+                  <th className="text-right text-xs text-gray-500 font-medium px-5 py-3">Net Distributed</th>
+                  <th className="text-right text-xs text-gray-500 font-medium px-5 py-3">Date</th>
+                  <th className="text-left text-xs text-gray-500 font-medium px-5 py-3">Status</th>
+                  <th className="text-left text-xs text-gray-500 font-medium px-5 py-3">Tx Hash</th>
                 </tr>
               </thead>
               <tbody>
@@ -99,10 +103,10 @@ export function AdminPayouts() {
                           <span className="text-gray-800 text-xs">{spv?.name}</span>
                         </div>
                       </td>
-                      <td className="px-5 py-3 font-medium text-gray-900">{fmt(rent.amount)}</td>
-                      <td className="px-5 py-3 text-amber-600">{fmt(rent.fee || 0)}</td>
-                      <td className="px-5 py-3 text-green-600 font-semibold">{fmt(rent.netAmount || 0)}</td>
-                      <td className="px-5 py-3 text-gray-500">{rent.date}</td>
+                      <td className="px-5 py-3 text-right font-medium text-gray-900">{fmt(rent.amount)}</td>
+                      <td className="px-5 py-3 text-right text-amber-600">{fmt(rent.fee || 0)}</td>
+                      <td className="px-5 py-3 text-right text-green-600 font-semibold">{fmt(rent.netAmount || 0)}</td>
+                      <td className="px-5 py-3 text-right text-gray-500">{rent.date}</td>
                       <td className="px-5 py-3"><Badge variant="success">Distributed</Badge></td>
                       <td className="px-5 py-3">
                         <a href="#" className="text-xs text-blue-500 font-mono hover:underline">{rent.txHash?.slice(0, 10)}…</a>

@@ -1,7 +1,6 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import {
-  PieChart, Pie, Cell,
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts'
 import { Layout } from '@/components/layout/Layout'
 import { Header } from '@/components/layout/Header'
@@ -217,6 +216,163 @@ function HolderDetail({ holder, onBack, onApproveKyc, onOpenReject, portfolioHol
   )
 }
 
+// Y-axis tick rendered as a clickable underlined link
+function StickinessYTick({ x, y, payload, onClickMetric, activeMetric }) {
+  const BREAKS = {
+    'Auto-Reinvest (DRIP)':  ['Auto-Reinvest', '(DRIP)'],
+    'Monthly Active Logins': ['Monthly Active', 'Logins'],
+    'Tax / Audit Doc Reviewers':    ['Document', 'Reviewers'],
+  }
+  const parts    = BREAKS[payload.value] || [payload.value]
+  const dy       = parts.length > 1 ? -7 : 0
+  const isActive = activeMetric === payload.value
+  const fill     = isActive ? '#4338ca' : '#6366f1'
+
+  return (
+    <g
+      transform={`translate(${x},${y})`}
+      style={{ cursor: 'pointer', outline: 'none' }}
+      onMouseDown={(e) => e.preventDefault()}
+      onClick={(e) => onClickMetric && onClickMetric(isActive ? null : payload.value, e)}
+    >
+      {parts.map((part, i) => (
+        <text
+          key={i}
+          x={-6}
+          y={dy + i * 14}
+          textAnchor="end"
+          fill={fill}
+          fontSize={10}
+          fontWeight={isActive ? 700 : 500}
+          textDecoration="underline"
+        >
+          {part}
+        </text>
+      ))}
+    </g>
+  )
+}
+
+const STICKINESS_META = {
+  'Multi-SPV Holders': {
+    label: 'Multi-SPV Holders',
+    why: 'Diversified holders are significantly less likely to exit on a single asset\'s underperformance, making them the platform\'s most resilient cohort. A rising ratio is the strongest leading indicator of long-term retention.',
+  },
+  'Auto-Reinvest (DRIP)': {
+    label: 'Auto-Reinvest (DRIP)',
+    why: 'DRIP participants compound returns without any manual action, keeping capital on-platform and reducing cash outflow pressure. High adoption signals deep holder confidence in future SPV yield.',
+  },
+  'Active Voters': {
+    label: 'Active Voters',
+    why: 'Voters are demonstrably more informed about their investment, making them far less likely to sell during short-term market dips. Declining participation is an early-warning signal for disengagement ahead of churn.',
+  },
+  'Tax / Audit Doc Reviewers': {
+    label: 'Tax / Audit Doc Reviewers',
+    why: 'Engaged reviewers understand their investment deeply, which reduces inbound support queries and mis-selling complaints. High rates also demonstrate platform-level audit readiness to regulators.',
+  },
+  'Monthly Active Logins': {
+    label: 'Monthly Active Logins',
+    why: 'Frequent logins correlate strongly with reinvestment intent and proactive portfolio monitoring. A sustained drop in this metric is a reliable leading indicator of upcoming redemption requests.',
+  },
+}
+
+const CHART_HEIGHT   = 210
+const YAXIS_WIDTH    = 118
+const POPUP_WIDTH    = 230
+const POPUP_MARGIN   = 8   // gap between bar start and popup left edge
+
+function StickinessChart({ data }) {
+  const [active, setActive] = useState(null)  // { metric, relY }
+  const wrapperRef = useRef(null)
+
+  const handleMetricClick = (metric, e) => {
+    if (!metric) { setActive(null); return }
+    const rect = wrapperRef.current?.getBoundingClientRect()
+    const relY  = rect ? e.clientY - rect.top : 0
+    setActive(prev =>
+      prev?.metric === metric ? null : { metric, relY }
+    )
+  }
+
+  const meta = active ? STICKINESS_META[active.metric] : null
+
+  // Clamp popup so it never overflows the chart area
+  const popupTop = active
+    ? Math.max(4, Math.min(active.relY - 48, CHART_HEIGHT - 148))
+    : 0
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col">
+      <p className="text-sm font-semibold text-gray-900">Portfolio Stickiness</p>
+      <p className="text-xs text-gray-400 mt-0.5 mb-1">Holder engagement benchmarks — click a label to learn more</p>
+
+      <div
+        ref={wrapperRef}
+        style={{ height: CHART_HEIGHT, outline: 'none', position: 'relative', marginTop: 'auto' }}
+        tabIndex={-1}
+      >
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart
+            data={data}
+            layout="vertical"
+            margin={{ top: 4, right: 16, left: 0, bottom: 4 }}
+            style={{ outline: 'none' }}
+            barSize={9}
+            barCategoryGap="30%"
+            barGap={3}
+          >
+            <XAxis type="number" domain={[0, 100]} hide />
+            <YAxis
+              type="category"
+              dataKey="metric"
+              tick={<StickinessYTick onClickMetric={handleMetricClick} activeMetric={active?.metric} />}
+              axisLine={false}
+              tickLine={false}
+              width={YAXIS_WIDTH}
+            />
+            <Bar dataKey="actual" name="Actual User %" fill="#4f46e5" radius={[0, 3, 3, 0]} />
+            <Bar dataKey="target" name="Target Goal %" fill="#d1d5db" radius={[0, 3, 3, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+
+        {/* Floating popup — anchored to bar start, vertically at click point */}
+        {meta && (
+          <div
+            style={{
+              position:     'absolute',
+              top:          popupTop,
+              left:         YAXIS_WIDTH + POPUP_MARGIN,
+              width:        POPUP_WIDTH,
+              background:   '#fff',
+              border:       '1px solid #e0e7ff',
+              borderRadius: 10,
+              padding:      '10px 12px',
+              boxShadow:    '0 4px 20px rgba(79,70,229,0.14)',
+              zIndex:       20,
+              pointerEvents: 'none',
+            }}
+          >
+            <p style={{ fontSize: 11, fontWeight: 700, color: '#312e81', marginBottom: 6 }}>{meta.label}</p>
+            <p style={{ fontSize: 10.5, color: '#4338ca', lineHeight: 1.65, margin: 0 }}>{meta.why}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Colour key */}
+      <div className="flex justify-center gap-6 pt-2">
+        <div className="flex items-center gap-1.5">
+          <div className="w-2.5 h-2.5 rounded-sm bg-indigo-600 flex-shrink-0" />
+          <span className="text-[10px] text-gray-400">Actual User %</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-2.5 h-2.5 rounded-sm bg-gray-300 flex-shrink-0" />
+          <span className="text-[10px] text-gray-400">Target Goal %</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Main List View ────────────────────────────────────────────────────────────
 
 export function AdminHolders() {
@@ -363,6 +519,48 @@ export function AdminHolders() {
     fill:    b.fill,
   }))
 
+  const lexKollerData = (() => {
+    const swissResidential = spvs.filter(s =>
+      s.status === 'live' &&
+      s.region === 'Switzerland' &&
+      (s.propertyType === 'Residential' || s.type === 'Residential')
+    )
+    return swissResidential
+      .map(spv => {
+        const holdings = portfolioHoldings.filter(h => h.spvId === spv.id)
+        const totalHeld = holdings.reduce((s, h) => s + h.bricks, 0)
+        if (totalHeld === 0) return null
+        let swissBricks = 0, foreignBricks = 0
+        holdings.forEach(h => {
+          const inv = investors.find(i => i.id === h.investorId)
+          if (inv?.country === 'Switzerland') swissBricks += h.bricks
+          else foreignBricks += h.bricks
+        })
+        if (foreignBricks === 0) return null
+        return {
+          name:    spv.propertyDisplayName || spv.name,
+          swiss:   parseFloat(((swissBricks  / totalHeld) * 100).toFixed(1)),
+          foreign: parseFloat(((foreignBricks / totalHeld) * 100).toFixed(1)),
+        }
+      })
+      .filter(Boolean)
+  })()
+
+  const stickinessData = (() => {
+    const verified = investors.filter(i => i.kycStatus === 'verified')
+    const total = verified.length || 1
+    const multiSpv = verified.filter(inv =>
+      portfolioHoldings.filter(h => h.investorId === inv.id).length > 2
+    ).length
+    return [
+      { metric: 'Multi-SPV Holders',     actual: Math.round(multiSpv / total * 100), target: 65 },
+      { metric: 'Auto-Reinvest (DRIP)',  actual: 32, target: 40 },
+      { metric: 'Active Voters',         actual: 51, target: 50 },
+      { metric: 'Tax / Audit Doc Reviewers',    actual: 78, target: 75 },
+      { metric: 'Monthly Active Logins', actual: 74, target: 65 },
+    ]
+  })()
+
   return (
     <Layout>
       <Header title="Holders" subtitle={`${counts.verified} verified · ${counts.pending} pending · ${counts.rejected} rejected`} />
@@ -371,89 +569,73 @@ export function AdminHolders() {
         {/* Analytics Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
-          {/* Chart 1 — Geographic Distribution (Donut) */}
+          {/* Chart 1 — Lex Koller Compliance (Horizontal Stacked Bar) */}
           <div className="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col">
-            <p className="text-sm font-semibold text-gray-900">Geographic Distribution</p>
-            <p className="text-xs text-gray-400 mt-0.5 mb-4">Swiss vs. International — Lex Koller compliance</p>
-            <div className="relative" style={{ height: 135 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={geoData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={40}
-                    outerRadius={58}
-                    dataKey="value"
-                    startAngle={90}
-                    endAngle={-270}
-                    strokeWidth={0}
-                  >
-                    <Cell fill="#0ea5e9" />
-                    <Cell fill="#e2e8f0" />
-                  </Pie>
-                  <Tooltip
-                    formatter={(v, n) => [v + ' holders', n]}
-                    contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e5e7eb', boxShadow: 'none' }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-xl font-bold text-gray-900">{geoData[0].pct}%</span>
-                <span className="text-xs text-gray-400 mt-0.5">Swiss</span>
+            <p className="text-sm font-semibold text-gray-900">Lex Koller Compliance</p>
+            <p className="text-xs text-gray-400 mt-0.5 mb-4">Swiss Residential SPVs with foreign Brick holders — any red bar requires scrutiny</p>
+            {lexKollerData.length === 0 ? (
+              <div className="flex-1 flex flex-col items-center justify-center gap-2 py-6">
+                <CheckCircle2 size={26} className="text-green-500" />
+                <p className="text-sm font-semibold text-green-700">All Clear</p>
+                <p className="text-xs text-gray-400 text-center">No foreign holders detected on Swiss Residential SPVs</p>
               </div>
-            </div>
-            <div className="flex justify-center gap-6 mt-4">
-              <div className="flex items-center gap-1.5">
-                <div className="w-2.5 h-2.5 rounded-full bg-sky-400 flex-shrink-0" aria-hidden="true" />
-                <span className="text-xs text-gray-700">Swiss ({geoData[0].value})</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2.5 h-2.5 rounded-full bg-slate-200 flex-shrink-0" aria-hidden="true" />
-                <span className="text-xs text-gray-700">International ({geoData[1].value})</span>
-              </div>
-            </div>
+            ) : (
+              <>
+                <div className="mt-auto" style={{ height: Math.max(80, lexKollerData.length * 40 + 20) }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={lexKollerData}
+                      layout="vertical"
+                      margin={{ top: 0, right: 8, left: 0, bottom: 0 }}
+                      barSize={14}
+                    >
+                      <XAxis
+                        type="number"
+                        domain={[0, 100]}
+                        tickFormatter={v => `${v}%`}
+                        tick={{ fontSize: 10, fill: '#9ca3af' }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <YAxis
+                        type="category"
+                        dataKey="name"
+                        tick={{ fontSize: 10, fill: '#6b7280' }}
+                        axisLine={false}
+                        tickLine={false}
+                        width={110}
+                      />
+                      <Tooltip
+                        formatter={(v, key) => [`${v}%`, key === 'swiss' ? 'Swiss Holders' : 'Foreign Holders']}
+                        contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e5e7eb', boxShadow: 'none' }}
+                      />
+                      <Bar dataKey="swiss"   stackId="a" fill="#22c55e" name="Swiss" />
+                      <Bar dataKey="foreign" stackId="a" fill="#ef4444" name="Foreign" radius={[0, 3, 3, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="flex justify-center gap-6 pt-3">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2.5 h-2.5 rounded-sm bg-green-500 flex-shrink-0" />
+                    <span className="text-xs text-gray-700">Swiss Holders</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2.5 h-2.5 rounded-sm bg-red-500 flex-shrink-0" />
+                    <span className="text-xs text-gray-700">Foreign Holders</span>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
-          {/* Chart 2 — Portfolio Diversification (Bar) */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col">
-            <p className="text-sm font-semibold text-gray-900">Portfolio Diversification</p>
-            <p className="text-xs text-gray-400 mt-0.5 mb-4">SPVs owned per holder — user stickiness</p>
-            <div style={{ height: 135 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={diversData} barSize={32} margin={{ top: 8, right: 8, left: -24, bottom: 0 }}>
-                  <XAxis
-                    dataKey="label"
-                    tick={{ fontSize: 11, fill: '#9ca3af' }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    allowDecimals={false}
-                    tick={{ fontSize: 11, fill: '#9ca3af' }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <Tooltip
-                    formatter={(v) => [v + ' holders', 'Count']}
-                    contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e5e7eb', boxShadow: 'none' }}
-                    cursor={{ fill: '#f8fafc' }}
-                  />
-                  <Bar dataKey="holders" fill="#0ea5e9" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            <p className="text-xs text-gray-400 mt-3 text-center">
-              {diversData.find(d => d.label.startsWith('1'))?.holders || 0} single-SPV holders ·{' '}
-              {diversData.filter(d => !d.label.startsWith('0') && !d.label.startsWith('1')).reduce((s, d) => s + d.holders, 0)} diversified
-            </p>
-          </div>
+          {/* Chart 2 — Portfolio Stickiness (Grouped Horizontal Bar) */}
+          <StickinessChart data={stickinessData} />
 
           {/* Chart 3 — Investor Concentration (Bar + colour coding) */}
           <div className="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col">
             <p className="text-sm font-semibold text-gray-900">Investor Concentration</p>
             <p className="text-xs text-gray-400 mt-0.5 mb-4">Retail vs. Whale — liquidity risk indicator</p>
-            <div style={{ height: 135 }}>
+            <div className="mt-auto" style={{ height: 135 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={concData} barSize={32} margin={{ top: 8, right: 8, left: -24, bottom: 0 }}>
                   <XAxis
@@ -481,7 +663,7 @@ export function AdminHolders() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3 justify-center">
+            <div className="flex flex-wrap gap-x-4 gap-y-1 pt-3 justify-center">
               {concData.map((d, i) => (
                 <div key={i} className="flex items-center gap-1.5">
                   <div className="w-2 h-2 rounded-sm flex-shrink-0" style={{ backgroundColor: d.fill }} />
