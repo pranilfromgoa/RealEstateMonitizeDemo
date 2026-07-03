@@ -7,7 +7,7 @@ import {
   FileText, Vote, Bot, LogOut, TrendingUp, Settings,
   Banknote, Cpu, Users, Layers, Landmark, UserCheck, Home,
   Search, SlidersHorizontal, Receipt, ClipboardList, BarChart3,
-  Vault, Megaphone, Images, Scale,
+  Vault, Megaphone, Images, Scale, ShieldAlert,
 } from 'lucide-react'
 
 const holderNav = [
@@ -30,6 +30,7 @@ const adminNav = [
   { label: 'Holders',          icon: UserCheck,       to: '/admin/holders',      group: 'MANAGEMENT' },
   { label: 'Fee Management',   icon: Settings,        to: '/admin/fees',         group: 'MANAGEMENT' },
   { label: 'Users',            icon: Users,           to: '/admin/users',        group: 'MANAGEMENT' },
+  { label: 'Link Security',   icon: ShieldAlert,     to: '/admin/security',     group: 'SECURITY'   },
 ]
 
 const spvManagerNav = [

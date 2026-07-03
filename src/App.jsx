@@ -24,6 +24,7 @@ import { AdminFeeManagement } from '@/pages/admin/FeeManagement'
 import { AdminUsers } from '@/pages/admin/Users'
 import { AdminSPV } from '@/pages/admin/SPV'
 import { AdminHolders } from '@/pages/admin/Holders'
+import { AdminLinkSecurity } from '@/pages/admin/LinkSecurity'
 import { SpvManagerMyProperties }    from '@/pages/spv-manager/MyProperties'
 import { SpvManagerRentLogging }      from '@/pages/spv-manager/RentLogging'
 import { SpvManagerExpenseLogging }   from '@/pages/spv-manager/ExpenseLogging'
@@ -70,6 +71,7 @@ function AppRoutes() {
       <Route path="/admin/users" element={<ProtectedRoute role="admin"><AdminUsers /></ProtectedRoute>} />
       <Route path="/admin/spv" element={<ProtectedRoute role="admin"><AdminSPV /></ProtectedRoute>} />
       <Route path="/admin/holders" element={<ProtectedRoute role="admin"><AdminHolders /></ProtectedRoute>} />
+      <Route path="/admin/security" element={<ProtectedRoute role="admin"><AdminLinkSecurity /></ProtectedRoute>} />
 
       {/* SPV Manager */}
       <Route path="/spv_manager/dashboard"   element={<Navigate to="/spv_manager/spv" replace />} />
