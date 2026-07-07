@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
 
-export function StatCard({ label, value, sub, icon: Icon, color = 'blue', trend }) {
+export function StatCard({ label, source, value, sub, icon: Icon, color = 'blue', trend }) {
   const colorMap = {
     blue:   'bg-blue-50 text-blue-600',
     green:  'bg-green-50 text-green-600',

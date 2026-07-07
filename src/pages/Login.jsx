@@ -68,7 +68,7 @@ const roleTheme = {
 }
 
 export function Login() {
-  const [selected, setSelected] = useState('spv_manager')
+  const [selected, setSelected] = useState('admin')
   const [cleared, setCleared] = useState(false)
   const { login } = useAuth()
   const { resetData } = useData()
